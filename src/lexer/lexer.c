@@ -4,6 +4,13 @@
 
 #include "lexer.h"
 
+#define STR_EQUALS_LEN(str, key, len)                                          \
+  (strncmp(str, key, len) == 0 && key[len] == '\0')
+#define MATCH_NEXT(lx, a, b) (peek(lx, 0) == (a) && peek(lx, 1) == (b))
+#define MAKE_TOKEN(type, start, lx, length)                                    \
+  make_token(type, start, lx->line, lx->col - 1, length)
+
+
 static const SymbolEntry symbols[] = {
     {"(", TOK_LPAREN},    {")", TOK_RPAREN},   {"{", TOK_LBRACE},
     {"}", TOK_RBRACE},    {"[", TOK_LBRACKET}, {"]", TOK_RBRACKET},
@@ -14,7 +21,8 @@ static const SymbolEntry symbols[] = {
     {"*", TOK_STAR},      {"/", TOK_SLASH},    {"<", TOK_LT},
     {">", TOK_GT},        {"&", TOK_AMP},      {"|", TOK_PIPE},
     {"^", TOK_CARET},     {"~", TOK_TILDE},    {"!", TOK_BANG},
-    {"?", TOK_QUESTION},
+    {"?", TOK_QUESTION},  {"::", TOK_RESOLVE}, {":", TOK_COLON},
+    {"_", TOK_SYMBOL},
 };
 
 static const KeywordEntry keywords[] = {
@@ -33,8 +41,7 @@ static const KeywordEntry keywords[] = {
 
 static TokenType lookup_keyword(const char *str, int length) {
   for (int i = 0; i < (int)(sizeof(keywords) / sizeof(*keywords)); ++i) {
-    if (strncmp(str, keywords[i].text, length) == 0 &&
-        keywords[i].text[length] == '\0') {
+    if (STR_EQUALS_LEN(str, keywords[i].text, length)) {
       return keywords[i].type;
     }
   }
@@ -43,8 +50,7 @@ static TokenType lookup_keyword(const char *str, int length) {
 
 static TokenType lookup_symbol(const char *str, int length) {
   for (int i = 0; i < (int)(sizeof(symbols) / sizeof(*symbols)); ++i) {
-    if (strncmp(str, symbols[i].text, length) == 0 &&
-        symbols[i].text[length] == '\0') {
+    if (STR_EQUALS_LEN(str, symbols[i].text, length)) {
       return symbols[i].type;
     }
   }
@@ -60,7 +66,7 @@ void init_lexer(Lexer *lexer, const char *source) {
 
 char peek(Lexer *lx, int offset) { return lx->current[offset]; }
 bool is_at_end(Lexer *lx) { return *lx->current == '\0'; }
-char advance(Lexer *lx) { 
+char advance(Lexer *lx) {
   char c = *lx->current++;
   if (c == '\n') {
     lx->line++;
@@ -71,8 +77,21 @@ char advance(Lexer *lx) {
   return c;
 }
 
-Token make_token(TokenType type, const char *start, int line, int col, int length) {
+Token make_token(TokenType type, const char *start, int line, int col,
+                 int length) {
   return (Token){type, start, line, col, length};
+}
+
+void skip_multiline_comment(Lexer *lx) {
+  advance(lx); // skip '/'
+  advance(lx); // skip '*'
+  while (!is_at_end(lx) && !MATCH_NEXT(lx, '*', '/')) {
+    advance(lx);
+  }
+  if (!is_at_end(lx)) {
+    advance(lx); // skip '*'
+    advance(lx); // skip '/'
+  }
 }
 
 void skip_whitespace(Lexer *lx) {
@@ -86,16 +105,7 @@ void skip_whitespace(Lexer *lx) {
         advance(lx);
       }
     } else if (c == '/' && peek(lx, 1) == '*') {
-      // Skip multi-line comment
-      advance(lx); // Skip '/'
-      advance(lx); // Skip '*'
-      while (!is_at_end(lx) && !(peek(lx, 0) == '*' && peek(lx, 1) == '/')) {
-        advance(lx);
-      }
-      if (!is_at_end(lx)) {
-        advance(lx); // Skip '*'
-        advance(lx); // Skip '/'
-      }
+      skip_multiline_comment(lx);
     } else {
       break;
     }
@@ -105,7 +115,7 @@ void skip_whitespace(Lexer *lx) {
 Token next_token(Lexer *lx) {
   skip_whitespace(lx);
   if (is_at_end(lx)) {
-    return make_token(TOK_EOF, lx->current, 0, 0, 0);
+    return MAKE_TOKEN(TOK_EOF, lx->current, lx, 0);
   }
 
   const char *start = lx->current;
@@ -113,27 +123,33 @@ Token next_token(Lexer *lx) {
 
   // Identifiers and keywords
   if (isalpha(c) || c == '_') {
-    while (isalnum(peek(lx, 0)) || peek(lx, 0) == '_')
+    while (isalnum(peek(lx, 0)) || peek(lx, 0) == '_') {
       advance(lx);
+    }
     int len = (int)(lx->current - start);
     TokenType type = lookup_keyword(start, len);
-    return make_token(type, start, lx->line, lx->col - 1, len);
+    return MAKE_TOKEN(type, start, lx, len);
   }
 
   // Numbers
   if (isdigit(c)) {
-    while (isdigit(peek(lx, 0)))
+    while (isdigit(peek(lx, 0))) {
       advance(lx);
-    return make_token(TOK_NUMBER, start, lx->line, lx->col - 1, (int)(lx->current - start));
+    }
+    int len = (int)(lx->current - start);
+    return MAKE_TOKEN(TOK_NUMBER, start, lx, len);
   }
 
   // Strings
   if (c == '"') {
-    while (!is_at_end(lx) && peek(lx, 0) != '"')
+    while (!is_at_end(lx) && peek(lx, 0) != '"') {
       advance(lx);
-    if (!is_at_end(lx))
+    }
+    if (!is_at_end(lx)) {
       advance(lx); // Skip closing quote
-    return make_token(TOK_STRING, start + 1, lx->line, lx->col - 1, (int)(lx->current - start - 2));
+    }
+    int len = (int)(lx->current - start - 2);
+    return MAKE_TOKEN(TOK_STRING, start + 1, lx, len);
   }
 
   // Try to match two-character symbol
@@ -142,11 +158,11 @@ Token next_token(Lexer *lx) {
     TokenType ttype = lookup_symbol(two, 2);
     if (ttype != TOK_SYMBOL) {
       advance(lx);
-      return make_token(ttype, start, lx->line, lx->col - 1, 2);
+      return MAKE_TOKEN(ttype, start, lx, 2);
     }
   }
 
   // Fallback: single-character symbol
   TokenType single_type = lookup_symbol(start, 1);
-  return make_token(single_type, start, lx->line, lx->col - 1, 1);
+  return MAKE_TOKEN(single_type, start, lx, 1);
 }

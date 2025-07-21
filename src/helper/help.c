@@ -1,8 +1,92 @@
-#include <stdio.h>
+#include <string.h>
 
 #include "../c_libs/color/color.h"
-#include "../lexer/lexer.h"
 #include "help.h"
+
+bool check_argc(int argc, int expected) {
+  if (argc < expected) {
+    fprintf(stderr, "Usage: %s <source_file>\n", "crust");
+    return false;
+  }
+  return true;
+}
+
+const char *read_file(const char *filename) {
+  FILE *file = fopen(filename, "r");
+  if (!file) {
+    perror("Failed to open file");
+    return NULL;
+  }
+
+  fseek(file, 0, SEEK_END);
+  long size = ftell(file);
+  fseek(file, 0, SEEK_SET);
+
+  char *buffer = malloc(size + 1);
+  if (!buffer) {
+    perror("Failed to allocate memory");
+    fclose(file);
+    return NULL;
+  }
+
+  fread(buffer, 1, size, file);
+  buffer[size] = '\0';
+
+  fclose(file);
+  return buffer;
+}
+
+int print_help() {
+  printf("Usage: crust [options] <source_file>\n");
+  printf("Options:\n");
+  printf("  -v, --version   Show version information\n");
+  printf("  -h, --help      Show this help message\n");
+  printf("  -l, --license   Show license information\n");
+  printf("Crust Compiler Options:\n");
+  printf("  -name <name>    Set the name of the build target\n");
+  printf("  -save           Save the outputed llvm file\n");
+  printf("  build <target>  Build the specified target\n");
+  printf("  clean           Clean the build artifacts\n");
+  return 0;
+}
+
+int print_version() {
+  printf("Crust Compiler v1.0\n");
+  return 0;
+}
+
+int print_license() {
+  printf("Crust Compiler is licensed under the MIT License.\n");
+  return 0;
+}
+
+bool parse_args(int argc, char *argv[], BuildConfig *config) {
+  for (int i = 1; i < argc; i++) {
+    if (strcmp(argv[i], "-v") == 0 || strcmp(argv[i], "--version") == 0)
+      return print_version(), false;
+    else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
+      return print_help(), false;
+    else if (strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--license") == 0)
+      return print_license(), false;
+    else if (strcmp(argv[i], "build") == 0 && i + 1 < argc) {
+      config->filepath = argv[++i];
+      for (int j = i + 1; j < argc; j++) {
+        if (strcmp(argv[j], "-name") == 0 && j + 1 < argc)
+          config->name = argv[++j];
+        else if (strcmp(argv[j], "-save") == 0)
+          config->save = true;
+        else if (strcmp(argv[j], "-clean") == 0)
+          config->clean = true;
+        else {
+          fprintf(stderr, "Unknown build option: %s\n", argv[j]);
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
 
 void print_token(const Token *t) {
   printf("%.*s -> ", t->length, t->value);
@@ -181,6 +265,12 @@ void print_token(const Token *t) {
   case TOK_QUESTION:
     printf(BOLD_GREEN("QUESTION"));
     break;
+  case TOK_RESOLVE:
+    printf(BOLD_GREEN("RESOLVE"));
+    break;
+  case TOK_COLON:
+    printf(BOLD_GREEN("COLON"));
+    break;
 
   default:
     puts("UNKNOWN");
@@ -188,8 +278,8 @@ void print_token(const Token *t) {
   }
 
   printf(" at line ");
-  printf(UNDERLINE_COLORIZE(COLOR_RED, "%d"), t->line);
+  printf(COLORIZE(COLOR_RED, "%d"), t->line);
   printf(", column ");
-  printf(UNDERLINE_COLORIZE(COLOR_RED, "%d"), t->col);
+  printf(COLORIZE(COLOR_RED, "%d"), t->col);
   printf("\n");
 }

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "memory.h"
 
@@ -15,24 +16,26 @@ static inline size_t min_size(size_t a, size_t b) {
 
 /* Create a new buffer with specified size and alignment */
 Buffer* buffer_create(size_t s, size_t alignment) {
-    if (alignment == 0) alignment = 1024;
-    
-    alignment = min_size(s, alignment);
-    /* Align the whole block to max(alignment, alignof(Buffer)) */
-    size_t buffer_align = max_size(alignment, alignof(Buffer));
-    size_t total_size = sizeof(Buffer) + s + buffer_align;
+    if (alignment == 0)
+        alignment = 1024;
 
-    void *raw = aligned_alloc(buffer_align, total_size);
+    alignment = min_size(s, alignment);
+    size_t buffer_align = max_size(alignment, alignof(Buffer));
+
+    // Round up total_size to be a multiple of buffer_align
+    size_t total_size = sizeof(Buffer) + s + buffer_align;
+    size_t aligned_total_size = (total_size + buffer_align - 1) & ~(buffer_align - 1);
+
+    void *raw = aligned_alloc(buffer_align, aligned_total_size);
     if (!raw) {
         return NULL;
     }
 
-    /* Initialize the Buffer object */
     Buffer *buf = (Buffer*)raw;
     buf->size = s;
     buf->next = NULL;
 
-    /* Compute aligned pointer for buffer data after Buffer struct */
+    // Align the pointer to buffer data
     char *raw_bytes = (char*)raw;
     size_t struct_end = (size_t)(raw_bytes + sizeof(Buffer));
     size_t aligned_data = (struct_end + alignment - 1) & ~(alignment - 1);
@@ -117,5 +120,29 @@ void arena_destroy(ArenaAllocator *arena) {
     arena->offset = 0;
 }
 
-#ifdef __cplusplus
-#endif
+bool growable_array_init(GrowableArray *arr, ArenaAllocator *arena, size_t initial_capacity, size_t item_size) {
+    arr->data = arena_alloc(arena, initial_capacity * item_size, item_size);
+    if (!arr->data) return false;
+
+    arr->arena = arena;
+    arr->count = 0;
+    arr->capacity = initial_capacity;
+    arr->item_size = item_size;
+    return true;
+}
+
+void *growable_array_push(GrowableArray *arr) {
+    if (arr->count >= arr->capacity) {
+        size_t new_capacity = arr->capacity * 2;
+        void *new_block = arena_alloc(arr->arena, new_capacity * arr->item_size, arr->item_size);
+        if (!new_block) return NULL;
+
+        memcpy(new_block, arr->data, arr->count * arr->item_size);
+        arr->data = new_block;
+        arr->capacity = new_capacity;
+    }
+
+    void *slot = (char*)arr->data + (arr->count * arr->item_size);
+    arr->count += 1;
+    return slot;
+}
