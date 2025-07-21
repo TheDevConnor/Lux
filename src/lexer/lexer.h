@@ -1,4 +1,5 @@
 #pragma once
+#include <stdint.h>
 
 typedef enum {
   TOK_EOF,
@@ -6,9 +7,11 @@ typedef enum {
   TOK_KEYWORD,
   TOK_NUMBER,
   TOK_STRING,
+  TOK_CHAR_LITERAL,
 
   // Types (int, float, etc.)
   TOK_INT,     // int
+  TOK_DOUBLE,  // double
   TOK_UINT,    // unsigned int
   TOK_FLOAT,   // float
   TOK_BOOL,    // bool
@@ -20,12 +23,17 @@ typedef enum {
   TOK_IF,       // if
   TOK_ELSE,     // else
   TOK_LOOP,     // loop
-  TOK_FN,       // fn
   TOK_RETURN,   // return
   TOK_BREAK,    // break
   TOK_CONTINUE, // continue
   TOK_STRUCT,   // struct
   TOK_ENUM,     // enum
+  TOK_MOD,      // mod
+  TOK_IMPORT,   // import
+  TOK_TRUE,     // true
+  TOK_FALSE,    // false
+  TOK_PUBLIC,   // pub
+  TOK_PRIVATE,  // private
 
   // Symbols
   TOK_SYMBOL,    // fallback
@@ -57,12 +65,20 @@ typedef enum {
   TOK_OR,        // ||
   TOK_BANG,      // !
   TOK_QUESTION,  // ?
+  TOK_WHITESPACE, // whitespace
+  TOK_COMMENT,   // comment
 } TokenType;
 
-typedef struct {
-  TokenType type;
-  const char *start; // Points into source buffer
-  int length;        // Length of token
+typedef struct{
+  const char *src;
+  const char *current;
+  int line, col;
+} Lexer;
+
+typedef struct{
+  TokenType type_;
+  const char* value;
+  int line, col, length;
 } Token;
 
 typedef struct {
@@ -74,12 +90,6 @@ typedef struct {
   const char *text;
   TokenType type;
 } KeywordEntry;
-
-/// Lexer state (input source + current position).
-typedef struct {
-  const char *src;     // Source buffer
-  const char *current; // Current scan position
-} Lexer;
 
 void init_lexer(Lexer *lexer, const char *source);
 Token next_token(Lexer *lexer);

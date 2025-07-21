@@ -1,0 +1,8 @@
+mod main;
+
+import <stdio>
+
+pub int main() {
+    std::outputln("Num = ", 10);
+    return 0; 
+}
