@@ -5,7 +5,7 @@
 
 bool check_argc(int argc, int expected) {
   if (argc < expected) {
-    fprintf(stderr, "Usage: %s <source_file>\n", "crust");
+    fprintf(stderr, "Usage: %s <source_file>\n", "lux");
     return false;
   }
   return true;
@@ -37,7 +37,7 @@ const char *read_file(const char *filename) {
 }
 
 int print_help() {
-  printf("Usage: crust [options] <source_file>\n");
+  printf("Usage: lux [options] <source_file>\n");
   printf("Options:\n");
   printf("  -v, --version   Show version information\n");
   printf("  -h, --help      Show this help message\n");
@@ -51,12 +51,12 @@ int print_help() {
 }
 
 int print_version() {
-  printf("Crust Compiler v1.0\n");
+  printf("Lux Compiler v1.0\n");
   return 0;
 }
 
 int print_license() {
-  printf("Crust Compiler is licensed under the MIT License.\n");
+  printf("Lux Compiler is licensed under the MIT License.\n");
   return 0;
 }
 
@@ -106,17 +106,17 @@ void print_token(const Token *t) {
     printf(BOLD_GREEN("NUMBER"));
     break;
   case TOK_STRING:
-    printf(BOLD_GREEN("STRING")); 
+    printf(BOLD_GREEN("STRING"));
     break;
   case TOK_CHAR_LITERAL:
     printf(BOLD_GREEN("CHAR_LITERAL"));
     break;
   case TOK_INT:
-    printf(BOLD_GREEN("INT"));  
+    printf(BOLD_GREEN("INT"));
     break;
   case TOK_DOUBLE:
     printf(BOLD_GREEN("DOUBLE"));
-    break;  
+    break;
   case TOK_UINT:
     printf(BOLD_GREEN("UINT"));
     break;
@@ -131,25 +131,25 @@ void print_token(const Token *t) {
     break;
   case TOK_VOID:
     printf(BOLD_GREEN("VOID"));
-    break;  
+    break;
   case TOK_CHAR:
     printf(BOLD_GREEN("CHAR"));
     break;
   case TOK_IF:
     printf(BOLD_GREEN("IF"));
-    break;  
+    break;
   case TOK_ELSE:
     printf(BOLD_GREEN("ELSE"));
     break;
-  case TOK_LOOP:  
+  case TOK_LOOP:
     printf(BOLD_GREEN("LOOP"));
     break;
-  case TOK_RETURN:  
+  case TOK_RETURN:
     printf(BOLD_GREEN("RETURN"));
     break;
-  case TOK_BREAK:  
+  case TOK_BREAK:
     printf(BOLD_GREEN("BREAK"));
-    break;  
+    break;
   case TOK_CONTINUE:
     printf(BOLD_GREEN("CONTINUE"));
     break;
@@ -189,7 +189,7 @@ void print_token(const Token *t) {
     break;
   case TOK_LBRACE:
     printf(BOLD_GREEN("LBRACE"));
-    break; 
+    break;
   case TOK_RBRACE:
     printf(BOLD_GREEN("RBRACE"));
     break;
@@ -198,13 +198,13 @@ void print_token(const Token *t) {
     break;
   case TOK_RBRACKET:
     printf(BOLD_GREEN("RBRACKET"));
-    break;  
+    break;
   case TOK_SEMICOLON:
     printf(BOLD_GREEN("SEMICOLON"));
     break;
   case TOK_COMMA:
     printf(BOLD_GREEN("COMMA"));
-    break;  
+    break;
   case TOK_DOT:
     printf(BOLD_GREEN("DOT"));
     break;
@@ -226,13 +226,13 @@ void print_token(const Token *t) {
   case TOK_LT:
     printf(BOLD_GREEN("LT"));
     break;
-  case TOK_GT:  
+  case TOK_GT:
     printf(BOLD_GREEN("GT"));
     break;
   case TOK_LE:
     printf(BOLD_GREEN("LE"));
     break;
-  case TOK_GE:  
+  case TOK_GE:
     printf(BOLD_GREEN("GE"));
     break;
   case TOK_EQEQ:
@@ -258,7 +258,7 @@ void print_token(const Token *t) {
     break;
   case TOK_OR:
     printf(BOLD_GREEN("OR"));
-    break;  
+    break;
   case TOK_BANG:
     printf(BOLD_GREEN("BANG"));
     break;
