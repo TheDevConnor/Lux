@@ -36,39 +36,43 @@ typedef enum {
   TOK_PRIVATE,  // private
 
   // Symbols
-  TOK_SYMBOL,     // fallback
-  TOK_LPAREN,     // (
-  TOK_RPAREN,     // )
-  TOK_LBRACE,     // {
-  TOK_RBRACE,     // }
-  TOK_LBRACKET,   // [
-  TOK_RBRACKET,   // ]
-  TOK_SEMICOLON,  // ;
-  TOK_COMMA,      // ,
-  TOK_DOT,        // .
-  TOK_EQUAL,      // =
-  TOK_PLUS,       // +
-  TOK_MINUS,      // -
-  TOK_STAR,       // *
-  TOK_SLASH,      // /
-  TOK_LT,         // <
-  TOK_GT,         // >
-  TOK_LE,         // <=
-  TOK_GE,         // >=
-  TOK_EQEQ,       // ==
-  TOK_NEQ,        // !=
-  TOK_AMP,        // &
-  TOK_PIPE,       // |
-  TOK_CARET,      // ^
-  TOK_TILDE,      // ~
-  TOK_AND,        // &&
-  TOK_OR,         // ||
-  TOK_RESOLVE,    // ::
-  TOK_COLON,      // :
-  TOK_BANG,       // !
-  TOK_QUESTION,   // ?
-  TOK_WHITESPACE, // whitespace
-  TOK_COMMENT,    // comment
+  TOK_SYMBOL,      // fallback
+  TOK_LPAREN,      // (
+  TOK_RPAREN,      // )
+  TOK_LBRACE,      // {
+  TOK_RBRACE,      // }
+  TOK_LBRACKET,    // [
+  TOK_RBRACKET,    // ]
+  TOK_SEMICOLON,   // ;
+  TOK_COMMA,       // ,
+  TOK_DOT,         // .
+  TOK_EQUAL,       // =
+  TOK_PLUS,        // +
+  TOK_MINUS,       // -
+  TOK_STAR,        // *
+  TOK_SLASH,       // /
+  TOK_LT,          // <
+  TOK_GT,          // >
+  TOK_LE,          // <=
+  TOK_GE,          // >=
+  TOK_EQEQ,        // ==
+  TOK_NEQ,         // !=
+  TOK_AMP,         // &
+  TOK_PIPE,        // |
+  TOK_CARET,       // ^
+  TOK_TILDE,       // ~
+  TOK_AND,         // &&
+  TOK_OR,          // ||
+  TOK_RESOLVE,     // ::
+  TOK_COLON,       // :
+  TOK_BANG,        // !
+  TOK_QUESTION,    // ?
+  TOK_PLUSPLUS,    // ++
+  TOK_MINUSMINUS,  // --
+  TOK_SHIFT_LEFT,  // <<
+  TOK_SHIFT_RIGHT, // >>
+  TOK_WHITESPACE,  // whitespace
+  TOK_COMMENT,     // comment
 } TokenType;
 
 typedef struct {

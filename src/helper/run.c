@@ -1,3 +1,4 @@
+#include "../parser/parser.h"
 #include "help.h"
 
 bool run_build(BuildConfig config, ArenaAllocator *allocator) {
@@ -28,8 +29,7 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
     *slot = tk;
   }
 
-  for (size_t i = 0; i < tokens.count; i++)
-    print_token(&((Token *)tokens.data)[i]);
+  Stmt *stmts = parse(&tokens, allocator);
 
   if (config.name)
     printf("Building target: %s\n", config.name);

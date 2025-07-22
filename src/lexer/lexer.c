@@ -10,19 +10,19 @@
 #define MAKE_TOKEN(type, start, lx, length)                                    \
   make_token(type, start, lx->line, lx->col - 1, length)
 
-
 static const SymbolEntry symbols[] = {
-    {"(", TOK_LPAREN},    {")", TOK_RPAREN},   {"{", TOK_LBRACE},
-    {"}", TOK_RBRACE},    {"[", TOK_LBRACKET}, {"]", TOK_RBRACKET},
-    {";", TOK_SEMICOLON}, {",", TOK_COMMA},    {".", TOK_DOT},
-    {"==", TOK_EQEQ},     {"!=", TOK_NEQ},     {"<=", TOK_LE},
-    {">=", TOK_GE},       {"&&", TOK_AND},     {"||", TOK_OR},
-    {"=", TOK_EQUAL},     {"+", TOK_PLUS},     {"-", TOK_MINUS},
-    {"*", TOK_STAR},      {"/", TOK_SLASH},    {"<", TOK_LT},
-    {">", TOK_GT},        {"&", TOK_AMP},      {"|", TOK_PIPE},
-    {"^", TOK_CARET},     {"~", TOK_TILDE},    {"!", TOK_BANG},
-    {"?", TOK_QUESTION},  {"::", TOK_RESOLVE}, {":", TOK_COLON},
-    {"_", TOK_SYMBOL},
+    {"(", TOK_LPAREN},      {")", TOK_RPAREN},       {"{", TOK_LBRACE},
+    {"}", TOK_RBRACE},      {"[", TOK_LBRACKET},     {"]", TOK_RBRACKET},
+    {";", TOK_SEMICOLON},   {",", TOK_COMMA},        {".", TOK_DOT},
+    {"==", TOK_EQEQ},       {"!=", TOK_NEQ},         {"<=", TOK_LE},
+    {">=", TOK_GE},         {"&&", TOK_AND},         {"||", TOK_OR},
+    {"=", TOK_EQUAL},       {"+", TOK_PLUS},         {"-", TOK_MINUS},
+    {"*", TOK_STAR},        {"/", TOK_SLASH},        {"<", TOK_LT},
+    {">", TOK_GT},          {"&", TOK_AMP},          {"|", TOK_PIPE},
+    {"^", TOK_CARET},       {"~", TOK_TILDE},        {"!", TOK_BANG},
+    {"?", TOK_QUESTION},    {"::", TOK_RESOLVE},     {":", TOK_COLON},
+    {"_", TOK_SYMBOL},      {"++", TOK_PLUSPLUS},    {"--", TOK_MINUSMINUS},
+    {"<<", TOK_SHIFT_LEFT}, {">>", TOK_SHIFT_RIGHT},
 };
 
 static const KeywordEntry keywords[] = {
