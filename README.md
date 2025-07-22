@@ -44,7 +44,7 @@ Modern systems programming often involves a trade-off between performance, safet
 Lux is currently in active development. Core language features are being implemented and the compiler architecture is being established. 
 
 **What's Working:**
-- Basic lexer and Allocater 
+- Basic lexer and Allocator 
 
 **Coming Soon:**
 - Pratt Parsing, TypeChecker, and LLVM generation
