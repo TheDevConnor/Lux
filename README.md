@@ -1,5 +1,5 @@
 # Lux
-*A low-level compiled alternative to C, C++, Rust*
+*A low-level compiled alternative to C, C++, and more!*
 
 <p align="center">
   <img src="assets/lux.png" alt="Lux Logo" width="120">
