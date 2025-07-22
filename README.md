@@ -1,5 +1,5 @@
 <h1>
-  <img src="assets/lux.png" alt="Lux Logo" width="40" style="vertical-align: middle; margin-right: 10px;">
+  <img src="assets/lux.png" alt="Lux Logo" width="100" style="vertical-align: middle; margin-right: 10px;">
     Lux a low-level compiled alternative to C, C++, Rust, ...
 </h1>
 
