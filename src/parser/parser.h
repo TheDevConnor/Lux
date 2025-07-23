@@ -39,17 +39,11 @@ typedef struct {
 } Parser;
 
 // Parser Utility Functions
-bool has_tokens(Parser *psr);
-Token peek(Parser *psr, size_t offset);
-Token current(Parser *psr);
-Token advance(Parser *psr);
-Token consume(Parser *psr, TokenType type, const char *error_msg);
-
-// Parser utility functions bool parser_has_tokens(Parser *parser);
-Token parser_peek(Parser *parser, size_t offset);
-Token parser_current(Parser *parser);
-Token parser_advance(Parser *parser);
-Token parser_expect(Parser *parser, TokenType kind, const char *msg);
+bool p_has_tokens(Parser *psr);
+Token p_peek(Parser *psr, size_t offset);
+Token p_current(Parser *psr);
+Token p_advance(Parser *psr);
+Token p_consume(Parser *psr, TokenType type, const char *error_msg);
 
 // Main parsing functions
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena);
@@ -79,7 +73,6 @@ Type *tled(Parser *parser, Type *left, BindingPower bp);
 BindingPower tget_bp(Parser *parser, TokenType kind);
 
 // Statement parsing functions
-Stmt *module_stmt(Parser *parser);
 Stmt *expr_stmt(Parser *parser);
 Stmt *var_stmt(Parser *parser);
 Stmt *const_stmt(Parser *parser);

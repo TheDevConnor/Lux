@@ -1,10 +1,11 @@
-#include "parser.h"
-#include "../ast/ast.h"
-#include "../c_libs/memory/memory.h"
-#include "../helper/help.h"
-
 #include <stdalign.h>
 #include <stdio.h>
+
+#include "../c_libs/memory/memory.h"
+#include "../helper/help.h"
+#include "../ast/ast.h"
+#include "parser.h"
+
 
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
   Parser parser = {
@@ -90,7 +91,7 @@ BindingPower get_bp(TokenType kind) {
 }
 
 Expr *nud(Parser *parser) {
-  switch (current(parser).type_) {
+  switch (p_current(parser).type_) {
   case TOK_NUMBER:
   case TOK_STRING:
   case TOK_IDENTIFIER:
@@ -102,13 +103,13 @@ Expr *nud(Parser *parser) {
   case TOK_LPAREN:
     return grouping(parser);
   default:
-    advance(parser);
+    p_advance(parser);
     return NULL;
   }
 }
 
 Expr *led(Parser *parser, Expr *left, BindingPower bp) {
-  switch (current(parser).type_) {
+  switch (p_current(parser).type_) {
   case TOK_PLUS:
   case TOK_MINUS:
   case TOK_STAR:
@@ -132,13 +133,13 @@ Expr *led(Parser *parser, Expr *left, BindingPower bp) {
   case TOK_DOT:
     return prefix_expr(parser, left, bp);
   default:
-    advance(parser);
+    p_advance(parser);
     return left; // No valid LED found, return left expression
   }
 }
 
 Type *parse_type(Parser *parser) {
-  switch (current(parser).type_) {
+  switch (p_current(parser).type_) {
   case TOK_INT:
   case TOK_UINT:
   case TOK_FLOAT:
@@ -150,7 +151,7 @@ Type *parse_type(Parser *parser) {
   case TOK_IDENTIFIER:
     return tled(parser, NULL, BP_NONE);
   default:
-    advance(parser);
+    p_advance(parser);
     return NULL; // No valid type found
   }
 }

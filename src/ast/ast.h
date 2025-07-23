@@ -3,6 +3,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "../c_libs/memory/memory.h"
+
 // Forward declaration
 typedef struct AstNode AstNode;
 
@@ -26,8 +28,7 @@ typedef enum {
   AST_STMT_CONST_DECL, // Constant declarations
   AST_STMT_FUNCTION,   // Function definitions
   AST_STMT_IF,         // If statements
-  AST_STMT_WHILE,      // While loops
-  AST_STMT_FOR,        // For loops
+  AST_STMT_LOOP,        // Loop statements (while, for)
   AST_STMT_RETURN,     // Return statements
   AST_STMT_BREAK,      // Break statements
   AST_STMT_CONTINUE,   // Continue statements
@@ -93,11 +94,18 @@ typedef enum {
   UNOP_ADDR,     // &x
 } UnaryOp;
 
+typedef enum {
+  Node_Category_EXPR,
+  Node_Category_STMT,
+  Node_Category_TYPE
+} NodeCategory;
+
 // Base AST node structure
 struct AstNode {
   NodeType type;
   size_t line;
   size_t column;
+  NodeCategory category; // Category of the node (expression, statement, type)
 
   union {
     struct {
@@ -182,7 +190,7 @@ struct AstNode {
 
         // Variable declaration
         struct {
-          char *name;
+          const char *name;
           AstNode *var_type;    // Changed from Type* to AstNode*
           AstNode *initializer; // Changed from Expr* to AstNode*
           bool is_mutable;
@@ -190,7 +198,7 @@ struct AstNode {
 
         // Function declaration
         struct {
-          char *name;
+          const char *name;
           char **param_names;
           AstNode **param_types; // Changed from Type** to AstNode**
           size_t param_count;
@@ -205,19 +213,14 @@ struct AstNode {
           AstNode *else_stmt; // Changed from Stmt* to AstNode*
         } if_stmt;
 
-        // While loop
+        // Loop statement (Combined while and for)
         struct {
           AstNode *condition; // Changed from Expr* to AstNode*
           AstNode *body;      // Changed from Stmt* to AstNode*
-        } while_stmt;
-
-        // For loop
-        struct {
-          AstNode *init;      // Changed from Stmt* to AstNode*
-          AstNode *condition; // Changed from Expr* to AstNode*
-          AstNode *increment; // Changed from Expr* to AstNode*
-          AstNode *body;      // Changed from Stmt* to AstNode*
-        } for_stmt;
+          // For loops can be represented as a while loop with an initializer and increment
+          AstNode *initializer; // Optional initializer for for loops (Changed from Stmt* to AstNode*)
+          AstNode *increment;  // Optional increment for for loops (Changed from Stmt* to AstNode*)
+        } loop_stmt;
 
         // Return statement
         struct {
@@ -243,7 +246,7 @@ struct AstNode {
       union {
         // Basic type
         struct {
-          char *name;
+          const char *name;
         } basic;
 
         // Pointer type
@@ -264,7 +267,7 @@ struct AstNode {
           AstNode *return_type; // Changed from Type* to AstNode*
         } function;
       };
-    } type_data; // Good change - avoiding name conflict with 'type' field
+    } type_data;
   };
 };
 
@@ -272,3 +275,40 @@ struct AstNode {
 typedef AstNode Expr;
 typedef AstNode Stmt;
 typedef AstNode Type;
+
+AstNode *create_expr_node(ArenaAllocator *arena, NodeType type, size_t line, size_t column);
+AstNode *create_stmt_node(ArenaAllocator *arena, NodeType type, size_t line, size_t column);
+AstNode *create_type_node(ArenaAllocator *arena, NodeType type, size_t line, size_t column);
+
+// Helper macros for creating nodes
+#define create_expr(arena, type, line, column) create_expr_node(arena, type, line, column)
+#define create_stmt(arena, type, line, column) create_stmt_node(arena, type, line, column)
+#define create_type(arena, type, line, column) create_type_node(arena, type, line, column)
+
+// Expression creation macros
+AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *value, size_t line, size_t column);
+AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name, size_t line, size_t column);
+AstNode *create_binary_expr(ArenaAllocator *arena, BinaryOp op, Expr *left, Expr *right, size_t line, size_t column);
+AstNode *create_unary_expr(ArenaAllocator *arena, UnaryOp op, Expr *operand, size_t line, size_t column);
+AstNode *create_call_expr(ArenaAllocator *arena, Expr *callee, Expr **args, size_t arg_count, size_t line, size_t column);
+AstNode *create_assignment_expr(ArenaAllocator *arena, Expr *target, Expr *value, size_t line, size_t column);
+AstNode *create_ternary_expr(ArenaAllocator *arena, Expr *condition, Expr *then_expr, Expr *else_expr, size_t line, size_t column);
+AstNode *create_member_expr(ArenaAllocator *arena, Expr *object, const char *member, size_t line, size_t column);
+AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index, size_t line, size_t column);
+AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line, size_t column);
+
+// Statement creation macros
+AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, size_t column);
+AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, size_t line, size_t column);
+AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, AstNode *body, size_t line, size_t column);
+AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode *else_stmt, size_t line, size_t column);
+AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition, AstNode *body, AstNode *initializer, AstNode *increment, size_t line, size_t column);
+AstNode *create_return_stmt(ArenaAllocator *arena, Expr *value, size_t line, size_t column);
+AstNode *create_block_stmt(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);
+AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions, size_t expr_count, size_t line, size_t column);
+
+// Type creation macros
+AstNode *create_basic_type(ArenaAllocator *arena, const char *name, size_t line, size_t column);
+AstNode *create_pointer_type(ArenaAllocator *arena, AstNode *pointee_type, size_t line, size_t column);
+AstNode *create_array_type(ArenaAllocator *arena, AstNode *element_type, Expr *size, size_t line, size_t column);
+AstNode *create_function_type(ArenaAllocator *arena, AstNode **param_types, size_t param_count, AstNode *return_type, size_t line, size_t column);
