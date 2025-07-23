@@ -324,3 +324,6 @@ AstNode *create_basic_type(ArenaAllocator *arena, const char *name, size_t line,
 AstNode *create_pointer_type(ArenaAllocator *arena, AstNode *pointee_type, size_t line, size_t column);
 AstNode *create_array_type(ArenaAllocator *arena, AstNode *element_type, Expr *size, size_t line, size_t column);
 AstNode *create_function_type(ArenaAllocator *arena, AstNode **param_types, size_t param_count, AstNode *return_type, size_t line, size_t column);
+
+// Free the AST node
+void free_ast_node(AstNode *node);

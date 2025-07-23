@@ -36,27 +36,27 @@ Expr *primary(Parser *parser) {
     void *value = NULL;
     switch (lit_type) {
     case LITERAL_INT:
-      value = malloc(sizeof(long long));
-      *(long long *)value = strtoll(current.value, NULL, 10); // base 10
+      value = arena_alloc(parser->arena, sizeof(long long), alignof(long long));
+      *(long long *)value = strtoll(current.value, NULL, 10);
       break;
     case LITERAL_FLOAT:
-      value = malloc(sizeof(double));
+      value = arena_alloc(parser->arena, sizeof(double), alignof(double));
       *(double *)value = strtod(current.value, NULL);
       break;
     case LITERAL_STRING:
-      value = malloc(strlen(current.value) + 1);
+      value = arena_alloc(parser->arena, strlen(current.value) + 1, alignof(char));
       strcpy((char *)value, current.value); // Duplicate the string
       break;
     case LITERAL_CHAR:
-      value = malloc(sizeof(char));
+      value = arena_alloc(parser->arena, sizeof(char), alignof(char));
       *(char *)value = current.value[0]; // Assume single character
       break;
     case LITERAL_BOOL:
-      value = malloc(sizeof(bool));
+      value = arena_alloc(parser->arena, sizeof(bool), alignof(bool));
       *(bool *)value = (strcmp(current.value, "true") == 0);
       break;
     case LITERAL_IDENT:
-      value = malloc(strlen(current.value) + 1);
+      value = arena_alloc(parser->arena, strlen(current.value) + 1, alignof(char));
       strcpy((char *)value, current.value); // Duplicate the identifier
       break;
     default:
