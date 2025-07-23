@@ -105,18 +105,16 @@ void arena_reset(ArenaAllocator *arena) {
 /* Free all memory and cleanup arena */
 void arena_destroy(ArenaAllocator *arena) {
     if (!arena) return;
-    
-    arena_reset(arena);
-    Buffer *current = arena->buffer;
-    
-    while (current != NULL) {
+
+    Buffer *current = arena->head;
+    while (current) {
         Buffer *next = current->next;
         free(current);
         current = next;
     }
-    
-    arena->buffer = NULL;
+
     arena->head = NULL;
+    arena->buffer = NULL;
     arena->offset = 0;
 }
 

@@ -2,17 +2,14 @@
 #include <stdio.h>
 
 #include "../c_libs/memory/memory.h"
-#include "../helper/help.h"
 #include "../ast/ast.h"
 #include "parser.h"
 
-
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
   Parser parser = {
+      .arena = arena,
       .tks = (Token *)tks->data, // Cast to Token pointer
-      .stmts =
-          (Stmt *)arena_alloc(arena, sizeof(Stmt) * tks->count,
-                              alignof(100)), // Allocate memory for statements
+      .stmts = (Stmt *)arena_alloc(arena, sizeof(Stmt) * tks->count, alignof(Stmt)),
       .tk_count = tks->count,
       .stmt_count = 0,
       .capacity = tks->capacity,
@@ -24,10 +21,22 @@ Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
   }
 
   printf("Parsing statements...\n");
-  for (size_t i = 0; i < parser.tk_count; i++)
-    print_token(parser.tks + i);
+  while (p_has_tokens(&parser)) {
+    Stmt *stmt = parse_stmt(&parser);
+    if (!stmt) {
+      fprintf(stderr, "Error parsing statement at line %d, column %d\n", p_current(&parser).line, p_current(&parser).col);
+      return NULL; // Handle error appropriately
+    }
+    
+    parser.stmts[parser.stmt_count++] = *stmt;
 
-  return NULL;
+    if (parser.stmt_count >= parser.capacity) {
+      fprintf(stderr, "Statement array capacity exceeded.\n");
+      return NULL; // Handle capacity exceeded
+    }
+  }
+
+  return parser.stmts; // Return the array of parsed statements
 }
 
 BindingPower get_bp(TokenType kind) {
@@ -136,6 +145,62 @@ Expr *led(Parser *parser, Expr *left, BindingPower bp) {
     p_advance(parser);
     return left; // No valid LED found, return left expression
   }
+}
+
+Expr *parse_expr(Parser *parser, BindingPower bp) {
+  Expr *left = nud(parser);
+
+  while (p_has_tokens(parser) && get_bp(p_current(parser).type_) > bp) {
+    left = led(parser, left, get_bp(p_current(parser).type_));
+  }
+
+  return left;
+}
+
+Stmt *parse_stmt(Parser *parser) {
+  switch (p_current(parser).type_) {
+    case TOK_VAR:
+      p_advance(parser);
+      return var_stmt(parser);
+    case TOK_FN:
+      p_advance(parser);
+      return fn_stmt(parser, NULL);
+    case TOK_ENUM:
+      p_advance(parser);
+      return enum_stmt(parser, NULL);
+    case TOK_STRUCT:
+      p_advance(parser);
+      return struct_stmt(parser, NULL);
+    case TOK_RETURN:
+      p_advance(parser);
+      return return_stmt(parser);
+    case TOK_LBRACE:
+      return block_stmt(parser); // don't advance here; block_stmt does
+    case TOK_LOOP:
+      p_advance(parser);
+      return loop_stmt(parser);
+    case TOK_IF:
+      p_advance(parser);
+      return if_stmt(parser);
+    case TOK_PRINT:
+      p_advance(parser);
+      return print_stmt(parser, false);
+    case TOK_PRINTLN:
+      p_advance(parser);
+      return print_stmt(parser, true);
+    default:
+      return expr_stmt(parser); // expression statements handle their own semicolon
+  }
+}
+
+Type *tnud(Parser *parser) {
+  fprintf(stderr, "Parsing type nud: %.*s\n", CURRENT_TOKEN_LENGTH(parser), CURRENT_TOKEN_VALUE(parser));
+  return create_basic_type(parser->arena, p_current(parser).value, p_current(parser).line, p_current(parser).col);
+}
+
+Type *tled(Parser *parser, Type *left, BindingPower bp) {
+  fprintf(stderr, "Parsing type led: %.*s\n", CURRENT_TOKEN_LENGTH(parser), CURRENT_TOKEN_VALUE(parser));
+  return NULL; // No valid type found
 }
 
 Type *parse_type(Parser *parser) {

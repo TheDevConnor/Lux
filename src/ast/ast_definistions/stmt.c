@@ -1,5 +1,12 @@
 #include "../ast.h"
 
+AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_PROGRAM, line, column);
+  node->stmt.program.statements = statements;
+  node->stmt.program.stmt_count = stmt_count;
+  return node;
+}
+
 AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_EXPRESSION, line, column);
   node->stmt.expr_stmt.expression = expression;

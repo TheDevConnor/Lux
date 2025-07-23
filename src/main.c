@@ -23,5 +23,5 @@ int main(int argc, char *argv[]) {
   bool success = run_build(config, &allocator);
 
   arena_destroy(&allocator);
-  return success ? 0 : MEMORY_ERROR;
+  return success ? 0 : 1;
 }

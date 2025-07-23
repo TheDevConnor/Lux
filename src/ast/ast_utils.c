@@ -8,6 +8,7 @@ static void indent(int level) {
 
 const char *node_type_to_string(NodeType type) {
   switch (type) {
+    case AST_PROGRAM: return "Program";
     case AST_EXPR_LITERAL: return "Literal";
     case AST_EXPR_IDENTIFIER: return "Identifier";
     case AST_EXPR_BINARY: return "Binary";
@@ -105,7 +106,13 @@ void print_ast(const AstNode *node, int indent_level) {
   indent(indent_level);
   printf("[%s] @ line %zu\n", node_type_to_string(node->type), node->line);
 
-  if (IS_LITERAL(node)) {
+  if (IS_PROGRAM(node)) {
+    indent(indent_level + 1);
+    printf("Program:\n");
+    for (size_t i = 0; i < node->stmt.program.stmt_count; ++i) {
+      print_ast(node->stmt.program.statements[i], indent_level + 2);
+    }
+  } else if (IS_LITERAL(node)) {
     indent(indent_level + 1);
     printf("Literal (%s): ", literal_type_to_string(node->expr.literal.lit_type));
     switch (node->expr.literal.lit_type) {
@@ -145,12 +152,45 @@ void print_ast(const AstNode *node, int indent_level) {
       printf("Initializer:\n");
       print_ast(node->stmt.var_decl.initializer, indent_level + 3);
     }
-  } else if (node->type == AST_STMT_BLOCK) {
+  } else if (IS_FUNC_DECL(node)) {
+    indent(indent_level + 1);
+    printf("Function: %s\n", node->stmt.func_decl.name);
+    if (node->stmt.func_decl.return_type) {
+      indent(indent_level + 2);
+      printf("Return Type:\n");
+      print_ast(node->stmt.func_decl.return_type, indent_level + 3);
+    }
+    if (node->stmt.func_decl.param_count > 0) {
+      indent(indent_level + 2);
+      printf("Parameters:\n");
+      for (size_t i = 0; i < node->stmt.func_decl.param_count; ++i) {
+        indent(indent_level + 3);
+        printf("%s: ", node->stmt.func_decl.param_names[i]);
+        if (node->stmt.func_decl.param_types[i]) {  
+          print_ast(node->stmt.func_decl.param_types[i], indent_level + 4);
+        } else {
+          printf("unknown type\n");
+        }
+      }
+    }
+    if (node->stmt.func_decl.body) {
+      indent(indent_level + 2);
+      printf("Body:\n");
+      print_ast(node->stmt.func_decl.body, indent_level + 3);
+    } 
+  } else if (IS_BLOCK(node)) {
     indent(indent_level);
     printf("Block:\n");
     for (size_t i = 0; i < node->stmt.block.stmt_count; ++i) {
       print_ast(node->stmt.block.statements[i], indent_level + 1);
     }
+  } else if (IS_EXPR_STMT(node)) {
+    indent(indent_level);
+    printf("Expression Statement:\n");
+    print_ast(node->stmt.expr_stmt.expression, indent_level + 1);
+  } else if (IS_GROUPING(node)) {
+    indent(indent_level);
+    printf("Grouping:\n");
+    print_ast(node->expr.grouping.expr, indent_level + 1);
   }
-  // More node types can be added similarly as needed.
 }

@@ -34,6 +34,10 @@ typedef enum {
   TOK_FALSE,    // false
   TOK_PUBLIC,   // pub
   TOK_PRIVATE,  // private
+  TOK_VAR,      // let
+  TOK_FN,       // fn
+  TOK_PRINT,    // output
+  TOK_PRINTLN,  // println
 
   // Symbols
   TOK_SYMBOL,      // fallback

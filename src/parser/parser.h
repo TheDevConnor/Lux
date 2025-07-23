@@ -6,6 +6,12 @@
 #include "../c_libs/memory/memory.h"
 #include "../lexer/lexer.h"
 
+#define CURRENT_TOKEN_LENGTH(parser) ((int)p_current(parser).length)
+#define CURRENT_TOKEN_VALUE(parser) (p_current(parser).value)
+#define MAX_STMT 1024
+#define MAX_EXPR 1024
+#define MAX_TYPE 1024
+
 typedef enum {
   BP_NONE = 0, // No binding power
   BP_LOWEST,   // Lowest binding power
@@ -30,11 +36,12 @@ typedef enum {
 } BindingPower;
 
 typedef struct {
-  Token *tks;        // Pointer to the array of tokens
-  Stmt *stmts;       // Pointer to the array of statements
-  size_t tk_count;   // Number of tokens
-  size_t stmt_count; // Number of statements
-  size_t capacity;   // Capacity of the token and statement arrays
+  ArenaAllocator *arena; // Memory arena for AST nodes
+  Token *tks;            // Pointer to the array of tokens
+  Stmt *stmts;           // Pointer to the array of statements
+  size_t tk_count;       // Number of tokens
+  size_t stmt_count;     // Number of statements
+  size_t capacity;       // Capacity of the token and statement arrays
   size_t pos;
 } Parser;
 
@@ -75,16 +82,11 @@ BindingPower tget_bp(Parser *parser, TokenType kind);
 // Statement parsing functions
 Stmt *expr_stmt(Parser *parser);
 Stmt *var_stmt(Parser *parser);
-Stmt *const_stmt(Parser *parser);
-Stmt *print_stmt(Parser *parser);
 Stmt *fn_stmt(Parser *parser, const char *name);
 Stmt *enum_stmt(Parser *parser, const char *name);
 Stmt *struct_stmt(Parser *parser, const char *name);
-Stmt *block_stmt(Parser *parser);
+Stmt *print_stmt(Parser *parser, bool ln);
 Stmt *return_stmt(Parser *parser);
+Stmt *block_stmt(Parser *parser);
 Stmt *loop_stmt(Parser *parser);
 Stmt *if_stmt(Parser *parser);
-
-// Parser creation and destruction
-Parser *parser_create(ArenaAllocator *arena);
-void parser_destroy(Parser *parser);

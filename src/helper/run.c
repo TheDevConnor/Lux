@@ -1,4 +1,5 @@
 #include "../parser/parser.h"
+#include "../ast/ast_utils.h"
 #include "help.h"
 
 bool run_build(BuildConfig config, ArenaAllocator *allocator) {
@@ -29,7 +30,24 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
     *slot = tk;
   }
 
-  Stmt *stmts = parse(&tokens, allocator);
+  AstNode *ast = create_ast_node(allocator, AST_PROGRAM, Node_Category_STMT, 0, 0);
+  if (!ast) {
+    fprintf(stderr, "Failed to create AST node.\n");
+    free((void *)source);
+    return false;
+  }
+  ast->stmt.program.statements = (AstNode **)create_program_node(allocator, ast->stmt.program.statements, ast->stmt.program.stmt_count, 0, 0);
+  ast->stmt.program.stmt_count = 0;
+
+  AstNode *root = parse(&tokens, allocator);
+  if (!root) {
+    fprintf(stderr, "Failed to parse source code.\n");
+    free((void *)source);
+    return false;
+  }
+  ast->stmt.program.statements[ast->stmt.program.stmt_count++] = root;
+
+  print_ast(ast, 0);
 
   if (config.name)
     printf("Building target: %s\n", config.name);

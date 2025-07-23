@@ -7,11 +7,19 @@
 #define IS_STMT(node) ((node)->type >= AST_STMT_EXPRESSION && (node)->type <= AST_STMT_STRUCT)
 #define IS_TYPE(node) ((node)->type >= AST_TYPE_BASIC && (node)->type <= AST_TYPE_ENUM)
 
+#define IS_PROGRAM(node) ((node)->type == AST_PROGRAM)
+#define IS_EXPR_STMT(node) ((node)->type == AST_STMT_EXPRESSION)
 #define IS_LITERAL(node) ((node)->type == AST_EXPR_LITERAL)
 #define IS_BINARY(node)  ((node)->type == AST_EXPR_BINARY)
+#define IS_GROUPING(node) ((node)->type == AST_EXPR_GROUPING)
 #define IS_UNARY(node)   ((node)->type == AST_EXPR_UNARY)
 #define IS_CALL(node)    ((node)->type == AST_EXPR_CALL)
 #define IS_VAR_DECL(node) ((node)->type == AST_STMT_VAR_DECL)
+#define IS_FUNC_DECL(node) ((node)->type == AST_STMT_FUNCTION)
+#define IS_BLOCK(node)   ((node)->type == AST_STMT_BLOCK)
+#define IS_IF(node)      ((node)->type == AST_STMT_IF)
+#define IS_LOOP(node)    ((node)->type == AST_STMT_LOOP)
+#define IS_RETURN(node)  ((node)->type == AST_STMT_RETURN)
 
 const char *node_type_to_string(NodeType type);
 const char *binop_to_string(BinaryOp op);

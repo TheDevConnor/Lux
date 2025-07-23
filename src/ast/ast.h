@@ -23,6 +23,7 @@ typedef enum {
   AST_EXPR_GROUPING,   // Parenthesized expressions
 
   // Statement nodes
+  AST_PROGRAM,         // Program root node
   AST_STMT_EXPRESSION, // Expression statements
   AST_STMT_VAR_DECL,   // Variable declarations
   AST_STMT_CONST_DECL, // Constant declarations
@@ -49,6 +50,7 @@ typedef enum {
 
 // Literal types
 typedef enum {
+  LITERAL_IDENT,
   LITERAL_INT,
   LITERAL_FLOAT,
   LITERAL_STRING,
@@ -183,6 +185,12 @@ struct AstNode {
     struct {
       // Statement-specific data
       union {
+        // Program root node
+        struct {
+          AstNode **statements; // Changed from Stmt** to AstNode**
+          size_t stmt_count;
+        } program;
+
         // Expression statement
         struct {
           AstNode *expression; // Changed from Expr* to AstNode*
@@ -285,6 +293,9 @@ AstNode *create_type_node(ArenaAllocator *arena, NodeType type, size_t line, siz
 #define create_stmt(arena, type, line, column) create_stmt_node(arena, type, line, column)
 #define create_type(arena, type, line, column) create_type_node(arena, type, line, column)
 
+// Create the AstNode
+AstNode *create_ast_node(ArenaAllocator *arena, NodeType type, NodeCategory category, size_t line, size_t column);
+
 // Expression creation macros
 AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *value, size_t line, size_t column);
 AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name, size_t line, size_t column);
@@ -298,6 +309,7 @@ AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index, siz
 AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line, size_t column);
 
 // Statement creation macros
+AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);
 AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, size_t column);
 AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, size_t line, size_t column);
 AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, AstNode *body, size_t line, size_t column);
