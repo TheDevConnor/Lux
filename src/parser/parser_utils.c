@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "parser.h"
 
@@ -17,11 +18,10 @@ Token p_current(Parser *psr) {
 }
 
 Token p_advance(Parser *psr) {
-  if (psr->pos < psr->tk_count) {
+  if (p_has_tokens(psr)) {
     return psr->tks[psr->pos++];
-  } else {
-    return (Token){.type_ = TOK_EOF}; // Return EOF token if no tokens left
   }
+  return (Token){.type_ = TOK_EOF}; // Return EOF token if no tokens left
 }
 
 Token p_consume(Parser *psr, TokenType type, const char *error_msg) {
@@ -32,4 +32,11 @@ Token p_consume(Parser *psr, TokenType type, const char *error_msg) {
             p_current(psr).line, p_current(psr).col, error_msg);
     return (Token){.type_ = TOK_EOF}; // Return an error token
   }
+}
+
+char *get_name(Parser *psr) {
+  char *name = (char *)arena_alloc(psr->arena, CURRENT_TOKEN_LENGTH(psr) + 1, alignof(char));
+  memcpy((void *)name, CURRENT_TOKEN_VALUE(psr), CURRENT_TOKEN_LENGTH(psr));
+  ((char *)name)[CURRENT_TOKEN_LENGTH(psr)] = '\0';
+  return name;
 }

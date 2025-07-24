@@ -1,3 +1,11 @@
+fn string () *char {
+    "Hello, World!";
+}
+
+fn add () int { 
+    return a + b; 
+}
+
 fn main () int { 
     return 100; 
 }

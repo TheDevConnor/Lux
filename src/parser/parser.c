@@ -7,31 +7,50 @@
 #include "parser.h"
 
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
+  size_t estimated_stmts = (tks->count / 4) + 10;
+  
   Parser parser = {
       .arena = arena,
-      .tks = (Token *)tks->data, // Cast to Token pointer
-      .stmts = (Stmt *)arena_alloc(arena, sizeof(Stmt) * tks->count, alignof(Stmt)),
+      .tks = (Token *)tks->data,
+      // Store pointers to statements, not statement values
+      .stmts = (Stmt *)arena_alloc(arena, sizeof(Stmt *) * estimated_stmts, alignof(Stmt *)),
       .tk_count = tks->count,
       .stmt_count = 0,
-      .capacity = tks->capacity,
+      .capacity = estimated_stmts,
       .pos = 0,
   };
 
   if (!parser.tks || !parser.stmts) {
-    return NULL; // Memory allocation failed
+    fprintf(stderr, "Failed to allocate parser memory\n");
+    return NULL;
   }
-
-  while (p_has_tokens(&parser)) {
+  
+  // Create an array of statement pointers
+  Stmt **stmt_ptrs = (Stmt **)arena_alloc(arena, sizeof(Stmt *) * parser.capacity, alignof(Stmt *));
+  if (!stmt_ptrs) {
+    fprintf(stderr, "Failed to allocate statement pointers\n");
+    return NULL;
+  }
+  
+  while (p_has_tokens(&parser) && p_current(&parser).type_ != TOK_EOF) {
     Stmt *stmt = parse_stmt(&parser);
-    if (!stmt) {
-      fprintf(stderr, "Error parsing statement at line %d, column %d\n", p_current(&parser).line, p_current(&parser).col);
-      return NULL; // Handle error appropriately
+    if (stmt == NULL) {
+        fprintf(stderr, "Failed to parse statement at position %zu\n", parser.pos);
+        break;
     }
 
-    parser.stmts[parser.stmt_count++] = *stmt;
+    // Store the pointer to the statement (not the statement itself)
+    stmt_ptrs[parser.stmt_count] = stmt;
+    parser.stmt_count++;
+    
+    if (parser.stmt_count >= parser.capacity) {
+        fprintf(stderr, "Too many statements, reached capacity limit of %zu\n", parser.capacity);
+        break;
+    }
   }
 
-  return create_program_node(parser.arena, &parser.stmts, parser.stmt_count, 0, 0);
+  // Cast to AstNode** since program expects AstNode** not Stmt**
+  return create_program_node(parser.arena, (AstNode **)stmt_ptrs, parser.stmt_count, 0, 0);
 }
 
 BindingPower get_bp(TokenType kind) {
@@ -196,9 +215,10 @@ Type *parse_type(Parser *parser) {
   case TOK_UINT:
   case TOK_FLOAT:
   case TOK_BOOL:
-  case TOK_STRING:
+  case TOK_STRINGT:
   case TOK_VOID:
-  case TOK_CHAR_LITERAL:
+  case TOK_CHAR:
+  case TOK_STAR: // Pointer type
     return tnud(parser);
 
   // Optionally: handle identifiers like 'MyStruct' or user-defined types

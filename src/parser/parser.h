@@ -51,6 +51,7 @@ Token p_peek(Parser *psr, size_t offset);
 Token p_current(Parser *psr);
 Token p_advance(Parser *psr);
 Token p_consume(Parser *psr, TokenType type, const char *error_msg);
+char *get_name(Parser *psr);
 
 // Main parsing functions
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena);
@@ -78,6 +79,9 @@ Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp);
 Type *tnud(Parser *parser);
 Type *tled(Parser *parser, Type *left, BindingPower bp);
 BindingPower tget_bp(Parser *parser, TokenType kind);
+
+// Type Functions
+Type *pointer(Parser *parser);
 
 // Statement parsing functions
 Stmt *expr_stmt(Parser *parser);

@@ -15,10 +15,14 @@ Stmt *expr_stmt(Parser *parser) {
 Stmt *var_stmt(Parser *parser) { return NULL; }
 
 Stmt *fn_stmt(Parser *parser, const char *name) { 
-  name = (char *)arena_alloc(parser->arena, CURRENT_TOKEN_LENGTH(parser) + 1, alignof(char));
-  memcpy((void *)name, CURRENT_TOKEN_VALUE(parser), CURRENT_TOKEN_LENGTH(parser));
-  ((char *)name)[CURRENT_TOKEN_LENGTH(parser)] = '\0';
-  p_consume(parser, TOK_IDENTIFIER, "Expected function name after 'fn' keyword");
+  // First consume the identifier token and get its name
+  if (p_current(parser).type_ != TOK_IDENTIFIER) {
+    fprintf(stderr, "Expected function name after 'fn' keyword\n");
+    return NULL;
+  }
+  
+  name = get_name(parser);
+  p_advance(parser); // Now advance past the identifier
 
   p_consume(parser, TOK_LPAREN, "Expected '(' after function name");
   p_consume(parser, TOK_RPAREN, "Expected ')' after function parameters");

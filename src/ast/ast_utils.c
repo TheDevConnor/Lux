@@ -219,13 +219,18 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
 
   case AST_TYPE_POINTER:
     print_prefix(next_prefix, true);
-    printf(BOLD_CYAN("Pointer Type: "));
-    print_ast(node->type_data.pointer.pointee_type, next_prefix, true, false);
+    printf(BOLD_CYAN("Pointer Type: \n"));
+    if (node->type_data.pointer.pointee_type) {
+      print_ast(node->type_data.pointer.pointee_type, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<void>\n"));
+    }
     break;
 
   case AST_TYPE_ARRAY:
     print_prefix(next_prefix, true);
-    printf(BOLD_CYAN("Array Type: "));
+    printf(BOLD_CYAN("Array Type: \n"));
     print_ast(node->type_data.array.element_type, next_prefix, true, false);
     if (node->type_data.array.size) {
       print_prefix(next_prefix, true);
@@ -239,7 +244,7 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
 
   case AST_TYPE_FUNCTION:
     print_prefix(next_prefix, true);
-    printf(BOLD_CYAN("Function Type: "));
+    printf(BOLD_CYAN("Function Type: \n"));
     if (node->type_data.function.return_type) {
       print_ast(node->type_data.function.return_type, next_prefix, true, false);
     } else {
@@ -256,6 +261,7 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       print_prefix(next_prefix, true);
       printf(GRAY("<no parameters>\n"));
     }
+    break;
 
   case AST_EXPR_LITERAL:
     print_prefix(next_prefix, true);
@@ -273,6 +279,20 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       printf(GREEN("%s\n"), node->expr.literal.value.bool_val ? "true" : "false"); break;
     case LITERAL_NULL:
       printf(GREEN("null\n")); break;
+    default:
+      print_prefix(next_prefix, true);
+      printf(GRAY("<unknown literal type>\n"));
+      break;
+    }
+    break;
+
+  case AST_EXPR_IDENTIFIER:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Identifier: "));
+    if (node->expr.identifier.name) {
+      printf(YELLOW("%s\n"), node->expr.identifier.name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
     }
     break;
 

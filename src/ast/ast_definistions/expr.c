@@ -23,7 +23,7 @@ AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *
       node->expr.literal.value.float_val = *(double *)value;
       break;
     case LITERAL_STRING:
-      node->expr.literal.value.string_val = strdup((char *)value);
+      node->expr.literal.value.string_val = arena_strdup(arena, (char *)value);
       break;
     case LITERAL_CHAR:
       node->expr.literal.value.char_val = *(char *)value;
@@ -33,6 +33,13 @@ AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *
       break;
     case LITERAL_NULL:
       break;
+    case LITERAL_IDENT:
+      node->expr.literal.value.string_val = arena_strdup(arena, (char *)value);
+      break;
+    default:
+      fprintf(stderr, "Error: Unsupported literal type %d in create_literal_expr.\n", lit_type);
+      exit(1);
+      break;
     }
 
     return node;
@@ -40,7 +47,7 @@ AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *
 
 AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name, size_t line, size_t column) {
     AstNode *node = create_expr(arena, AST_EXPR_IDENTIFIER, line, column);
-    node->expr.identifier.name = strdup(name);
+    node->expr.identifier.name = arena_strdup(arena, name);
     return node;
 }
 

@@ -32,7 +32,6 @@ Expr *primary(Parser *parser) {
   }
 
   if (lit_type != LITERAL_NULL) {
-    p_advance(parser); // Consume the token
     void *value = NULL;
     switch (lit_type) {
     case LITERAL_INT:
@@ -44,8 +43,8 @@ Expr *primary(Parser *parser) {
       *(double *)value = strtod(current.value, NULL);
       break;
     case LITERAL_STRING:
-      value = arena_alloc(parser->arena, strlen(current.value) + 1, alignof(char));
-      strcpy((char *)value, current.value); // Duplicate the string
+      value = arena_alloc(parser->arena, strlen(get_name(parser)) + 1, alignof(char));
+      strcpy((char *)value, get_name(parser));
       break;
     case LITERAL_CHAR:
       value = arena_alloc(parser->arena, sizeof(char), alignof(char));
@@ -56,16 +55,18 @@ Expr *primary(Parser *parser) {
       *(bool *)value = (strcmp(current.value, "true") == 0);
       break;
     case LITERAL_IDENT:
-      value = arena_alloc(parser->arena, strlen(current.value) + 1, alignof(char));
-      strcpy((char *)value, current.value); // Duplicate the identifier
+      value = get_name(parser); // Get the identifier name
       break;
     default:
       value = NULL; // Handle null or unsupported literal types
       break;
     }
+    p_advance(parser); // Consume the token
 
-    return create_literal_expr(parser->arena, lit_type, value, current.line,
-                               current.col);
+    if (lit_type == LITERAL_IDENT) {
+      return create_identifier_expr(parser->arena, (char *)value, current.line, current.col);
+    }
+    return create_literal_expr(parser->arena, lit_type, value, current.line, current.col);
   }
 
   return NULL; // Handle error or unsupported literal type
