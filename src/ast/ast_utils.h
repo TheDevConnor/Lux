@@ -26,4 +26,5 @@ const char *binop_to_string(BinaryOp op);
 const char *unop_to_string(UnaryOp op);
 const char *literal_type_to_string(LiteralType type);
 
-void print_ast(const AstNode *node, int indent);
+void print_prefix(const char *prefix, bool is_last);
+void print_ast(const AstNode *node, const char *prefix, bool is_last, bool root);

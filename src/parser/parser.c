@@ -20,23 +20,17 @@ Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
     return NULL; // Memory allocation failed
   }
 
-  printf("Parsing statements...\n");
   while (p_has_tokens(&parser)) {
     Stmt *stmt = parse_stmt(&parser);
     if (!stmt) {
       fprintf(stderr, "Error parsing statement at line %d, column %d\n", p_current(&parser).line, p_current(&parser).col);
       return NULL; // Handle error appropriately
     }
-    
-    parser.stmts[parser.stmt_count++] = *stmt;
 
-    if (parser.stmt_count >= parser.capacity) {
-      fprintf(stderr, "Statement array capacity exceeded.\n");
-      return NULL; // Handle capacity exceeded
-    }
+    parser.stmts[parser.stmt_count++] = *stmt;
   }
 
-  return parser.stmts; // Return the array of parsed statements
+  return create_program_node(parser.arena, &parser.stmts, parser.stmt_count, 0, 0);
 }
 
 BindingPower get_bp(TokenType kind) {
