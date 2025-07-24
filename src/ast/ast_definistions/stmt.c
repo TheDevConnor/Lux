@@ -1,4 +1,6 @@
 #include "../ast.h"
+#include <stdio.h>
+#include <string.h>
 
 AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_PROGRAM, line, column);

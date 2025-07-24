@@ -207,6 +207,56 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     }
     break;
 
+  case AST_TYPE_BASIC:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Basic Type: "));
+    if (node->type_data.basic.name) {
+      printf(YELLOW("%s\n"), node->type_data.basic.name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
+    }
+    break;
+
+  case AST_TYPE_POINTER:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Pointer Type: "));
+    print_ast(node->type_data.pointer.pointee_type, next_prefix, true, false);
+    break;
+
+  case AST_TYPE_ARRAY:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Array Type: "));
+    print_ast(node->type_data.array.element_type, next_prefix, true, false);
+    if (node->type_data.array.size) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Size: "));
+      print_ast(node->type_data.array.size, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<unsized>\n"));
+    }
+    break;
+
+  case AST_TYPE_FUNCTION:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Function Type: "));
+    if (node->type_data.function.return_type) {
+      print_ast(node->type_data.function.return_type, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<void>\n"));
+    }
+    if (node->type_data.function.param_count > 0) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Parameters: %zu\n"), node->type_data.function.param_count);
+      for (size_t i = 0; i < node->type_data.function.param_count; ++i) {
+        print_ast(node->type_data.function.param_types[i], next_prefix, true, false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no parameters>\n"));
+    }
+
   case AST_EXPR_LITERAL:
     print_prefix(next_prefix, true);
     printf(GREEN(" (%s): "), literal_type_to_string(node->expr.literal.lit_type));

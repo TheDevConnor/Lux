@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "../c_libs/memory/memory.h"
+#include "../ast/ast_utils.h"
 #include "../ast/ast.h"
 #include "parser.h"
 
@@ -187,18 +188,10 @@ Stmt *parse_stmt(Parser *parser) {
   }
 }
 
-Type *tnud(Parser *parser) {
-  fprintf(stderr, "Parsing type nud: %.*s\n", CURRENT_TOKEN_LENGTH(parser), CURRENT_TOKEN_VALUE(parser));
-  return create_basic_type(parser->arena, p_current(parser).value, p_current(parser).line, p_current(parser).col);
-}
-
-Type *tled(Parser *parser, Type *left, BindingPower bp) {
-  fprintf(stderr, "Parsing type led: %.*s\n", CURRENT_TOKEN_LENGTH(parser), CURRENT_TOKEN_VALUE(parser));
-  return NULL; // No valid type found
-}
-
 Type *parse_type(Parser *parser) {
-  switch (p_current(parser).type_) {
+  TokenType tok = p_current(parser).type_;
+
+  switch (tok) {
   case TOK_INT:
   case TOK_UINT:
   case TOK_FLOAT:
@@ -207,10 +200,14 @@ Type *parse_type(Parser *parser) {
   case TOK_VOID:
   case TOK_CHAR_LITERAL:
     return tnud(parser);
+
+  // Optionally: handle identifiers like 'MyStruct' or user-defined types
   case TOK_IDENTIFIER:
     return tled(parser, NULL, BP_NONE);
+
   default:
-    p_advance(parser);
-    return NULL; // No valid type found
+    fprintf(stderr, "[parse_type] Unexpected token for type: %d\n", tok);
+    return NULL;
   }
 }
+

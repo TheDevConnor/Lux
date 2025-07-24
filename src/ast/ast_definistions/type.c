@@ -1,8 +1,10 @@
+#include <stdio.h>
+
 #include "../ast.h"
 
 AstNode *create_basic_type(ArenaAllocator *arena, const char *name, size_t line, size_t column) {
   AstNode *node = create_type_node(arena, AST_TYPE_BASIC, line, column);
-  node->type_data.basic.name = name;
+  node->type_data.basic.name = name; // Store the name directly
   return node;
 }
 
