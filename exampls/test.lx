@@ -34,7 +34,7 @@ struct Scene {
 
 fn main() int {
     // Create scene
-    let scene = Scene{
+    let scene: Scene = {
         shapes: [
             Square(3.0),
             Circle(2.0),
@@ -42,7 +42,7 @@ fn main() int {
         ],
     };
 
-    print("Total area = ", scene.total_area());
+    output("Total area = ", scene.total_area());
 
     const sq = generate_squares(5);
     loop (i = 0; i < len(sq)) {

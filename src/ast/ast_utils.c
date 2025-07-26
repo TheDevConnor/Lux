@@ -342,7 +342,23 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     } else {
       printf(YELLOW("<unnamed>\n"));
     }
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Parameters: %zu\n"), node->stmt.func_decl.param_count);
+    for (size_t i = 0; i < node->stmt.func_decl.param_count; ++i) {
+      print_prefix(next_prefix, false);
+      printf(BOLD_CYAN("Parameter %zu: "), i + 1);
+      if (node->stmt.func_decl.param_names[i]) {
+        printf(YELLOW("%s\n"), node->stmt.func_decl.param_names[i]);
+      } else {
+        printf(YELLOW("<unnamed>\n"));
+      }
+      print_ast(node->stmt.func_decl.param_types[i], next_prefix, true, false);
+    }
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Return Type: \n"));
     print_ast(node->stmt.func_decl.return_type, next_prefix, true, false);
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Body:\n"));
     print_ast(node->stmt.func_decl.body, next_prefix, true, false); 
     break; 
   
