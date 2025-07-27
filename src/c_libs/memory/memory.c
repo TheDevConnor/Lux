@@ -1,8 +1,20 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
 #include "memory.h"
+
+#if defined(_WIN32)
+#include <malloc.h>
+#define ALIGNED_ALLOC(sz, align) _aligned_malloc((sz), (align))
+#define ALIGNED_FREE(ptr) _aligned_free(ptr)
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L
+#include <stdlib.h>
+#define ALIGNED_ALLOC(sz, align) aligned_alloc((align), (sz))
+#define ALIGNED_FREE(ptr) free(ptr)
+#else
+#error "aligned_alloc or platform equivalent not available"
+#endif
+
+
 
 #ifndef DEBUG_PRINT
 #define DEBUG_PRINT(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
@@ -26,7 +38,12 @@ Buffer *buffer_create(size_t s, size_t alignment) {
   size_t aligned_total_size =
       (total_size + buffer_align - 1) & ~(buffer_align - 1);
 
-  void *raw = aligned_alloc(buffer_align, aligned_total_size);
+  #if defined(_WIN32)
+    void *raw = _aligned_malloc(aligned_total_size, buffer_align);
+  #else
+    void *raw = aligned_alloc(buffer_align, aligned_total_size);
+  #endif
+
   TRACK_ALLOC(raw);
   if (!raw) {
     DEBUG_PRINT("buffer_create: FAILED to allocate %zu bytes (align %zu)\n",
@@ -132,7 +149,12 @@ void arena_destroy(ArenaAllocator *arena) {
     DEBUG_PRINT("arena_destroy: freeing buffer %p (size %zu, ptr %p)\n",
                 (void *)current, current->size, (void *)current->ptr);
     Buffer *next = current->next;
-    free(current);
+    #if defined(_WIN32)
+        _aligned_free(current);
+    #else
+        free(current);
+    #endif
+
     TRACK_FREE(current);
     current = next;
   }
