@@ -38,7 +38,7 @@ static const KeywordEntry keywords[] = {
     {"float", TOK_FLOAT},   {"double", TOK_DOUBLE},
     {"bool", TOK_BOOL},     {"let", TOK_VAR},
     {"fn", TOK_FN},       {"output", TOK_PRINT},
-    {"outputln", TOK_PRINTLN},
+    {"outputln", TOK_PRINTLN}, {"const", TOK_CONST},
 };
 
 static TokenType lookup_keyword(const char *str, int length) {

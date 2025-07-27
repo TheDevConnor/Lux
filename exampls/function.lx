@@ -1,11 +1,27 @@
-fn string () *char {
-    "Hello, World!";
+const STRING: str = "Hello, World!";
+const NUM: int = 3;
+
+const Direction = enum {
+    left, right, up, down
+};
+
+/*
+const Point = struct {
+    x: int, 
+    y: int,
+
+    init = fn (self *Point, x int, y int) void {
+        self.x = x;
+        self.y = y;
+    }
+};
+*/
+
+const add = fn (a: int, b: int) int {
+    return a + b;
 }
 
-fn add () int { 
-    return a + b; 
-}
-
-fn main () int { 
-    return 100; 
+const main = fn () int {
+    let x: int = 0;
+    return 0;
 }

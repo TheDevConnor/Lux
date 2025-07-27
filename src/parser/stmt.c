@@ -12,19 +12,84 @@ Stmt *expr_stmt(Parser *parser) {
                           p_current(parser).col);
 }
 
-Stmt *var_stmt(Parser *parser) { return NULL; }
+// const 'name' = (fn, struct, or enum)
+// If no type is specified, it defaults to the type of the value
+// const 'name': Type = value
+Stmt *const_stmt(Parser *parser) {
+  p_consume(parser, TOK_CONST, "Expected 'const' keyword");
+  const char *name = get_name(parser);
+  p_advance(parser); // Advance past the identifier token
 
-Stmt *fn_stmt(Parser *parser, const char *name) { 
-  // First consume the identifier token and get its name
-  if (p_current(parser).type_ != TOK_IDENTIFIER) {
-    fprintf(stderr, "Expected function name after 'fn' keyword\n");
+  if (p_current(parser).type_ == TOK_COLON) {
+    p_consume(parser, TOK_COLON, "Expected ':' after const name");
+
+    Type *type = parse_type(parser);
+    p_advance(parser); // Advance past the type token
+
+    p_consume(parser, TOK_EQUAL, "Expected '=' after const type");
+    Expr *value = parse_expr(parser, BP_LOWEST);
+
+    p_consume(parser, TOK_SEMICOLON, "Expected semicolon after const declaration");
+    return create_var_decl_stmt(parser->arena, name, type, value, false, p_current(parser).line, p_current(parser).col);
+  } 
+  
+  p_consume(parser, TOK_EQUAL, "Expected '=' after const name");
+
+  switch (p_current(parser).type_) {
+    case TOK_FN:     return fn_stmt(parser, name);
+    case TOK_STRUCT: return struct_stmt(parser, name);
+    case TOK_ENUM:   return enum_stmt(parser, name);
+    default: {
+      fprintf(stderr, "Expected function, struct, or enum after const '%s'\n", name);
+      return NULL;
+    }
+  }
+}
+
+Stmt *fn_stmt(Parser *parser, const char *name) {
+  GrowableArray param_names, param_types;
+  if (!growable_array_init(&param_names, parser->arena, 4, sizeof(char *)) ||
+      !growable_array_init(&param_types, parser->arena, 4, sizeof(Type *))) {
+    fprintf(stderr, "Failed to initialize parameter arrays.\n");
     return NULL;
   }
-  
-  name = get_name(parser);
-  p_advance(parser); // Now advance past the identifier
 
+  p_consume(parser, TOK_FN, "Expected 'fn' keyword");
   p_consume(parser, TOK_LPAREN, "Expected '(' after function name");
+
+  while (p_has_tokens(parser) && p_current(parser).type_ != TOK_RPAREN) {
+    if (p_current(parser).type_ != TOK_IDENTIFIER) {
+      fprintf(stderr, "Expected identifier for function parameter\n");
+      return NULL;
+    }
+
+    char *param_name = get_name(parser);
+    p_advance(parser); // Advance past the identifier token
+
+    p_consume(parser, TOK_COLON, "Expected ':' after parameter name");
+
+    Type *param_type = parse_type(parser);
+    if (!param_type) {
+      fprintf(stderr, "Failed to parse type for parameter '%s'\n", param_name);
+      return NULL;
+    }
+    p_advance(parser); // Advance past the type token
+
+    char **name_slot = (char **)growable_array_push(&param_names);
+    Type **type_slot = (Type **)growable_array_push(&param_types);
+    if (!name_slot || !type_slot) {
+      fprintf(stderr, "Out of memory while growing parameter arrays\n");
+      return NULL;
+    }
+
+    *name_slot = param_name;
+    *type_slot = param_type;
+
+    if (p_current(parser).type_ == TOK_COMMA) {
+      p_advance(parser); // Advance past the comma
+    }
+  }
+
   p_consume(parser, TOK_RPAREN, "Expected ')' after function parameters");
 
   Type *return_type = parse_type(parser);
@@ -32,14 +97,74 @@ Stmt *fn_stmt(Parser *parser, const char *name) {
 
   Stmt *body = block_stmt(parser);
 
-  return create_func_decl_stmt(parser->arena, name, NULL, NULL,
-                               0, return_type, body, 
+  return create_func_decl_stmt(parser->arena, name, (char **)param_names.data,
+                               (AstNode **)param_types.data, param_names.count,
+                               return_type, body, p_current(parser).line, p_current(parser).col);
+}
+
+Stmt *enum_stmt(Parser *parser, const char *name) { 
+  GrowableArray members;
+  if (!growable_array_init(&members, parser->arena, 4, sizeof(char *))) {
+    fprintf(stderr, "Failed to initialize enum members array.\n");
+    return NULL;
+  }
+
+  p_consume(parser, TOK_ENUM, "Expected 'enum' keyword");
+  p_consume(parser, TOK_LBRACE, "Expected '{' after enum name");
+
+  while (p_has_tokens(parser) && p_current(parser).type_ != TOK_RBRACE) {
+    if (p_current(parser).type_ != TOK_IDENTIFIER) {
+      fprintf(stderr, "Expected identifier for enum member\n");
+      return NULL;
+    }
+
+    char *member_name = get_name(parser);
+    p_advance(parser); // Advance past the identifier token
+
+    char **slot = (char **)growable_array_push(&members);
+    if (!slot) {
+      fprintf(stderr, "Out of memory while growing enum members array\n");
+      return NULL;
+    }
+    *slot = member_name;
+
+    if (p_current(parser).type_ == TOK_COMMA) {
+      p_advance(parser); // Advance past the comma
+    }
+  }
+
+  p_consume(parser, TOK_RBRACE, "Expected '}' to end enum declaration");
+  p_consume(parser, TOK_SEMICOLON, "Expected semicolon after enum declaration");
+
+  return create_enum_decl_stmt(parser->arena, name,
+                               (char **)members.data, members.count,
                                p_current(parser).line, p_current(parser).col);
 }
 
-Stmt *enum_stmt(Parser *parser, const char *name) { return NULL; }
-
 Stmt *struct_stmt(Parser *parser, const char *name) { return NULL; }
+
+// let 'name': Type = value
+Stmt *var_stmt(Parser *parser) { 
+  p_consume(parser, TOK_VAR, "Expected 'let' keyword");
+  const char *name = get_name(parser);
+  p_advance(parser); // Advance past the identifier token
+
+  Type *type = NULL;
+  if (p_current(parser).type_ == TOK_COLON) {
+    p_consume(parser, TOK_COLON, "Expected ':' after variable name");
+    type = parse_type(parser);
+    p_advance(parser); // Advance past the type token
+  }
+
+  p_consume(parser, TOK_EQUAL, "Expected '=' after variable declaration");
+
+  Expr *value = parse_expr(parser, BP_LOWEST);
+  p_consume(parser, TOK_SEMICOLON, "Expected semicolon after variable declaration");
+
+  // const are not changable aka immutable and vars are mutable so we set is_mutable to true
+  return create_var_decl_stmt(parser->arena, name, type, value, true,
+                              p_current(parser).line, p_current(parser).col);
+}
 
 Stmt *print_stmt(Parser *parser, bool ln) { return NULL; }
 

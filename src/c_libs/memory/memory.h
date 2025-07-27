@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-#define DEBUG_ARENA_ALLOC 1  // Comment this line to disable debug logs
+// #define DEBUG_ARENA_ALLOC 1  // Comment this line to disable debug logs
 
 #ifdef DEBUG_ARENA_ALLOC
 #define DEBUG_PRINT(...) fprintf(stderr, __VA_ARGS__)

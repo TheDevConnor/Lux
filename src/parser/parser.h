@@ -86,6 +86,7 @@ Type *pointer(Parser *parser);
 // Statement parsing functions
 Stmt *expr_stmt(Parser *parser);
 Stmt *var_stmt(Parser *parser);
+Stmt *const_stmt(Parser *parser);
 Stmt *fn_stmt(Parser *parser, const char *name);
 Stmt *enum_stmt(Parser *parser, const char *name);
 Stmt *struct_stmt(Parser *parser, const char *name);

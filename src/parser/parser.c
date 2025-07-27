@@ -174,17 +174,9 @@ Expr *parse_expr(Parser *parser, BindingPower bp) {
 Stmt *parse_stmt(Parser *parser) {
   switch (p_current(parser).type_) {
     case TOK_VAR:
-      p_advance(parser);
       return var_stmt(parser);
-    case TOK_FN:
-      p_advance(parser);
-      return fn_stmt(parser, NULL);
-    case TOK_ENUM:
-      p_advance(parser);
-      return enum_stmt(parser, NULL);
-    case TOK_STRUCT:
-      p_advance(parser);
-      return struct_stmt(parser, NULL);
+    case TOK_CONST:
+      return const_stmt(parser);
     case TOK_RETURN:
       p_advance(parser);
       return return_stmt(parser);

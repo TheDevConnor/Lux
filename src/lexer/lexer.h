@@ -35,6 +35,7 @@ typedef enum {
   TOK_PUBLIC,   // pub
   TOK_PRIVATE,  // private
   TOK_VAR,      // let
+  TOK_CONST,    // const
   TOK_FN,       // fn
   TOK_PRINT,    // output
   TOK_PRINTLN,  // println

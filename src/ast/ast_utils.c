@@ -342,9 +342,49 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     } else {
       printf(YELLOW("<unnamed>\n"));
     }
-    print_ast(node->stmt.func_decl.return_type, next_prefix, true, false);
-    print_ast(node->stmt.func_decl.body, next_prefix, true, false); 
-    break; 
+    if (node->stmt.func_decl.param_count > 0) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Parameters: %zu\n"), node->stmt.func_decl.param_count);
+      for (size_t i = 0; i < node->stmt.func_decl.param_count; ++i) {
+        print_prefix(next_prefix, false);
+        printf(GREEN("Parameter %zu: %s\n"), i + 1, node->stmt.func_decl.param_names[i]);
+        print_ast(node->stmt.func_decl.param_types[i], next_prefix, true, false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no parameters>\n"));
+    }
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Return Type: "));
+    if (node->stmt.func_decl.return_type) {
+      print_ast(node->stmt.func_decl.return_type, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no return type>\n"));
+    }
+    print_ast(node->stmt.func_decl.body, next_prefix, true, false);
+    break;
+
+  case AST_STMT_ENUM: 
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Enum Declaration: "));
+    if (node->stmt.enum_decl.name) {
+      printf(YELLOW("%s\n"), node->stmt.enum_decl.name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
+    }
+    if (node->stmt.enum_decl.member_count > 0) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Members: %zu\n"), node->stmt.enum_decl.member_count);
+      for (size_t i = 0; i < node->stmt.enum_decl.member_count; ++i) {
+        print_prefix(next_prefix, false);
+        printf(GREEN("Member %zu: %s\n"), i + 1, node->stmt.enum_decl.members[i]);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no members>\n"));
+    }
+    break;
   
   case AST_STMT_BLOCK:
     print_prefix(next_prefix, true);

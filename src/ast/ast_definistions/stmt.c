@@ -35,6 +35,14 @@ AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **p
   return node;
 }
 
+AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_ENUM, line, column);
+  node->stmt.enum_decl.name = name;
+  node->stmt.enum_decl.members = members;
+  node->stmt.enum_decl.member_count = member_count;
+  return node;
+}
+
 AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode *else_stmt, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_IF, line, column);
   node->stmt.if_stmt.condition = condition;
