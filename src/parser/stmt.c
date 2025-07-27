@@ -166,8 +166,6 @@ Stmt *var_stmt(Parser *parser) {
                               p_current(parser).line, p_current(parser).col);
 }
 
-Stmt *print_stmt(Parser *parser, bool ln) { return NULL; }
-
 Stmt *return_stmt(Parser *parser) { 
   Expr *value = NULL;
   if (p_current(parser).type_ != TOK_SEMICOLON) {
@@ -180,13 +178,13 @@ Stmt *return_stmt(Parser *parser) {
 
 Stmt *block_stmt(Parser *parser) {
   p_consume(parser, TOK_LBRACE, "Expected '{' to start block statement");
-
+  
   GrowableArray block;
   if (!growable_array_init(&block, parser->arena, 4, sizeof(Stmt *))) {
     fprintf(stderr, "Failed to initialize block statement array.\n");
     return NULL;
   }
-
+  
   while (p_has_tokens(parser) && p_current(parser).type_ != TOK_RBRACE) {
     Stmt *stmt = parse_stmt(parser);
     if (!stmt) {
@@ -199,7 +197,7 @@ Stmt *block_stmt(Parser *parser) {
       fprintf(stderr, "Out of memory while growing block statement array\n");
       return NULL;
     }
-
+    
     *slot = stmt;
   }
 
@@ -209,10 +207,12 @@ Stmt *block_stmt(Parser *parser) {
   if (block.count == 0) {
     return create_block_stmt(parser->arena, NULL, 0, p_current(parser).line, p_current(parser).col);
   }
-
+  
   return create_block_stmt(parser->arena, stmts, block.count, p_current(parser).line, p_current(parser).col);
 }
 
 Stmt *loop_stmt(Parser *parser) { return NULL; }
 
 Stmt *if_stmt(Parser *parser) { return NULL; }
+
+Stmt *print_stmt(Parser *parser, bool ln) { return NULL; }

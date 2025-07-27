@@ -101,7 +101,7 @@ void skip_whitespace(Lexer *lx) {
     char c = peek(lx, 0);
     if (isspace(c)) {
       advance(lx);
-    } else if (c == '/' && peek(lx, 1) == '/') {
+    } else if (c == ';' && peek(lx, 1) == ';') {
       // Skip single-line comment
       while (!is_at_end(lx) && peek(lx, 0) != '\n') {
         advance(lx);
