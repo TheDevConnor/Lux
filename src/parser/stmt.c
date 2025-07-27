@@ -96,6 +96,7 @@ Stmt *fn_stmt(Parser *parser, const char *name) {
   p_advance(parser); // Advance past the return type token
 
   Stmt *body = block_stmt(parser);
+  p_consume(parser, TOK_SEMICOLON, "Expected semicolon after function declaration");
 
   return create_func_decl_stmt(parser->arena, name, (char **)param_names.data,
                                (AstNode **)param_types.data, param_names.count,
