@@ -405,6 +405,31 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       printf(GRAY("<no return value>\n"));
     }
     break;
+
+  case AST_STMT_IF:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("If Statement\n"));
+    print_ast(node->stmt.if_stmt.condition, next_prefix, false, false);
+    print_ast(node->stmt.if_stmt.then_stmt, next_prefix, true, false);
+    if (node->stmt.if_stmt.elif_stmts) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Elif Statements\n"));
+      for (int i = 0; i < node->stmt.if_stmt.elif_count; ++i) {
+        print_ast(node->stmt.if_stmt.elif_stmts[i], next_prefix, (i == node->stmt.if_stmt.elif_count - 1), false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no elif statements>\n"));
+    }
+    if (node->stmt.if_stmt.else_stmt) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Else Statement\n"));
+      print_ast(node->stmt.if_stmt.else_stmt, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no else statement>\n"));
+    }
+    break;
   
   default:
     print_prefix(next_prefix, true);

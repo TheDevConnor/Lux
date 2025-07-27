@@ -225,6 +225,8 @@ struct AstNode {
         struct {
           AstNode *condition; // Changed from Expr* to AstNode*
           AstNode *then_stmt; // Changed from Stmt* to AstNode*
+          AstNode **elif_stmts; // Changed from Stmt* to AstNode*
+          int elif_count; // Number of elif statements
           AstNode *else_stmt; // Changed from Stmt* to AstNode*
         } if_stmt;
 
@@ -321,7 +323,7 @@ AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, 
 AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, size_t line, size_t column);
 AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, AstNode *body, size_t line, size_t column);
 AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, size_t line, size_t column);
-AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode *else_stmt, size_t line, size_t column);
+AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode **elif_stmts, int elif_count, AstNode *else_stmt, size_t line, size_t column);
 AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition, AstNode *body, AstNode *initializer, AstNode *increment, size_t line, size_t column);
 AstNode *create_return_stmt(ArenaAllocator *arena, Expr *value, size_t line, size_t column);
 AstNode *create_block_stmt(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);

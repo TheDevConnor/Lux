@@ -43,10 +43,12 @@ AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **m
   return node;
 }
 
-AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode *else_stmt, size_t line, size_t column) {
+AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode **elif_stmts, int elif_count, AstNode *else_stmt, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_IF, line, column);
   node->stmt.if_stmt.condition = condition;
   node->stmt.if_stmt.then_stmt = then_stmt;
+  node->stmt.if_stmt.elif_stmts = elif_stmts;
+  node->stmt.if_stmt.elif_count = elif_count;
   node->stmt.if_stmt.else_stmt = else_stmt;
   return node;
 }

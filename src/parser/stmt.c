@@ -6,10 +6,13 @@
 #include "parser.h"
 
 Stmt *expr_stmt(Parser *parser) {
+  // Capture line/col info at the beginning
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   Expr *expr = parse_expr(parser, BP_LOWEST);
   p_consume(parser, TOK_SEMICOLON, "Expected semicolon after expression statement");
-  return create_expr_stmt(parser->arena, expr, p_current(parser).line,
-                          p_current(parser).col);
+  return create_expr_stmt(parser->arena, expr, line, col);
 }
 
 // const 'name' = (fn, struct, or enum)
@@ -47,6 +50,10 @@ Stmt *const_stmt(Parser *parser) {
 }
 
 Stmt *fn_stmt(Parser *parser, const char *name) {
+  // Capture line/col info at the beginning
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   GrowableArray param_names, param_types;
   if (!growable_array_init(&param_names, parser->arena, 4, sizeof(char *)) ||
       !growable_array_init(&param_types, parser->arena, 4, sizeof(Type *))) {
@@ -100,10 +107,14 @@ Stmt *fn_stmt(Parser *parser, const char *name) {
 
   return create_func_decl_stmt(parser->arena, name, (char **)param_names.data,
                                (AstNode **)param_types.data, param_names.count,
-                               return_type, body, p_current(parser).line, p_current(parser).col);
+                               return_type, body, line, col);
 }
 
 Stmt *enum_stmt(Parser *parser, const char *name) { 
+  // Capture line/col info at the beginning
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   GrowableArray members;
   if (!growable_array_init(&members, parser->arena, 4, sizeof(char *))) {
     fprintf(stderr, "Failed to initialize enum members array.\n");
@@ -139,13 +150,17 @@ Stmt *enum_stmt(Parser *parser, const char *name) {
 
   return create_enum_decl_stmt(parser->arena, name,
                                (char **)members.data, members.count,
-                               p_current(parser).line, p_current(parser).col);
+                               line, col);
 }
 
 Stmt *struct_stmt(Parser *parser, const char *name) { return NULL; }
 
 // let 'name': Type = value
 Stmt *var_stmt(Parser *parser) { 
+  // Capture line/col info at the beginning
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   p_consume(parser, TOK_VAR, "Expected 'let' keyword");
   const char *name = get_name(parser);
   p_advance(parser); // Advance past the identifier token
@@ -164,19 +179,27 @@ Stmt *var_stmt(Parser *parser) {
 
   // const are not changable aka immutable and vars are mutable so we set is_mutable to true
   return create_var_decl_stmt(parser->arena, name, type, value, true,
-                              p_current(parser).line, p_current(parser).col);
+                              line, col);
 }
 
+// return Expr;
 Stmt *return_stmt(Parser *parser) { 
+  // Capture line/col info at the beginning
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+    
+
+  p_consume(parser, TOK_RETURN, "Expected 'return' keyword");
   Expr *value = NULL;
   if (p_current(parser).type_ != TOK_SEMICOLON) {
     value = parse_expr(parser, BP_LOWEST);
   }
   p_consume(parser, TOK_SEMICOLON, "Expected semicolon after return statement");
   
-  return create_return_stmt(parser->arena, value, p_current(parser).line, p_current(parser).col);
+  return create_return_stmt(parser->arena, value, line, col);
 }
 
+// { Stmt* }
 Stmt *block_stmt(Parser *parser) {
   p_consume(parser, TOK_LBRACE, "Expected '{' to start block statement");
   
@@ -212,8 +235,53 @@ Stmt *block_stmt(Parser *parser) {
   return create_block_stmt(parser->arena, stmts, block.count, p_current(parser).line, p_current(parser).col);
 }
 
-Stmt *loop_stmt(Parser *parser) { return NULL; }
+Stmt *if_stmt(Parser *parser) { 
+    // Capture line/col info at the beginning
+    int line = p_current(parser).line;
+    int col = p_current(parser).col;
+    
+    if (p_current(parser).type_ != TOK_IF && p_current(parser).type_ != TOK_ELIF) {
+        fprintf(stderr, "Expected 'if' or 'elif' keyword\n");
+        return NULL;
+    }
+    p_consume(parser, p_current(parser).type_, "Expected 'if' or 'elif' keyword");
+    
+    p_consume(parser, TOK_LPAREN, "Expected '(' after 'if' keyword");
+    Expr *condition = parse_expr(parser, BP_LOWEST);
+    p_consume(parser, TOK_RPAREN, "Expected ')' after if condition");
 
-Stmt *if_stmt(Parser *parser) { return NULL; }
+    Stmt *then_stmt = block_stmt(parser);
+    
+    // Collect all elif statements in a list/array instead of recursing
+    Stmt **elif_stmts = (Stmt **)arena_alloc(parser->arena, sizeof(Stmt *) * 4, alignof(Stmt *));
+    int elif_count = 0;
+
+    while (p_has_tokens(parser) && p_current(parser).type_ == TOK_ELIF) {
+        int elif_line = p_current(parser).line;
+        int elif_col = p_current(parser).col;
+
+        p_consume(parser, TOK_ELIF, "Expected 'elif' keyword");
+        p_consume(parser, TOK_LPAREN, "Expected '(' after 'elif' keyword");
+        
+        Expr *elif_condition = parse_expr(parser, BP_LOWEST);
+        p_consume(parser, TOK_RPAREN, "Expected ')' after elif condition");
+
+        Stmt *elif_stmt = block_stmt(parser);
+
+        // Store the elif condition and statement
+        elif_stmts[elif_count] = create_if_stmt(parser->arena, elif_condition, elif_stmt, NULL, elif_count, NULL, elif_line, elif_col);
+        elif_count++;
+    }
+
+    Stmt *else_stmt = NULL;
+    if (p_current(parser).type_ == TOK_ELSE) {
+        p_consume(parser, TOK_ELSE, "Expected 'else' keyword");
+        else_stmt = block_stmt(parser);
+    }
+
+    return create_if_stmt(parser->arena, condition, then_stmt, elif_stmts, elif_count, else_stmt, line, col);
+}
+
+Stmt *loop_stmt(Parser *parser) { return NULL; }
 
 Stmt *print_stmt(Parser *parser, bool ln) { return NULL; }

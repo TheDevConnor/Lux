@@ -21,6 +21,7 @@ typedef enum {
 
   // Keywords
   TOK_IF,       // if
+  TOK_ELIF,     // elif
   TOK_ELSE,     // else
   TOK_LOOP,     // loop
   TOK_RETURN,   // return

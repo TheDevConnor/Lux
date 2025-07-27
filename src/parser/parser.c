@@ -173,29 +173,25 @@ Expr *parse_expr(Parser *parser, BindingPower bp) {
 
 Stmt *parse_stmt(Parser *parser) {
   switch (p_current(parser).type_) {
-    case TOK_VAR:
-      return var_stmt(parser);
-    case TOK_CONST:
-      return const_stmt(parser);
-    case TOK_RETURN:
-      p_advance(parser);
-      return return_stmt(parser);
-    case TOK_LBRACE:
-      return block_stmt(parser); // don't advance here; block_stmt does
-    case TOK_LOOP:
-      p_advance(parser);
-      return loop_stmt(parser);
-    case TOK_IF:
-      p_advance(parser);
-      return if_stmt(parser);
-    case TOK_PRINT:
-      p_advance(parser);
-      return print_stmt(parser, false);
-    case TOK_PRINTLN:
-      p_advance(parser);
-      return print_stmt(parser, true);
-    default:
-      return expr_stmt(parser); // expression statements handle their own semicolon
+  case TOK_CONST:
+    return const_stmt(parser);
+  case TOK_RETURN:
+    return return_stmt(parser);
+  case TOK_LBRACE:
+    return block_stmt(parser);
+  case TOK_VAR:
+    return var_stmt(parser);
+  case TOK_IF:
+    return if_stmt(parser);
+  case TOK_LOOP:
+    return loop_stmt(parser);
+  case TOK_PRINT:
+    return print_stmt(parser, false);
+  case TOK_PRINTLN:
+    return print_stmt(parser, true);
+  default:
+    return expr_stmt(
+        parser); // expression statements handle their own semicolon
   }
 }
 
