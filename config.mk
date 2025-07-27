@@ -9,6 +9,3 @@ SRC_DIR = src
 OBJ_DIR = build
 BIN     = lux
 
-SRC_FILES := $(shell find $(SRC_DIR) -name '*.c')
-OBJ_FILES := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRC_FILES))
-
