@@ -5,6 +5,9 @@
 #include "parser.h"
 
 Expr *primary(Parser *parser) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   Token current = p_current(parser);
   LiteralType lit_type;
   switch (current.type_) {
@@ -43,7 +46,8 @@ Expr *primary(Parser *parser) {
       *(double *)value = strtod(current.value, NULL);
       break;
     case LITERAL_STRING:
-      value = arena_alloc(parser->arena, strlen(get_name(parser)) + 1, alignof(char));
+      value = arena_alloc(parser->arena, strlen(get_name(parser)) + 1,
+                          alignof(char));
       strcpy((char *)value, get_name(parser));
       break;
     case LITERAL_CHAR:
@@ -64,15 +68,18 @@ Expr *primary(Parser *parser) {
     p_advance(parser); // Consume the token
 
     if (lit_type == LITERAL_IDENT) {
-      return create_identifier_expr(parser->arena, (char *)value, current.line, current.col);
+      return create_identifier_expr(parser->arena, (char *)value, line, col);
     }
-    return create_literal_expr(parser->arena, lit_type, value, current.line, current.col);
+    return create_literal_expr(parser->arena, lit_type, value, line, col);
   }
 
   return NULL; // Handle error or unsupported literal type
 }
 
 Expr *unary(Parser *parser) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   Token current = p_current(parser);
   UnaryOp op;
 
@@ -94,22 +101,26 @@ Expr *unary(Parser *parser) {
   if (op) {
     p_advance(parser); // Consume the token
     Expr *operand = parse_expr(parser, BP_UNARY);
-    return create_unary_expr(parser->arena, op, operand, current.line,
-                             current.col);
+    return create_unary_expr(parser->arena, op, operand, line, col);
   }
 
   return NULL;
 }
 
 Expr *grouping(Parser *parser) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   p_consume(parser, TOK_LPAREN, "Expected '(' for grouping");
   Expr *expr = parse_expr(parser, BP_LOWEST);
   p_consume(parser, TOK_RPAREN, "Expected ')' to close grouping");
-  return create_grouping_expr(parser->arena, expr, p_current(parser).line,
-                              p_current(parser).col);
+  return create_grouping_expr(parser->arena, expr, line, col);
 }
 
 Expr *binary(Parser *parser, Expr *left, BindingPower bp) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
   Token current = p_current(parser);
   BinaryOp op;
 
@@ -149,10 +160,9 @@ Expr *binary(Parser *parser, Expr *left, BindingPower bp) {
   }
 
   p_advance(parser); // Consume the token
-  Expr *right = parse_expr(parser, get_bp(current.type_));
+  Expr *right = parse_expr(parser, bp);
 
-  return create_binary_expr(parser->arena, op, left, right, current.line,
-                            current.col);
+  return create_binary_expr(parser->arena, op, left, right, line, col);
 }
 
 Expr *call_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
