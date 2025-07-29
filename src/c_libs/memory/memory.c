@@ -51,6 +51,8 @@ Buffer *buffer_create(size_t s, size_t alignment) {
     return NULL;
   }
 
+  memset(raw, 0, aligned_total_size);
+
   Buffer *buf = (Buffer *)raw;
   buf->size = s;
   buf->next = NULL;

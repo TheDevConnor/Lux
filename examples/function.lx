@@ -1,7 +1,7 @@
-const STRING: str = "Hello, World!";  ;; public by default
-const NUM: int = 3;                   ;; public by default
+;; const STRING: str = "Hello, World!";  ;; public by default
+;; const NUM: int = 3;                   ;; public by default
 
-const Direction = pub enum {          ;; explicitly public (redundant but clear)
+const Direction = enum {          ;; explicitly public (redundant but clear)
     left, right, up, down
 };
 
@@ -18,11 +18,11 @@ const Direction = pub enum {          ;; explicitly public (redundant but clear)
  * };
 */
 
-const add = fn (a: int, b: int) *int {  ;; public by default
+const add = fn (a: int, b: int) int {  ;; public by default
     return (a + b) / 25;
 };
 
-const helper = priv fn (x: int) int {   ;; explicitly private
+const helper = fn (x: int) int {   ;; explicitly private
     return x * 2;
 };
 
