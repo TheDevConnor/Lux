@@ -47,6 +47,7 @@ int print_help() {
   printf("  -save           Save the outputed llvm file\n");
   printf("  build <target>  Build the specified target\n");
   printf("  clean           Clean the build artifacts\n");
+  printf("  -debug          builds a debug version and shows the allocators trace");
   return 0;
 }
 
@@ -77,6 +78,8 @@ bool parse_args(int argc, char *argv[], BuildConfig *config) {
           config->save = true;
         else if (strcmp(argv[j], "-clean") == 0)
           config->clean = true;
+        else if (strcmp(argv[j], "-debug") == 0) {
+        }
         else {
           fprintf(stderr, "Unknown build option: %s\n", argv[j]);
           return false;

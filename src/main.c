@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
   }
 
   ArenaAllocator allocator;
-  arena_allocator_init(&allocator, 1024);
+  arena_allocator_init(&allocator, 1024 * 1024);
 
   bool success = run_build(config, &allocator);
 

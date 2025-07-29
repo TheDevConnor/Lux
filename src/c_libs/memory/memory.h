@@ -8,6 +8,11 @@
 extern "C" {
 #endif
 
+// Growth configuration
+#define ARENA_MIN_BUFFER_SIZE (64 * 1024)    // 64KB minimum
+#define ARENA_GROWTH_FACTOR 2                 // Double the size each time
+#define ARENA_MAX_BUFFER_SIZE (16 * 1024 * 1024) // 16MB maximum per buffer
+
 // #define DEBUG_ARENA_ALLOC 1  // Comment this line to disable debug logs
 
 #ifdef DEBUG_ARENA_ALLOC
@@ -25,7 +30,6 @@ static int active_buffers = 0;
 #define TRACK_FREE(ptr) ((void)0)
 #endif
 
-
 typedef struct Buffer {
     size_t size;
     struct Buffer *next;
@@ -34,15 +38,17 @@ typedef struct Buffer {
 
 typedef struct ArenaAllocator {
     size_t offset;
-    Buffer *buffer;
-    Buffer *head;
+    Buffer *buffer;      // Current buffer
+    Buffer *head;        // First buffer
+    size_t next_buffer_size; // Size for next buffer allocation
+    size_t total_allocated;  // Total memory allocated across all buffers
 } ArenaAllocator;
 
 typedef struct {
-    void *data;           // Pointer to the actual array in arena
-    size_t count;         // Number of elements in use
-    size_t capacity;      // Total elements allocated
-    size_t item_size;     // Size of each element
+    void *data;           
+    size_t count;         
+    size_t capacity;      
+    size_t item_size;     
     ArenaAllocator *arena;
 } GrowableArray;
 
@@ -50,11 +56,15 @@ typedef struct {
 Buffer* buffer_create(size_t s, size_t alignment);
 
 /* Arena allocator functions */
-int arena_allocator_init(ArenaAllocator *arena, size_t size);
+int arena_allocator_init(ArenaAllocator *arena, size_t initial_size);
 void* arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment);
 void arena_reset(ArenaAllocator *arena);
 void arena_destroy(ArenaAllocator *arena);
 char *arena_strdup(ArenaAllocator *arena, const char *str);
+
+/* Arena statistics and debugging */
+void arena_print_stats(ArenaAllocator *arena);
+size_t arena_get_total_allocated(ArenaAllocator *arena);
 
 /* Growable array functions */
 bool growable_array_init(GrowableArray *arr, ArenaAllocator *arena, size_t initial_capacity, size_t item_size);

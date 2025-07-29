@@ -1,56 +1,52 @@
 #include <stdalign.h>
 #include <stdio.h>
 
-#include "../c_libs/memory/memory.h"
-#include "../ast/ast_utils.h"
 #include "../ast/ast.h"
+#include "../c_libs/memory/memory.h"
 #include "parser.h"
 
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
   size_t estimated_stmts = (tks->count / 4) + 10;
-  
+
   Parser parser = {
       .arena = arena,
       .tks = (Token *)tks->data,
-      // Store pointers to statements, not statement values
-      .stmts = (Stmt *)arena_alloc(arena, sizeof(Stmt *) * estimated_stmts, alignof(Stmt *)),
       .tk_count = tks->count,
-      .stmt_count = 0,
       .capacity = estimated_stmts,
       .pos = 0,
   };
 
-  if (!parser.tks || !parser.stmts) {
-    fprintf(stderr, "Failed to allocate parser memory\n");
+  if (!parser.tks) {
+    fprintf(stderr, "Failed to get tokens from GrowableArray\n");
     return NULL;
   }
-  
-  // Create an array of statement pointers
-  Stmt **stmt_ptrs = (Stmt **)arena_alloc(arena, sizeof(Stmt *) * parser.capacity, alignof(Stmt *));
-  if (!stmt_ptrs) {
-    fprintf(stderr, "Failed to allocate statement pointers\n");
+
+  // Allocate array of statement pointers with proper alignment
+  GrowableArray stmts;
+  if (!growable_array_init(&stmts, parser.arena, 1024, sizeof(Stmt *))) {
+    fprintf(stderr, "Failed to initialize the statements array.\n");
     return NULL;
   }
-  
+
   while (p_has_tokens(&parser) && p_current(&parser).type_ != TOK_EOF) {
     Stmt *stmt = parse_stmt(&parser);
-    if (stmt == NULL) {
-        fprintf(stderr, "Failed to parse statement at position %zu\n", parser.pos);
-        break;
+    if (!stmt) {
+      fprintf(stderr, "parse_stmt returned NULL inside block\n");
+      continue;  // or return NULL to fail the entire block
     }
 
-    // Store the pointer to the statement (not the statement itself)
-    stmt_ptrs[parser.stmt_count] = stmt;
-    parser.stmt_count++;
-    
-    if (parser.stmt_count >= parser.capacity) {
-        fprintf(stderr, "Too many statements, reached capacity limit of %zu\n", parser.capacity);
-        break;
+    Stmt **slot = (Stmt **)growable_array_push(&stmts);
+    if (!slot) {
+      fprintf(stderr, "Out of memory while growing block statement array\n");
+      return NULL;
     }
+    
+    *slot = stmt;
   }
 
-  // Cast to AstNode** since program expects AstNode** not Stmt**
-  return create_program_node(parser.arena, (AstNode **)stmt_ptrs, parser.stmt_count, 0, 0);
+  // Cast to AstNode** since program expects AstNode**
+  return create_program_node(parser.arena, (AstNode **)stmts.data,
+                             stmts.count, 0, 0);
 }
 
 BindingPower get_bp(TokenType kind) {
@@ -172,15 +168,25 @@ Expr *parse_expr(Parser *parser, BindingPower bp) {
 }
 
 Stmt *parse_stmt(Parser *parser) {
+  bool is_public = false;
+  
+  if (p_current(parser).type_ == TOK_PUBLIC) {
+    is_public = true;
+    p_advance(parser);
+  } else if (p_current(parser).type_ == TOK_PRIVATE) {
+    is_public = false;
+    p_advance(parser);
+  }
+
   switch (p_current(parser).type_) {
   case TOK_CONST:
-    return const_stmt(parser);
+    return const_stmt(parser, is_public);
+  case TOK_VAR:
+    return var_stmt(parser, is_public);
   case TOK_RETURN:
     return return_stmt(parser);
   case TOK_LBRACE:
     return block_stmt(parser);
-  case TOK_VAR:
-    return var_stmt(parser);
   case TOK_IF:
     return if_stmt(parser);
   case TOK_LOOP:
@@ -218,4 +224,3 @@ Type *parse_type(Parser *parser) {
     return NULL;
   }
 }
-

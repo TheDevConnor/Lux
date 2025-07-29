@@ -15,31 +15,34 @@ AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, 
   return node;
 }
 
-AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, size_t line, size_t column) {
+AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, bool is_public, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_VAR_DECL, line, column);
   node->stmt.var_decl.name = name;
   node->stmt.var_decl.var_type = var_type;
   node->stmt.var_decl.initializer = initializer;
   node->stmt.var_decl.is_mutable = is_mutable;
+  node->stmt.var_decl.is_public = is_public;
   return node;
 }
 
-AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, AstNode *body, size_t line, size_t column) {
+AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, bool is_public, AstNode *body, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_FUNCTION, line, column);
   node->stmt.func_decl.name = name;
   node->stmt.func_decl.param_names = param_names;
   node->stmt.func_decl.param_types = param_types;
   node->stmt.func_decl.param_count = param_count;
   node->stmt.func_decl.return_type = return_type;
+  node->stmt.func_decl.is_public = is_public;
   node->stmt.func_decl.body = body;
   return node;
 }
 
-AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, size_t line, size_t column) {
+AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, bool is_public, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_ENUM, line, column);
   node->stmt.enum_decl.name = name;
   node->stmt.enum_decl.members = members;
   node->stmt.enum_decl.member_count = member_count;
+  node->stmt.enum_decl.is_public = is_public;
   return node;
 }
 

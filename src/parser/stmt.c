@@ -1,7 +1,5 @@
 #include <stdio.h>
-#include <string.h>
 
-#include "../ast/ast_utils.h"
 #include "../ast/ast.h"
 #include "parser.h"
 
@@ -18,7 +16,7 @@ Stmt *expr_stmt(Parser *parser) {
 // const 'name' = (fn, struct, or enum)
 // If no type is specified, it defaults to the type of the value
 // const 'name': Type = value
-Stmt *const_stmt(Parser *parser) {
+Stmt *const_stmt(Parser *parser, bool is_public) {
   p_consume(parser, TOK_CONST, "Expected 'const' keyword");
   const char *name = get_name(parser);
   p_advance(parser); // Advance past the identifier token
@@ -33,15 +31,15 @@ Stmt *const_stmt(Parser *parser) {
     Expr *value = parse_expr(parser, BP_LOWEST);
 
     p_consume(parser, TOK_SEMICOLON, "Expected semicolon after const declaration");
-    return create_var_decl_stmt(parser->arena, name, type, value, false, p_current(parser).line, p_current(parser).col);
+    return create_var_decl_stmt(parser->arena, name, type, value, false, is_public, p_current(parser).line, p_current(parser).col);
   } 
   
   p_consume(parser, TOK_EQUAL, "Expected '=' after const name");
 
   switch (p_current(parser).type_) {
-    case TOK_FN:     return fn_stmt(parser, name);
+    case TOK_FN:     return fn_stmt(parser, name, is_public);
     case TOK_STRUCT: return struct_stmt(parser, name);
-    case TOK_ENUM:   return enum_stmt(parser, name);
+    case TOK_ENUM:   return enum_stmt(parser, name, is_public);
     default: {
       fprintf(stderr, "Expected function, struct, or enum after const '%s'\n", name);
       return NULL;
@@ -49,7 +47,7 @@ Stmt *const_stmt(Parser *parser) {
   }
 }
 
-Stmt *fn_stmt(Parser *parser, const char *name) {
+Stmt *fn_stmt(Parser *parser, const char *name, bool is_public) {
   // Capture line/col info at the beginning
   int line = p_current(parser).line;
   int col = p_current(parser).col;
@@ -107,10 +105,10 @@ Stmt *fn_stmt(Parser *parser, const char *name) {
 
   return create_func_decl_stmt(parser->arena, name, (char **)param_names.data,
                                (AstNode **)param_types.data, param_names.count,
-                               return_type, body, line, col);
+                               return_type, is_public, body, line, col);
 }
 
-Stmt *enum_stmt(Parser *parser, const char *name) { 
+Stmt *enum_stmt(Parser *parser, const char *name, bool is_public) { 
   // Capture line/col info at the beginning
   int line = p_current(parser).line;
   int col = p_current(parser).col;
@@ -149,14 +147,14 @@ Stmt *enum_stmt(Parser *parser, const char *name) {
   p_consume(parser, TOK_SEMICOLON, "Expected semicolon after enum declaration");
 
   return create_enum_decl_stmt(parser->arena, name,
-                               (char **)members.data, members.count,
+                               (char **)members.data, members.count, is_public,
                                line, col);
 }
 
 Stmt *struct_stmt(Parser *parser, const char *name) { return NULL; }
 
 // let 'name': Type = value
-Stmt *var_stmt(Parser *parser) { 
+Stmt *var_stmt(Parser *parser, bool is_public) { 
   // Capture line/col info at the beginning
   int line = p_current(parser).line;
   int col = p_current(parser).col;
@@ -178,7 +176,7 @@ Stmt *var_stmt(Parser *parser) {
   p_consume(parser, TOK_SEMICOLON, "Expected semicolon after variable declaration");
 
   // const are not changable aka immutable and vars are mutable so we set is_mutable to true
-  return create_var_decl_stmt(parser->arena, name, type, value, true,
+  return create_var_decl_stmt(parser->arena, name, type, value, true, is_public,
                               line, col);
 }
 

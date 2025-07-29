@@ -10,6 +10,8 @@
 #define TOKEN_AT(i) (((Token *)tokens.data)[(i)])
 #define MAX_TOKENS 100
 
+#define DEBUG_ARENA_ALLOC 1  // Comment this line to disable debug logs
+
 typedef enum {
   ARGC_ERROR = 1,
   FILE_ERROR = 2,

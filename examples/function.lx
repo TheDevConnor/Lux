@@ -1,7 +1,7 @@
-;; const STRING: str = "Hello, World!";  ;; public by default
-;; const NUM: int = 3;                   ;; public by default
+const STRING: str = "Hello, World!";  ;; private by default
+const NUM: int = 3;                   ;; private by default
 
-const Direction = enum {          ;; explicitly public (redundant but clear)
+priv const Direction = enum {          ;; explicitly public (redundant but clear)
     left, right, up, down
 };
 
@@ -18,15 +18,15 @@ const Direction = enum {          ;; explicitly public (redundant but clear)
  * };
 */
 
-const add = fn (a: int, b: int) int {  ;; public by default
+pub const add = fn (a: int, b: int) int {
     return (a + b) / 25;
 };
 
-const helper = fn (x: int) int {   ;; explicitly private
+pub const helper = fn (x: int) int {
     return x * 2;
 };
 
-const main = fn () int {
+pub const main = fn () int {
     let x: int = 0;
     return 0;
 };

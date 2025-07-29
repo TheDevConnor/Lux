@@ -202,6 +202,7 @@ struct AstNode {
           AstNode *var_type;    // Changed from Type* to AstNode*
           AstNode *initializer; // Changed from Expr* to AstNode*
           bool is_mutable; // Whether the variable is mutable
+          bool is_public;
         } var_decl;
 
         // Enumeration declaration
@@ -209,6 +210,7 @@ struct AstNode {
           const char *name;
           char **members; // Changed from char** to AstNode**
           size_t member_count;
+          bool is_public;
         } enum_decl;
 
         // Function declaration
@@ -218,6 +220,7 @@ struct AstNode {
           AstNode **param_types; // Changed from Type** to AstNode**
           size_t param_count;
           AstNode *return_type; // Changed from Type* to AstNode*
+          bool is_public;
           AstNode *body;        // Changed from Stmt* to AstNode*
         } func_decl;
 
@@ -320,9 +323,9 @@ AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line, si
 // Statement creation macros
 AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);
 AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, size_t column);
-AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, size_t line, size_t column);
-AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, AstNode *body, size_t line, size_t column);
-AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, size_t line, size_t column);
+AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, bool is_public, size_t line, size_t column);
+AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type,  bool is_public, AstNode *body, size_t line, size_t column);
+AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, bool is_public, size_t line, size_t column);
 AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode **elif_stmts, int elif_count, AstNode *else_stmt, size_t line, size_t column);
 AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition, AstNode *body, AstNode *initializer, AstNode *increment, size_t line, size_t column);
 AstNode *create_return_stmt(ArenaAllocator *arena, Expr *value, size_t line, size_t column);

@@ -40,7 +40,7 @@ static const KeywordEntry keywords[] = {
     {"true", TOK_TRUE},
     {"false", TOK_FALSE},
     {"pub", TOK_PUBLIC},
-    {"private", TOK_PRIVATE},
+    {"priv", TOK_PRIVATE},
     {"void", TOK_VOID},
     {"char", TOK_CHAR},
     {"str", TOK_STRINGT},

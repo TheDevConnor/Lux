@@ -332,6 +332,8 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     print_ast(node->stmt.var_decl.initializer, next_prefix, true, false);
     print_prefix(next_prefix, true);
     printf(GRAY("Mutable: %s\n"), node->stmt.var_decl.is_mutable ? "true" : "false");
+    print_prefix(next_prefix, true);
+    printf(GRAY("Is Public: %s\n"), node->stmt.var_decl.is_public ? "true" : "false");
     break;
   
   case AST_STMT_FUNCTION:
@@ -342,6 +344,8 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     } else {
       printf(YELLOW("<unnamed>\n"));
     }
+    print_prefix(next_prefix, true);
+    printf(GRAY("Is Public: %s\n"), node->stmt.func_decl.is_public ? "true" : "false");
     if (node->stmt.func_decl.param_count > 0) {
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Parameters: %zu\n"), node->stmt.func_decl.param_count);
@@ -373,6 +377,8 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     } else {
       printf(YELLOW("<unnamed>\n"));
     }
+    print_prefix(next_prefix, true);
+    printf(GRAY("Is Public: %s\n"), node->stmt.enum_decl.is_public ? "true" : "false");
     if (node->stmt.enum_decl.member_count > 0) {
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Members: %zu\n"), node->stmt.enum_decl.member_count);

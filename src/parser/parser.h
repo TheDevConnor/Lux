@@ -38,9 +38,7 @@ typedef enum {
 typedef struct {
   ArenaAllocator *arena; // Memory arena for AST nodes
   Token *tks;            // Pointer to the array of tokens
-  Stmt *stmts;           // Pointer to the array of statements
   size_t tk_count;       // Number of tokens
-  size_t stmt_count;     // Number of statements
   size_t capacity;       // Capacity of the token and statement arrays
   size_t pos;
 } Parser;
@@ -85,10 +83,10 @@ Type *pointer(Parser *parser);
 
 // Statement parsing functions
 Stmt *expr_stmt(Parser *parser);
-Stmt *var_stmt(Parser *parser);
-Stmt *const_stmt(Parser *parser);
-Stmt *fn_stmt(Parser *parser, const char *name);
-Stmt *enum_stmt(Parser *parser, const char *name);
+Stmt *var_stmt(Parser *parser, bool is_public);
+Stmt *const_stmt(Parser *parser, bool is_public);
+Stmt *fn_stmt(Parser *parser, const char *name, bool is_public);
+Stmt *enum_stmt(Parser *parser, const char *name, bool is_public);
 Stmt *struct_stmt(Parser *parser, const char *name);
 Stmt *print_stmt(Parser *parser, bool ln);
 Stmt *return_stmt(Parser *parser);
