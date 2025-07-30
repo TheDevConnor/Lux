@@ -1,3 +1,4 @@
+#include "../c_libs/error/error.h"
 #include "../parser/parser.h"
 #include "../ast/ast_utils.h"
 #include "help.h"
@@ -10,7 +11,7 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   }
 
   Lexer lexer;
-  init_lexer(&lexer, source);
+  init_lexer(&lexer, source, allocator);
 
   GrowableArray tokens;
   if (!growable_array_init(&tokens, allocator, MAX_TOKENS, sizeof(Token))) {
@@ -28,6 +29,10 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
       return false;
     }
     *slot = tk;
+  }
+  if (error_report()) {
+    free((void *)source);
+    return false;
   }
 
   AstNode *root = parse(&tokens, allocator);

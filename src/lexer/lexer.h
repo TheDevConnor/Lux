@@ -1,8 +1,11 @@
 #pragma once
 #include <stdint.h>
 
+#include "../c_libs/memory/memory.h"
+
 typedef enum {
   TOK_EOF,
+  TOK_ERROR,
   TOK_IDENTIFIER,
   TOK_KEYWORD,
   TOK_NUMBER,
@@ -82,6 +85,7 @@ typedef enum {
 } TokenType;
 
 typedef struct {
+  ArenaAllocator *arena;
   const char *src;
   const char *current;
   int line, col;
@@ -91,6 +95,7 @@ typedef struct {
   TokenType type_;
   const char *value;
   int line, col, length;
+  int whitespace_len;
 } Token;
 
 typedef struct {
@@ -103,5 +108,8 @@ typedef struct {
   TokenType type;
 } KeywordEntry;
 
-void init_lexer(Lexer *lexer, const char *source);
+void report_lexer_error(Lexer *lx, const char *error_type, const char *file,
+                        const char *msg, const char *line_text, int line,
+                        int col, int tk_length);
+void init_lexer(Lexer *lexer, const char *source, ArenaAllocator *arena);
 Token next_token(Lexer *lexer);
