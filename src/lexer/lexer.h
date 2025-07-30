@@ -111,5 +111,6 @@ typedef struct {
 void report_lexer_error(Lexer *lx, const char *error_type, const char *file,
                         const char *msg, const char *line_text, int line,
                         int col, int tk_length);
+const char *get_line_text_from_source(const char *source, int target_line);
 void init_lexer(Lexer *lexer, const char *source, ArenaAllocator *arena);
 Token next_token(Lexer *lexer);

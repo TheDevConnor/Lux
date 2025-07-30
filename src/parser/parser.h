@@ -43,6 +43,10 @@ typedef struct {
   size_t pos;
 } Parser;
 
+// Error Reporting
+void parser_error(Parser *psr, const char *error_type, const char *file,
+                  const char *msg, int line, int col, int tk_length);
+
 // Parser Utility Functions
 bool p_has_tokens(Parser *psr);
 Token p_peek(Parser *psr, size_t offset);

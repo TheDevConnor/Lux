@@ -1,10 +1,10 @@
-pub const main = fn () int { `
+pub const main = fn () int {
     let x: int = 5;
     if (x < 5) { 
-        return (x - 5) * 45 /` 5; 
-    } elif (x > 5) {
+        return (x - 5) * 45 / 5; 
+    } elif (x > 5 {
         return 0;
     } else { 
         return -1; 
     }
-}; `
+};

@@ -244,7 +244,7 @@ Token next_token(Lexer *lx) {
 
   static char error_msg[64];
   snprintf(error_msg, sizeof(error_msg), "Token not found: '%c'", c);
-  report_lexer_error(lx, "Syntax Error", "main.lx", error_msg,
+  report_lexer_error(lx, "LexerError", "unknown_file", error_msg,
                      get_line_text_from_source(lx->src, lx->line), lx->line,
                      lx->col, 1);
   return MAKE_TOKEN(TOK_ERROR, start, lx, 1, wh_count);

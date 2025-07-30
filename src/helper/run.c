@@ -36,6 +36,11 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   }
 
   AstNode *root = parse(&tokens, allocator);
+  if (error_report()) {
+    free((void *)source);
+    return false;
+  }
+  
   print_ast(root, "", true, true);
 
   if (config.name)

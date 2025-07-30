@@ -2,6 +2,9 @@
 
 #include <stdbool.h>
 
+#include "../../lexer/lexer.h"
+#include "../memory/memory.h"
+
 typedef struct {
   const char *error_type;
   const char *file_path;
@@ -17,6 +20,8 @@ typedef struct {
   const char *note;  // optional
   const char *help;  // optional
 } ErrorInformation;
+
+const char *generate_line(ArenaAllocator *arena, Token *tokens, int token_count, int target_line);
 
 void error_add(ErrorInformation err);
 bool error_report(void);

@@ -1,12 +1,52 @@
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <string.h>
 
+#include "../../lexer/lexer.h"
+#include "../memory/memory.h"
 #include "../color/color.h"
 #include "error.h"
 
 #define MAX_ERRORS 256
 static ErrorInformation error_list[MAX_ERRORS];
 static int error_count = 0;
+
+const char *generate_line(ArenaAllocator *arena, Token *tokens, int token_count, int target_line) {
+    if (target_line < 0 || !tokens) return "";
+    
+    // Calculate total length needed
+    size_t total_len = 1; // For newline
+    for (int i = 0; i < token_count; i++) {
+        if (tokens[i].line == target_line) {
+            total_len += tokens[i].whitespace_len + tokens[i].length;
+        }
+    }
+    
+    // Allocate result buffer
+    char *result = arena_alloc(arena, total_len + 1, alignof(char));
+    if (!result) return "";
+    
+    char *pos = result;
+    
+    // Build the line
+    for (int i = 0; i < token_count; i++) {
+        if (tokens[i].line != target_line) continue;
+        
+        // Add whitespace
+        memset(pos, ' ', tokens[i].whitespace_len);
+        pos += tokens[i].whitespace_len;
+        
+        // Add token text
+        memcpy(pos, tokens[i].value, tokens[i].length);
+        pos += tokens[i].length;
+    }
+    
+    *pos++ = '\n';
+    *pos = '\0';
+    
+    return result;
+}
+
 
 void error_add(ErrorInformation err) {
     if (error_count < MAX_ERRORS) {

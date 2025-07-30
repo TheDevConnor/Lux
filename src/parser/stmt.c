@@ -163,12 +163,9 @@ Stmt *var_stmt(Parser *parser, bool is_public) {
   const char *name = get_name(parser);
   p_advance(parser); // Advance past the identifier token
 
-  Type *type = NULL;
-  if (p_current(parser).type_ == TOK_COLON) {
-    p_consume(parser, TOK_COLON, "Expected ':' after variable name");
-    type = parse_type(parser);
-    p_advance(parser); // Advance past the type token
-  }
+  p_consume(parser, TOK_COLON, "Expected ':' after variable name");
+  Type *type = parse_type(parser);
+  p_advance(parser); // Advance past the type token
 
   p_consume(parser, TOK_EQUAL, "Expected '=' after variable declaration");
 

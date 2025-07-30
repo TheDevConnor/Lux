@@ -1,9 +1,30 @@
 #include <stdalign.h>
 #include <stdio.h>
 
-#include "../ast/ast.h"
 #include "../c_libs/memory/memory.h"
+#include "../c_libs/error/error.h"
+#include "../ast/ast.h"
 #include "parser.h"
+
+void parser_error(Parser *psr, const char *error_type, const char *file,
+                  const char *msg, int line, int col, int tk_length) {
+    // Use the same approach as the lexer to get the line text
+    const char *line_text = get_line_text_from_source(psr->tks->value, line);
+    
+    ErrorInformation err = {
+      .error_type = error_type,
+      .file_path = file,
+      .message = msg,
+      .line = line, 
+      .col = col,
+      .line_text = arena_strdup(psr->arena, line_text),
+      .token_length = tk_length,
+      .label = "Parser Error",
+      .note = NULL,
+      .help = NULL,
+    };
+    error_add(err);
+}
 
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
   size_t estimated_stmts = (tks->count / 4) + 10;
