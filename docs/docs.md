@@ -76,8 +76,21 @@ if x > 10 {
 
 **For-style loop:**
 ```lux
-loop (i: int = 0; i < x) : (i++) {
-    outputln(1, "Iteration: ", i);
+;; For loop
+loop [i: int = 0](i < 10) {
+    outputln("i = ", i);
+    ++i;
+}
+
+;; For loop + optional condition
+loop [i: int = 0](i < 10) : (++i) {
+    outputln("i = ", i);
+}
+
+;; For loop with mutliple vars
+loop [i: int = 0, j: int = 0](i < 10) : (++i) {
+    outputln("i = ", i, " j = ", j);
+    ++j;
 }
 ```
 
@@ -95,6 +108,14 @@ loop (i < x) {
 let j: int = 0;
 loop (j < x) : (j++) {
     outputln(1, "Iteration: ", j);
+}
+```
+
+**While-true loop (infinite loop):**
+```lux
+loop {
+    outputln("This will run forever");
+    ;; Use `break` to exit the loop
 }
 ```
 
