@@ -139,6 +139,8 @@ Expr *nud(Parser *parser) {
   case TOK_MINUS:
   case TOK_PLUS:
   case TOK_BANG:
+  case TOK_PLUSPLUS:
+  case TOK_MINUSMINUS:
     return unary(parser);
   case TOK_LPAREN:
     return grouping(parser);
@@ -171,6 +173,8 @@ Expr *led(Parser *parser, Expr *left, BindingPower bp) {
   case TOK_LBRACKET:
     return assign_expr(parser, left, bp);
   case TOK_DOT:
+  case TOK_PLUSPLUS:
+  case TOK_MINUSMINUS:
     return prefix_expr(parser, left, bp);
   default:
     p_advance(parser);

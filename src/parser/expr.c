@@ -93,6 +93,12 @@ Expr *unary(Parser *parser) {
   case TOK_BANG:
     op = UNOP_NOT;
     break;
+  case TOK_PLUSPLUS:
+    op = UNOP_PRE_INC;
+    break;
+  case TOK_MINUSMINUS:
+    op = UNOP_PRE_DEC;
+    break;
   default:
     op = 0;
     break; // or handle error

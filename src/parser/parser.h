@@ -95,5 +95,7 @@ Stmt *struct_stmt(Parser *parser, const char *name);
 Stmt *print_stmt(Parser *parser, bool ln);
 Stmt *return_stmt(Parser *parser);
 Stmt *block_stmt(Parser *parser);
+Stmt *infinite_loop_stmt(Parser *parser, int line, int col);
+Stmt *for_loop_stmt(Parser *parser, int line, int col);
 Stmt *loop_stmt(Parser *parser);
 Stmt *if_stmt(Parser *parser);

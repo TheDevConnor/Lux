@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "../ast/ast_utils.h"
 #include "../ast/ast.h"
 #include "parser.h"
 
@@ -103,7 +104,6 @@ Stmt *fn_stmt(Parser *parser, const char *name, bool is_public) {
   p_advance(parser); // Advance past the return type token
 
   Stmt *body = block_stmt(parser);
-  p_consume(parser, TOK_SEMICOLON, "Expected semicolon after function declaration");
 
   return create_func_decl_stmt(parser->arena, name, (char **)param_names.data,
                                (AstNode **)param_types.data, param_names.count,
@@ -275,6 +275,148 @@ Stmt *if_stmt(Parser *parser) {
     return create_if_stmt(parser->arena, condition, then_stmt, elif_stmts, elif_count, else_stmt, line, col);
 }
 
-Stmt *loop_stmt(Parser *parser) { return NULL; }
+// loop { ... }
+Stmt *infinite_loop_stmt(Parser *parser, int line, int col) {
+  Stmt *body = block_stmt(parser);
+  if (!body) {
+    parser_error(parser, "Syntax Error", __FILE__, "Expected block statement", line, col, 1);
+    return NULL;
+  }
+  return create_infinite_loop_stmt(parser->arena, body, line, col);
+}
 
-Stmt *print_stmt(Parser *parser, bool ln) { return NULL; }
+//       init    cond     o_cond   body
+// loop [ ... ]( ... ) : ( ... ) { ... }
+// loop [ ... ]( ... ) { ... }
+Stmt *loop_init(Parser *parser, int line, int col) {
+  const char *name = get_name(parser);
+  p_advance(parser); // Advance past the identifier token
+
+  p_consume(parser, TOK_COLON, "Expected ':' after loop initializer");
+  Type *type = parse_type(parser);
+  p_advance(parser); // Advance past the type token
+
+  p_consume(parser, TOK_EQUAL, "Expected '=' after loop initializer");
+  Expr *initializer = parse_expr(parser, BP_LOWEST);
+  return create_var_decl_stmt(parser->arena, name, type, initializer, true, false, line, col);
+}
+
+Stmt *for_loop_stmt(Parser *parser, int line, int col) { 
+  GrowableArray intializers;
+  if (!growable_array_init(&intializers, parser->arena, 4, sizeof(Expr *))) {
+    fprintf(stderr, "Failed to initialize loop initializers array.\n");
+    return NULL;
+  }
+
+  p_consume(parser, TOK_LBRACKET, "Expected '[' after 'loop' keyword");
+  // i: int = 0, j: int = 1
+  while (p_has_tokens(parser) && p_current(parser).type_ != TOK_RBRACKET) {
+    Expr *init = loop_init(parser, line, col);
+    if (!init) {
+      fprintf(stderr, "Failed to parse loop initializer\n");
+      return NULL;
+    }
+
+    Expr **slot = (Expr **)growable_array_push(&intializers);
+    if (!slot) {
+      fprintf(stderr, "Out of memory while growing loop initializers array\n");
+      return NULL;
+    }
+
+    *slot = init;
+
+    if (p_current(parser).type_ == TOK_COMMA) {
+      p_advance(parser); // Advance past the comma
+    }
+  }
+  p_consume(parser, TOK_RBRACKET, "Expected ']' after loop initializer");
+
+  p_consume(parser, TOK_LPAREN, "Expected '(' after loop initializer");
+  Expr *condition = parse_expr(parser, BP_LOWEST);
+  p_consume(parser, TOK_RPAREN, "Expected ')' after loop initializer");
+
+  // check for the optional condition
+  Expr *optional_condition = NULL;
+  if (p_current(parser).type_ == TOK_COLON) {
+    p_consume(parser, TOK_COLON, "Expected ':' after loop condition");
+    p_consume(parser, TOK_LPAREN, "Expected '(' after ':' in loop statement");
+    optional_condition = parse_expr(parser, BP_LOWEST);
+    p_consume(parser, TOK_RPAREN, "Expected ')' after optional condition in loop statement");
+  }
+
+  Stmt *body = block_stmt(parser);
+  return create_for_loop_stmt(parser->arena, (AstNode **)intializers.data, intializers.count, condition, optional_condition, body, line, col);
+}
+
+// loop (condition) { ... }
+// loop (condition) : (optional_condition) { ... }
+Stmt *loop_stmt(Parser *parser) { 
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  p_consume(parser, TOK_LOOP, "Expected 'loop' keyword");
+
+  if (p_current(parser).type_ == TOK_LBRACE) { // Aka we have a infinite loop 'loop { ... }'
+    return infinite_loop_stmt(parser, line, col);
+  }
+
+  if (p_current(parser).type_ == TOK_LBRACKET) { // Aka we have a for loop 'loop [ ... ] { ... }'
+    return for_loop_stmt(parser, line, col);
+  }
+
+  // else we have a standard while loop 'loop (condition) { ... }'
+  p_consume(parser, TOK_LPAREN, "Expected '(' after 'loop' keyword");
+  Expr *condition = parse_expr(parser, BP_LOWEST);
+  p_consume(parser, TOK_RPAREN, "Expected ')' after loop condition");
+
+  // check if there is an optional condition 'loop (condition) : (optional_condition) { ... }'
+  Expr *optional_condition = NULL;
+  if (p_current(parser).type_ == TOK_COLON) {
+    p_advance(parser); // Advance past the colon
+    p_consume(parser, TOK_LPAREN, "Expected '(' after ':' in loop statement");
+    optional_condition = parse_expr(parser, BP_LOWEST);
+    p_consume(parser, TOK_RPAREN, "Expected ')' after optional condition in loop statement");
+  }
+
+  Stmt *body = block_stmt(parser);
+  return create_loop_stmt(parser->arena, condition, optional_condition, body, line, col);
+}
+
+Stmt *print_stmt(Parser *parser, bool ln) { 
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  p_consume(parser, ln ? TOK_PRINTLN : TOK_PRINT, "Expected 'output' or 'outputln' keyword");
+  p_consume(parser, TOK_LPAREN, "Expected '(' after print statement");
+
+  GrowableArray expressions;
+  if (!growable_array_init(&expressions, parser->arena, 4, sizeof(Expr *))) {
+    fprintf(stderr, "Failed to initialize print expressions array.\n");
+    return NULL;
+  }
+
+  while (p_has_tokens(parser) && p_current(parser).type_ != TOK_RPAREN) {
+    Expr *expr = parse_expr(parser, BP_LOWEST);
+    if (!expr) {
+      fprintf(stderr, "Failed to parse expression in print statement\n");
+      return NULL;
+    }
+
+    Expr **slot = (Expr **)growable_array_push(&expressions);
+    if (!slot) {
+      fprintf(stderr, "Out of memory while growing print expressions array\n");
+      return NULL;
+    }
+    
+    *slot = expr;
+
+    if (p_current(parser).type_ == TOK_COMMA) {
+      p_advance(parser); // Advance past the comma
+    }
+  }
+  p_consume(parser, TOK_RPAREN, "Expected ')' to end print statement");
+  p_consume(parser, TOK_SEMICOLON, "Expected semicolon after print statement");
+
+  return create_print_stmt(parser->arena, (Expr **)expressions.data,
+                           expressions.count, ln, line, col);
+}

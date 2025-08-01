@@ -56,12 +56,33 @@ AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_st
   return node;
 }
 
-AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition, AstNode *body, AstNode *initializer, AstNode *increment, size_t line, size_t column) {
+AstNode *create_infinite_loop_stmt(ArenaAllocator *arena, AstNode *body, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_LOOP, line, column);
+  node->stmt.loop_stmt.condition = NULL;
+  node->stmt.loop_stmt.optional = NULL;
+  node->stmt.loop_stmt.initializer = NULL;
+  node->stmt.loop_stmt.init_count = 0;
+  node->stmt.loop_stmt.body = body;
+  return node;
+}
+
+AstNode *create_for_loop_stmt(ArenaAllocator *arena, AstNode **initializers, size_t init_count, Expr *condition, Expr *optional, AstNode *body, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_LOOP, line, column);
   node->stmt.loop_stmt.condition = condition;
+  node->stmt.loop_stmt.optional = optional;
   node->stmt.loop_stmt.body = body;
-  node->stmt.loop_stmt.initializer = initializer;
-  node->stmt.loop_stmt.increment = increment;
+  node->stmt.loop_stmt.initializer = initializers;
+  node->stmt.loop_stmt.init_count = init_count;
+  return node;
+}
+
+AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition, Expr *optional, AstNode *body, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_LOOP, line, column);
+  node->stmt.loop_stmt.condition = condition;
+  node->stmt.loop_stmt.optional = optional;
+  node->stmt.loop_stmt.initializer = NULL; // No initializers for standard loops
+  node->stmt.loop_stmt.init_count = 0;
+  node->stmt.loop_stmt.body = body;
   return node;
 }
 
@@ -78,9 +99,10 @@ AstNode *create_block_stmt(ArenaAllocator *arena, AstNode **statements, size_t s
   return node;
 }
 
-AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions, size_t expr_count, size_t line, size_t column) {
+AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions, size_t expr_count, bool ln, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_PRINT, line, column);
   node->stmt.print_stmt.expressions = expressions;
   node->stmt.print_stmt.expr_count = expr_count;
+  node->stmt.print_stmt.ln = ln;
   return node;
 }

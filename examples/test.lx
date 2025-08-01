@@ -1,10 +1,31 @@
 pub const main = fn () int {
-    let x: int = 5;
-    if (x < 5) { 
-        return (x - 5) * 45 / 5; 
-    } elif (x > 5 {
-        return 0;
-    } else { 
-        return -1; 
+    ;; while true loop
+    loop {
+        outputln("Hello, World!");
     }
-};
+
+    ;; While loop + optional condition
+    let i: int = 0;
+    loop (i < 1) : (++i) {
+        outputln("i = ", i);
+    }
+
+    ;; For loop
+    loop [i: int = 0](i < 10) {
+        outputln("i = ", i);
+        ++i;
+    }
+
+    ;; For loop + optional condition
+    loop [i: int = 0](i < 10) : (++i) {
+        outputln("i = ", i);
+    }
+
+    ;; For loop with mutliple vars
+    loop [i: int = 0, j: int = 0](i < 10) : (++i) {
+        outputln("i = ", i, " j = ", j);
+        ++j;
+    }
+
+    return 0;
+}

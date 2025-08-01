@@ -320,6 +320,26 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     print_ast(node->stmt.expr_stmt.expression, next_prefix, true, false);
     break;
 
+  case AST_STMT_PRINT:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Print Statement: \n"));
+    if (node->stmt.print_stmt.expr_count > 0) {
+      for (size_t i = 0; i < node->stmt.print_stmt.expr_count; ++i) {
+        print_ast(node->stmt.print_stmt.expressions[i], next_prefix, (i == node->stmt.print_stmt.expr_count - 1), false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no expressions>\n"));
+    }
+    if (node->stmt.print_stmt.ln) {
+      print_prefix(next_prefix, true);
+      printf(GRAY("Print with newline\n"));
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("Print without newline\n"));
+    }
+    break;
+
   case AST_STMT_VAR_DECL:
     print_prefix(next_prefix, true);
     printf(BOLD_CYAN("Variable Declaration: "));
@@ -359,7 +379,7 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       printf(GRAY("<no parameters>\n"));
     }
     print_prefix(next_prefix, true);
-    printf(BOLD_CYAN("Return Type: "));
+    printf(BOLD_CYAN("Return Type: \n"));
     if (node->stmt.func_decl.return_type) {
       print_ast(node->stmt.func_decl.return_type, next_prefix, true, false);
     } else {
@@ -435,6 +455,38 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       print_prefix(next_prefix, true);
       printf(GRAY("<no else statement>\n"));
     }
+    break;
+
+  case AST_STMT_LOOP:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Loop Statement\n"));
+    if (node->stmt.loop_stmt.condition) {
+      print_prefix(next_prefix, false);
+      printf(BOLD_CYAN("Condition: \n"));
+      print_ast(node->stmt.loop_stmt.condition, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no condition>\n"));
+    }
+    if (node->stmt.loop_stmt.optional) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Optional Expression: \n"));
+      print_ast(node->stmt.loop_stmt.optional, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no optional expression>\n"));
+    }
+    if (node->stmt.loop_stmt.initializer) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Initializers: %zu\n"), node->stmt.loop_stmt.init_count);
+      for (size_t i = 0; i < node->stmt.loop_stmt.init_count; ++i) {
+        print_ast(node->stmt.loop_stmt.initializer[i], next_prefix, (i == node->stmt.loop_stmt.init_count - 1), false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no initializers>\n"));
+    }
+    print_ast(node->stmt.loop_stmt.body, next_prefix, true, false);
     break;
   
   default:
