@@ -34,6 +34,8 @@ const char *node_type_to_string(NodeType type) {
     return "Index";
   case AST_EXPR_GROUPING:
     return "Grouping";
+  case AST_EXPR_ARRAY:
+    return "Array";
   case AST_STMT_EXPRESSION:
     return "ExprStmt";
   case AST_STMT_VAR_DECL:
@@ -314,6 +316,14 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     printf(BOLD_CYAN("Unary Operator: "));
     printf(YELLOW(" (%s)\n"), node->expr.unary.op ? unop_to_string(node->expr.unary.op) : "unknown");
     print_ast(node->expr.unary.operand, next_prefix, true, false);
+    break;
+
+  case AST_EXPR_ARRAY:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Array Expression: \n"));
+    for (size_t i = 0; i < node->expr.array.element_count; ++i) {
+      print_ast(node->expr.array.elements[i], next_prefix, true, false);
+    }
     break;
 
   case AST_STMT_EXPRESSION:

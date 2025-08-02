@@ -76,6 +76,7 @@ Expr *binary(Parser *parser, Expr *left, BindingPower bp);
 Expr *call_expr(Parser *parser, Expr *left, BindingPower bp);
 Expr *assign_expr(Parser *parser, Expr *left, BindingPower bp);
 Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp);
+Expr *array_expr(Parser *parser);
 
 // Type parsing functions
 Type *tnud(Parser *parser);
@@ -84,6 +85,7 @@ BindingPower tget_bp(Parser *parser, TokenType kind);
 
 // Type Functions
 Type *pointer(Parser *parser);
+Type *array_type(Parser *parser);
 
 // Statement parsing functions
 Stmt *expr_stmt(Parser *parser);

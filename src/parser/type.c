@@ -3,6 +3,7 @@
 #include "../ast/ast.h"
 #include "parser.h"
 
+// *Type
 Type *pointer(Parser *parser) {
   // We already advanced past the '*' token
   Type *pointee_type = parse_type(parser);
@@ -11,12 +12,28 @@ Type *pointer(Parser *parser) {
     return NULL;
   }
 
-  AstNode *node =
-      create_type_node(parser->arena, AST_TYPE_POINTER, p_current(parser).line,
-                       p_current(parser).col);
-  node->type_data.pointer.pointee_type = pointee_type;
+  return create_pointer_type(parser->arena, pointee_type, p_current(parser).line,
+                             p_current(parser).col);
+}
 
-  return node;
+// [Type; Size]
+Type *array_type(Parser *parser) {
+  Type *element_type = parse_type(parser);
+  p_advance(parser); // Consume the element type
+
+  p_consume(parser, TOK_SEMICOLON, "Expected ';' after array element type");
+  Expr *size_expr = parse_expr(parser, BP_LOWEST);
+  
+  if (p_current(parser).type_ != TOK_RBRACKET) {
+    parser_error(parser, "SyntaxError", "Unknown",
+                "Expected ']' to close array type declaration",
+                p_current(parser).line, p_current(parser).col,
+                CURRENT_TOKEN_LENGTH(parser));
+    return NULL; // Error, return NULL
+  }
+
+  return create_array_type(parser->arena, element_type, size_expr,
+                           p_current(parser).line, p_current(parser).col);
 }
 
 Type *tnud(Parser *parser) {
@@ -45,6 +62,9 @@ Type *tnud(Parser *parser) {
   case TOK_STAR:       // Pointer type
     p_advance(parser); // Consume the '*' token
     return pointer(parser);
+  case TOK_LBRACKET: // Array type
+    p_advance(parser); // Consume the '[' token
+    return array_type(parser);
   default:
     fprintf(stderr, "Unexpected token in type: %d\n", p_current(parser).type_);
     return NULL;

@@ -1,29 +1,8 @@
 pub const main = fn () int {
-    ;; while true loop
-    loop {
-        outputln("Hello, World!");
-    }
+    let arr: [*int; 5] = [5, 9, 2, 8, 1];
+    let n: int = 5;
 
-    ;; While loop + optional condition
-    let i: int = 0;
-    loop (i < 1) : (++i) {
-        outputln("i = ", i);
-    }
-
-    ;; For loop
-    loop [i: int = 0](i < 10) {
-        outputln("i = ", i);
-        ++i;
-    }
-
-    ;; For loop + optional condition
-    loop [i: int = 0](i < 10) : (++i) {
-        outputln("i = ", i);
-    }
-
-    ;; For loop with mutliple vars
     loop [i: int = 0, j: int = 0](i < 10) : (++i) {
-        outputln("i = ", i, " j = ", j);
         ++j;
     }
 

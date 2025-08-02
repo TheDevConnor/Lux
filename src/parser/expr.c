@@ -176,3 +176,39 @@ Expr *call_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
 Expr *assign_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
 
 Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
+
+Expr *array_expr(Parser *parser) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  GrowableArray elements;
+  if (!growable_array_init(&elements, parser->arena, 4, sizeof(Expr *))) {
+    fprintf(stderr, "Failed to initialize array elements\n");
+    return NULL;
+  }
+
+  p_consume(parser, TOK_LBRACKET, "Expected '[' for array expression");
+  while (p_current(parser).type_ != TOK_RBRACKET) {
+    Expr *element = parse_expr(parser, BP_LOWEST);
+    if (!element) {
+      fprintf(stderr, "Expected expression inside array\n");
+      return NULL;
+    }
+
+    Expr **slot = (Expr **)growable_array_push(&elements);
+    if (!slot) {
+      fprintf(stderr, "Out of memory while growing array elements\n");
+      return NULL;
+    }
+
+    *slot = element;
+
+    if (p_current(parser).type_ == TOK_COMMA) {
+      p_advance(parser); // Consume the comma
+    }
+  }
+  p_consume(parser, TOK_RBRACKET, "Expected ']' to close array expression");
+
+  return create_array_expr(parser->arena, (Expr **)elements.data,
+                           elements.count, line, col);
+}

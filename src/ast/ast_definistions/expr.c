@@ -108,3 +108,10 @@ AstNode *create_grouping_expr(ArenaAllocator *arena, AstNode *expr, size_t line,
     node->expr.grouping.expr = expr;
     return node;
 }
+
+AstNode *create_array_expr(ArenaAllocator *arena, AstNode **elements, size_t element_count, size_t line, size_t column) {
+    AstNode *node = create_expr(arena, AST_EXPR_ARRAY, line, column);
+    node->expr.array.elements = elements;
+    node->expr.array.element_count = element_count;
+    return node;
+}

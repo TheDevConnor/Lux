@@ -21,6 +21,7 @@ typedef enum {
   AST_EXPR_MEMBER,     // Member access (obj.field)
   AST_EXPR_INDEX,      // Array/object indexing (obj[index])
   AST_EXPR_GROUPING,   // Parenthesized expressions
+  AST_EXPR_ARRAY,      // [ ... ] array expressions
 
   // Statement nodes
   AST_PROGRAM,         // Program root node
@@ -179,6 +180,12 @@ struct AstNode {
         struct {
           AstNode *expr; // Changed from Expr* to AstNode*
         } grouping;
+
+        // Array expression
+        struct {
+          AstNode **elements; // Changed from Expr** to AstNode**
+          size_t element_count;
+        } array;
       };
     } expr;
 
@@ -321,6 +328,7 @@ AstNode *create_ternary_expr(ArenaAllocator *arena, Expr *condition, Expr *then_
 AstNode *create_member_expr(ArenaAllocator *arena, Expr *object, const char *member, size_t line, size_t column);
 AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index, size_t line, size_t column);
 AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line, size_t column);
+AstNode *create_array_expr(ArenaAllocator *arena, Expr **elements, size_t element_count, size_t line, size_t column);
 
 // Statement creation macros
 AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);

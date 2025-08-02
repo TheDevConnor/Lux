@@ -1,29 +1,29 @@
 #include <stdalign.h>
 #include <stdio.h>
 
-#include "../c_libs/memory/memory.h"
-#include "../c_libs/error/error.h"
 #include "../ast/ast.h"
+#include "../c_libs/error/error.h"
+#include "../c_libs/memory/memory.h"
 #include "parser.h"
 
 void parser_error(Parser *psr, const char *error_type, const char *file,
                   const char *msg, int line, int col, int tk_length) {
-    // Use the same approach as the lexer to get the line text
-    const char *line_text = get_line_text_from_source(psr->tks->value, line);
-    
-    ErrorInformation err = {
+  // Use the same approach as the lexer to get the line text
+  const char *line_text = get_line_text_from_source(psr->tks->value, line);
+
+  ErrorInformation err = {
       .error_type = error_type,
       .file_path = file,
       .message = msg,
-      .line = line, 
+      .line = line,
       .col = col,
       .line_text = arena_strdup(psr->arena, line_text),
       .token_length = tk_length,
       .label = "Parser Error",
       .note = NULL,
       .help = NULL,
-    };
-    error_add(err);
+  };
+  error_add(err);
 }
 
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
@@ -53,7 +53,7 @@ Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
     Stmt *stmt = parse_stmt(&parser);
     if (!stmt) {
       fprintf(stderr, "parse_stmt returned NULL inside block\n");
-      continue;  // or return NULL to fail the entire block
+      continue; // or return NULL to fail the entire block
     }
 
     Stmt **slot = (Stmt **)growable_array_push(&stmts);
@@ -61,13 +61,13 @@ Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
       fprintf(stderr, "Out of memory while growing block statement array\n");
       return NULL;
     }
-    
+
     *slot = stmt;
   }
 
   // Cast to AstNode** since program expects AstNode**
-  return create_program_node(parser.arena, (AstNode **)stmts.data,
-                             stmts.count, 0, 0);
+  return create_program_node(parser.arena, (AstNode **)stmts.data, stmts.count,
+                             0, 0);
 }
 
 BindingPower get_bp(TokenType kind) {
@@ -144,6 +144,8 @@ Expr *nud(Parser *parser) {
     return unary(parser);
   case TOK_LPAREN:
     return grouping(parser);
+  case TOK_LBRACKET:
+    return array_expr(parser);
   default:
     p_advance(parser);
     return NULL;
@@ -194,7 +196,7 @@ Expr *parse_expr(Parser *parser, BindingPower bp) {
 
 Stmt *parse_stmt(Parser *parser) {
   bool is_public = false;
-  
+
   if (p_current(parser).type_ == TOK_PUBLIC) {
     is_public = true;
     p_advance(parser);
@@ -238,6 +240,7 @@ Type *parse_type(Parser *parser) {
   case TOK_VOID:
   case TOK_CHAR:
   case TOK_STAR: // Pointer type
+  case TOK_LBRACKET: // Array type
     return tnud(parser);
 
   // Optionally: handle identifiers like 'MyStruct' or user-defined types
