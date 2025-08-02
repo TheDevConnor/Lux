@@ -31,6 +31,9 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(call MKDIR,$(dir $@))
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
+debug: CFLAGS += -g
+debug: all
+
 clean:
 	$(call RMDIR,$(OBJ_DIR))
 	$(call DEL,$(BIN))
