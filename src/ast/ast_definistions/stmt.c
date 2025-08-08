@@ -37,6 +37,25 @@ AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **p
   return node;
 }
 
+AstNode *create_struct_decl_stmt(ArenaAllocator *arena, const char *name, AstNode **public_members, size_t public_count, AstNode **private_members, size_t private_count, bool is_public, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_STRUCT, line, column);
+  node->stmt.struct_decl.name = name;
+  node->stmt.struct_decl.public_members = public_members;
+  node->stmt.struct_decl.public_count = public_count;
+  node->stmt.struct_decl.private_members = private_members;
+  node->stmt.struct_decl.private_count = private_count;
+  node->stmt.struct_decl.is_public = is_public;
+  return node;
+}
+
+AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *type, bool is_public, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_FIELD_DECL, line, column);
+  node->stmt.field_decl.name = name;
+  node->stmt.field_decl.type = type;
+  node->stmt.field_decl.is_public = is_public;
+  return node;
+}
+
 AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, bool is_public, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_ENUM, line, column);
   node->stmt.enum_decl.name = name;

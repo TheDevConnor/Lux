@@ -42,7 +42,7 @@ Stmt *const_stmt(Parser *parser, bool is_public) {
 
   switch (p_current(parser).type_) {
     case TOK_FN:     return fn_stmt(parser, name, is_public);
-    case TOK_STRUCT: return struct_stmt(parser, name);
+    case TOK_STRUCT: return struct_stmt(parser, name, is_public);
     case TOK_ENUM:   return enum_stmt(parser, name, is_public);
     default: {
       fprintf(stderr, "Expected function, struct, or enum after const '%s'\n", name);
@@ -152,7 +152,93 @@ Stmt *enum_stmt(Parser *parser, const char *name, bool is_public) {
                                line, col);
 }
 
-Stmt *struct_stmt(Parser *parser, const char *name) { return NULL; }
+/*
+  const Person = struct {
+  pub: 
+    name: str,
+    age: int,
+    email: str,
+
+    init = fn (self: Person) void {
+      // Constructor logic here
+    }
+  priv: 
+    ssn: str,
+
+    // Constructor logic here
+  };
+*/
+
+Stmt *struct_stmt(Parser *parser, const char *name, bool is_public) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  p_consume(parser, TOK_STRUCT, "Expected 'struct' keyword");
+  p_consume(parser, TOK_LBRACE, "Expected '{' after struct name");
+
+  GrowableArray public_fields;
+  GrowableArray private_fields;
+  if (!growable_array_init(&public_fields, parser->arena, 4, sizeof(Stmt *)) || 
+      !growable_array_init(&private_fields, parser->arena, 4, sizeof(Stmt *))) {
+    fprintf(stderr, "Failed to initialize field arrays.\n");
+    return NULL;
+  }
+
+  bool public_member = false;
+
+  while (p_has_tokens(parser) && p_current(parser).type_ != TOK_RBRACE) {
+    switch (p_current(parser).type_) {
+      case TOK_PUBLIC: 
+        public_member = true;
+        p_advance(parser); // Advance past the 'public' keyword
+        break;
+      case TOK_PRIVATE:
+        public_member = false;
+        p_advance(parser); // Advance past the 'private' keyword
+        break;
+      default:
+        fprintf(stderr, "Unexpected token in struct declaration\n");
+        return NULL;
+    }
+    p_consume(parser, TOK_COLON, "Expected ':' after visibility keyword");
+
+   while (p_has_tokens(parser) &&
+           p_current(parser).type_ != TOK_PUBLIC  &&
+           p_current(parser).type_ != TOK_PRIVATE &&
+           p_current(parser).type_ != TOK_RBRACE) {
+        int field_line = p_current(parser).line;
+        int field_col = p_current(parser).col;
+
+        char *field_name = get_name(parser);
+        p_advance(parser);
+        p_consume(parser, TOK_COLON, "Expected ':' after field name");
+        Type *field_type = parse_type(parser);
+        p_advance(parser);
+
+        if (p_current(parser).type_ == TOK_COMMA)
+            p_advance(parser);
+        else if (p_current(parser).type_ != TOK_RBRACE) { // We expected a ','
+          parser_error(parser, "Unexpected token", __FILE__, "Expected ',' to separate struct fields", field_line, field_col, 1);
+          return NULL;
+        }
+
+        Stmt *field_decl = create_field_decl_stmt(parser->arena, field_name, field_type, public_member, field_line, field_col);
+        Stmt **slot = public_member ?
+            (Stmt **)growable_array_push(&public_fields) :
+            (Stmt **)growable_array_push(&private_fields);
+
+        *slot = field_decl;
+    }
+  }
+
+  p_consume(parser, TOK_RBRACE, "Expected '}' to end struct declaration");
+  p_consume(parser, TOK_SEMICOLON, "Expected semicolon after struct declaration");
+
+  return create_struct_decl_stmt(parser->arena, name,
+                                 (Stmt **)public_fields.data, public_fields.count, 
+                                 (Stmt **)private_fields.data, private_fields.count,
+                                 is_public, line, col);
+}
 
 // let 'name': Type = value
 Stmt *var_stmt(Parser *parser, bool is_public) { 

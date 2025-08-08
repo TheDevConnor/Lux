@@ -1,3 +1,11 @@
+const Person = struct {
+pub: 
+    name: str,
+    age: int, 
+priv: 
+    ssn: str
+};
+
 pub const main = fn () int {
     let arr: [*int; 5] = [5, 9, 2, 8, 1];
     let n: int = 5;

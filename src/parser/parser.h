@@ -93,7 +93,7 @@ Stmt *var_stmt(Parser *parser, bool is_public);
 Stmt *const_stmt(Parser *parser, bool is_public);
 Stmt *fn_stmt(Parser *parser, const char *name, bool is_public);
 Stmt *enum_stmt(Parser *parser, const char *name, bool is_public);
-Stmt *struct_stmt(Parser *parser, const char *name);
+Stmt *struct_stmt(Parser *parser, const char *name, bool is_public);
 Stmt *print_stmt(Parser *parser, bool ln);
 Stmt *return_stmt(Parser *parser);
 Stmt *block_stmt(Parser *parser);

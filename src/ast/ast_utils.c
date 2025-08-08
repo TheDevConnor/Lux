@@ -64,6 +64,8 @@ const char *node_type_to_string(NodeType type) {
     return "Enum";
   case AST_STMT_STRUCT:
     return "Struct";
+  case AST_STMT_FIELD_DECL:
+    return "FieldDecl";
   case AST_TYPE_BASIC:
     return "TypeBasic";
   case AST_TYPE_POINTER:
@@ -420,6 +422,53 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       print_prefix(next_prefix, true);
       printf(GRAY("<no members>\n"));
     }
+    break;
+
+  case AST_STMT_STRUCT:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Struct Declaration: "));
+    if (node->stmt.struct_decl.name) {
+      printf(YELLOW("%s\n"), node->stmt.struct_decl.name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
+    }
+    print_prefix(next_prefix, true);
+    printf(GRAY("Is Public: %s\n"), node->stmt.struct_decl.is_public ? "true" : "false");
+    
+    if (node->stmt.struct_decl.public_count > 0) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Public Members: %zu\n"), node->stmt.struct_decl.public_count);
+      for (size_t i = 0; i < node->stmt.struct_decl.public_count; ++i) {
+        print_ast(node->stmt.struct_decl.public_members[i], next_prefix, true, false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no public members>\n"));
+    }
+
+    if (node->stmt.struct_decl.private_count > 0) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Private Members: %zu\n"), node->stmt.struct_decl.private_count);
+      for (size_t i = 0; i < node->stmt.struct_decl.private_count; ++i) {
+        print_ast(node->stmt.struct_decl.private_members[i], next_prefix, true, false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no private members>\n"));
+    }
+    break;
+
+  case AST_STMT_FIELD_DECL:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Field Declaration: "));
+    if (node->stmt.field_decl.name) {
+      printf(YELLOW("%s\n"), node->stmt.field_decl.name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
+    }
+    print_ast(node->stmt.field_decl.type, next_prefix, true, false);
+    print_prefix(next_prefix, true);
+    printf(GRAY("Is Public: %s\n"), node->stmt.field_decl.is_public ? "true" : "false");
     break;
   
   case AST_STMT_BLOCK:
