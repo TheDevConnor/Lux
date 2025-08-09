@@ -161,6 +161,12 @@ Expr *binary(Parser *parser, Expr *left, BindingPower bp) {
   case TOK_GE:
     op = BINOP_GE;
     break;
+  case TOK_AND:
+    op = BINOP_AND;
+    break;
+  case TOK_OR:
+    op = BINOP_OR;
+    break;
   default:
     return left; // No valid binary operator found
   }

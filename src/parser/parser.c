@@ -167,8 +167,8 @@ Expr *led(Parser *parser, Expr *left, BindingPower bp) {
   case TOK_AMP:
   case TOK_PIPE:
   case TOK_CARET:
-  case TOK_AND:
-  case TOK_OR:
+  case TOK_AND:     // Add logical AND
+  case TOK_OR:      // Add logical OR
     return binary(parser, left, bp);
   case TOK_LPAREN:
     return call_expr(parser, left, bp);

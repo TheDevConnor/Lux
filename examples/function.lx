@@ -1,32 +1,6 @@
-const STRING: str = "Hello, World!";  ;; private by default
-const NUM: int = 3;                   ;; private by default
-
-priv const Direction = enum {          ;; explicitly public (redundant but clear)
-    left, right, up, down
-}
-
-/*
- * const Point = struct {
- * pub:
- *     x: int, 
- *     y: int,
- * priv:
- *     init = fn (self *Point, x int, y int) void {
- *         self.x = x;
- *         self.y = y;
- *     }
- * }
-*/
-
-pub const add = fn (a: int, b: int) int {
-    return (a + b) / 25;
-}
-
-pub const helper = fn (x: int) int {
-    return x * 2;
-}
-
 pub const main = fn () int {
-    let x: int = 0;
+    if ((5 > 8) && (8 < 10)) {
+        return 10;
+    }
     return 0;
 }
