@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "../ast/ast_utils.h"
 #include "../ast/ast.h"
 #include "parser.h"
 

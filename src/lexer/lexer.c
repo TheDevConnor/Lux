@@ -96,7 +96,7 @@ const char *get_line_text_from_source(const char *source, int target_line) {
 
   // Extract the complete line
   int i = 0;
-  while (*start != '\0' && *start != '\n' && i < sizeof(line_buffer) - 1) {
+  while (*start != '\0' && *start != '\n' && i < (int)sizeof(line_buffer) - 1) {
     line_buffer[i++] = *start++;
   }
   line_buffer[i] = '\0';

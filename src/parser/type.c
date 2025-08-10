@@ -72,6 +72,7 @@ Type *tnud(Parser *parser) {
 }
 
 Type *tled(Parser *parser, Type *left, BindingPower bp) {
+  (void)left; (void)bp; // Suppress unused variable warnings
   fprintf(stderr, "Parsing type led: %.*s\n", CURRENT_TOKEN_LENGTH(parser),
           CURRENT_TOKEN_VALUE(parser));
   return NULL; // No valid type found

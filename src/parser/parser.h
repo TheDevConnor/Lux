@@ -35,6 +35,24 @@ typedef enum {
   BP_PRIMARY      // Primary expressions (literals, variables)
 } BindingPower;
 
+static const BinaryOp TOKEN_TO_BINOP_MAP[] = {
+  [TOK_PLUS]  = BINOP_ADD,
+  [TOK_MINUS] = BINOP_SUB,
+  [TOK_STAR]  = BINOP_MUL,
+  [TOK_SLASH] = BINOP_DIV,
+  [TOK_EQEQ]  = BINOP_EQ,
+  [TOK_NEQ]   = BINOP_NE,
+  [TOK_LT]    = BINOP_LT,
+  [TOK_LE]    = BINOP_LE,
+  [TOK_GT]    = BINOP_GT,
+  [TOK_GE]    = BINOP_GE,
+  [TOK_AND]   = BINOP_AND,
+  [TOK_OR]    = BINOP_OR,
+  [TOK_AMP]   = BINOP_BIT_AND,
+  [TOK_PIPE]  = BINOP_BIT_OR,
+  [TOK_CARET] = BINOP_BIT_XOR,
+};
+
 typedef struct {
   ArenaAllocator *arena; // Memory arena for AST nodes
   Token *tks;            // Pointer to the array of tokens

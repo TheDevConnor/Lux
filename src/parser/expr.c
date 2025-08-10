@@ -128,60 +128,27 @@ Expr *binary(Parser *parser, Expr *left, BindingPower bp) {
   int col = p_current(parser).col;
 
   Token current = p_current(parser);
-  BinaryOp op;
-
-  switch (current.type_) {
-  case TOK_PLUS:
-    op = BINOP_ADD;
-    break;
-  case TOK_MINUS:
-    op = BINOP_SUB;
-    break;
-  case TOK_STAR:
-    op = BINOP_MUL;
-    break;
-  case TOK_SLASH:
-    op = BINOP_DIV;
-    break;
-  case TOK_EQEQ:
-    op = BINOP_EQ;
-    break;
-  case TOK_NEQ:
-    op = BINOP_NE;
-    break;
-  case TOK_LT:
-    op = BINOP_LT;
-    break;
-  case TOK_LE:
-    op = BINOP_LE;
-    break;
-  case TOK_GT:
-    op = BINOP_GT;
-    break;
-  case TOK_GE:
-    op = BINOP_GE;
-    break;
-  case TOK_AND:
-    op = BINOP_AND;
-    break;
-  case TOK_OR:
-    op = BINOP_OR;
-    break;
-  default:
-    return left; // No valid binary operator found
-  }
-
+  BinaryOp op = TOKEN_TO_BINOP_MAP[current.type_];
   p_advance(parser); // Consume the token
   Expr *right = parse_expr(parser, bp);
 
   return create_binary_expr(parser->arena, op, left, right, line, col);
 }
 
-Expr *call_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
+Expr *call_expr(Parser *parser, Expr *left, BindingPower bp) { 
+  (void)bp; (void)left; (void)parser; // Suppress unused variable warnings
+  return NULL; 
+}
 
-Expr *assign_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
+Expr *assign_expr(Parser *parser, Expr *left, BindingPower bp) {
+  (void)bp; (void)left; (void)parser; // Suppress unused variable warnings
+  return NULL;
+}
 
-Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp) { return NULL; }
+Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp) {
+  (void)left; (void)bp; (void)parser; // Suppress unused variable warnings
+  return NULL;
+}
 
 Expr *array_expr(Parser *parser) {
   int line = p_current(parser).line;
