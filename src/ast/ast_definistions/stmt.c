@@ -126,3 +126,9 @@ AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions, size_t exp
   node->stmt.print_stmt.ln = ln;
   return node;
 }
+
+AstNode *create_break_continue_stmt(ArenaAllocator *arena, bool is_continue, size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_BREAK_CONTINUE, line, column);
+  node->stmt.break_continue.is_continue = is_continue;
+  return node;
+}

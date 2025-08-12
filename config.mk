@@ -1,6 +1,6 @@
 # config.mk
 
-CC       = cc
+CC       = gcc
 CFLAGS   = -Wall -Wextra -std=c17 -O2
 LDFLAGS  =
 INCLUDES = -Isrc

@@ -50,10 +50,8 @@ const char *node_type_to_string(NodeType type) {
     return "Loop";
   case AST_STMT_RETURN:
     return "Return";
-  case AST_STMT_BREAK:
-    return "Break";
-  case AST_STMT_CONTINUE:
-    return "Continue";
+  case AST_STMT_BREAK_CONTINUE:
+    return "BreakContinue";
   case AST_STMT_BLOCK:
     return "Block";
   case AST_STMT_PRINT:
@@ -327,6 +325,97 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       print_ast(node->expr.array.elements[i], next_prefix, true, false);
     }
     break;
+  
+  case AST_EXPR_CALL:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Function Call: "));
+    if (node->expr.call.callee) { 
+      print_ast(node->expr.call.callee, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no callee>\n"));
+    }
+    if (node->expr.call.arg_count > 0) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Arguments: %zu\n"), node->expr.call.arg_count);
+      for (size_t i = 0; i < node->expr.call.arg_count; ++i) {
+        print_ast(node->expr.call.args[i], next_prefix, true, false);
+      }
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no arguments>\n"));
+    }
+    break;
+
+  case AST_EXPR_ASSIGNMENT:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Assignment: \n"));
+    if (node->expr.assignment.target) { 
+      print_ast(node->expr.assignment.target, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no target>\n"));
+    }
+    if (node->expr.assignment.value) {
+      print_ast(node->expr.assignment.value, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no value>\n"));
+    }
+    break;
+
+  case AST_EXPR_MEMBER:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Member Access: \n"));
+    if (node->expr.member.object) {
+      print_ast(node->expr.member.object, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no object>\n"));
+    }
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Member Name: %s\n"), node->expr.member.member ? node->expr.member.member : "<unnamed>");
+    break;
+
+  case AST_EXPR_INDEX:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Index Expression: \n"));
+    if (node->expr.index.object) {
+      print_ast(node->expr.index.object, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no object>\n"));
+    }
+    if (node->expr.index.index) {
+      print_ast(node->expr.index.index, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no index>\n"));
+    }
+    break;
+
+  case AST_EXPR_TERNARY:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Ternary Expression: \n"));
+    if (node->expr.ternary.condition) {
+      print_ast(node->expr.ternary.condition, next_prefix, false, false);
+    } else {  
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no condition>\n"));
+    }
+    if (node->expr.ternary.then_expr) {
+      print_ast(node->expr.ternary.then_expr, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no then expression>\n"));
+    }
+    if (node->expr.ternary.else_expr) {
+      print_ast(node->expr.ternary.else_expr, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no else expression>\n"));
+    }
+    break;
 
   case AST_STMT_EXPRESSION:
     print_ast(node->stmt.expr_stmt.expression, next_prefix, true, false);
@@ -554,6 +643,17 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       printf(GRAY("<no initializers>\n"));
     }
     print_ast(node->stmt.loop_stmt.body, next_prefix, true, false);
+    break;
+
+  case AST_STMT_BREAK_CONTINUE:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("%s Statement | "), node->stmt.break_continue.is_continue ? "Continue" : "Break");
+    if (node->stmt.break_continue.is_continue) {
+      printf(GRAY("This is a continue statement.\n"));
+    } else {
+      printf(GRAY("This is a break statement.\n"));
+    }
+    printf("\n");
     break;
   
   default:

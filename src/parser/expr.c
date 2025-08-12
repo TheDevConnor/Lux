@@ -9,31 +9,8 @@ Expr *primary(Parser *parser) {
   int col = p_current(parser).col;
 
   Token current = p_current(parser);
-  LiteralType lit_type;
-  switch (current.type_) {
-  case TOK_NUMBER:
-    lit_type = LITERAL_INT;
-    break;
-  case TOK_STRING:
-    lit_type = LITERAL_STRING;
-    break;
-  case TOK_CHAR_LITERAL:
-    lit_type = LITERAL_CHAR;
-    break;
-  case TOK_TRUE:
-    lit_type = LITERAL_BOOL;
-    break;
-  case TOK_FALSE:
-    lit_type = LITERAL_BOOL;
-    break;
-  case TOK_IDENTIFIER:
-    lit_type = LITERAL_IDENT;
-    break;
-  default:
-    lit_type = LITERAL_NULL;
-    break;
-  }
-
+  LiteralType lit_type = PRIMARY_LITERAL_TYPE_MAP[current.type_];
+  
   if (lit_type != LITERAL_NULL) {
     void *value = NULL;
     switch (lit_type) {
@@ -81,28 +58,7 @@ Expr *unary(Parser *parser) {
   int col = p_current(parser).col;
 
   Token current = p_current(parser);
-  UnaryOp op;
-
-  switch (current.type_) {
-  case TOK_MINUS:
-    op = UNOP_NEG;
-    break;
-  case TOK_PLUS:
-    op = UNOP_POS;
-    break;
-  case TOK_BANG:
-    op = UNOP_NOT;
-    break;
-  case TOK_PLUSPLUS:
-    op = UNOP_PRE_INC;
-    break;
-  case TOK_MINUSMINUS:
-    op = UNOP_PRE_DEC;
-    break;
-  default:
-    op = 0;
-    break; // or handle error
-  }
+  UnaryOp op = TOKEN_TO_UNOP_MAP[current.type_];
 
   if (op) {
     p_advance(parser); // Consume the token
@@ -135,19 +91,97 @@ Expr *binary(Parser *parser, Expr *left, BindingPower bp) {
   return create_binary_expr(parser->arena, op, left, right, line, col);
 }
 
-Expr *call_expr(Parser *parser, Expr *left, BindingPower bp) { 
-  (void)bp; (void)left; (void)parser; // Suppress unused variable warnings
-  return NULL; 
+Expr *call_expr(Parser *parser, Expr *left, BindingPower bp) {
+  (void)bp; // Unused parameter, can be removed if not needed 
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  GrowableArray args;
+  if (!growable_array_init(&args, parser->arena, 4, sizeof(Expr *))) {
+    fprintf(stderr, "Failed to initialize call arguments\n"); 
+  }
+
+  p_consume(parser, TOK_LPAREN, "Expected '(' for function call");
+  while (p_current(parser).type_ != TOK_RPAREN) {
+    Expr *arg = parse_expr(parser, BP_LOWEST);
+    if (!arg) {      
+      fprintf(stderr, "Expected expression inside function call\n");
+      return NULL;
+    }
+    Expr **slot = (Expr **)growable_array_push(&args);
+    if (!slot) {      
+      fprintf(stderr, "Out of memory while growing call arguments\n");
+      return NULL;
+    }
+    *slot = arg;  
+    if (p_current(parser).type_ == TOK_COMMA) {
+      p_advance(parser); // Consume the comma
+    }
+  }
+  p_consume(parser, TOK_RPAREN, "Expected ')' to close function call");
+
+  return create_call_expr(parser->arena, left, (Expr **)args.data,
+                           args.count, line, col);
 }
 
 Expr *assign_expr(Parser *parser, Expr *left, BindingPower bp) {
-  (void)bp; (void)left; (void)parser; // Suppress unused variable warnings
-  return NULL;
+  (void)bp; // Unused parameter, can be removed if not needed
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  if (p_current(parser).type_ != TOK_EQUAL) {
+    fprintf(stderr, "Expected '=' for assignment\n");
+    return NULL;
+  }
+  p_advance(parser); // Consume the '=' token
+
+  Expr *value = parse_expr(parser, BP_ASSIGN);
+  if (!value) {
+    parser_error(parser, "Assignment Error", "parser.c",
+                 "Failed to parse assignment value", line, col,
+                 p_current(parser).length);
+    return NULL;
+  }
+
+  return create_assignment_expr(parser->arena, left, value, line, col);
 }
 
 Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp) {
-  (void)left; (void)bp; (void)parser; // Suppress unused variable warnings
-  return NULL;
+  (void)bp; // Unused parameter, can be removed if not needed
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  Token current = p_current(parser);
+  switch(current.type_) {
+  case TOK_LBRACKET:
+    p_advance(parser); // Consume the '[' token
+    Expr *index = parse_expr(parser, BP_LOWEST);
+    if (!index) {
+      fprintf(stderr, "Expected expression inside index\n");
+      return NULL;  
+    }
+    p_consume(parser, TOK_RBRACKET, "Expected ']' to close index expression");
+    return create_index_expr(parser->arena, left, index, line, col);
+  case TOK_DOT:
+    p_advance(parser); // Consume the '.' token
+    if (p_current(parser).type_ != TOK_IDENTIFIER) {
+      fprintf(stderr, "Expected identifier after '.' for member access\n");
+      return NULL;
+    }
+    char *member = get_name(parser);
+    p_advance(parser); // Consume the identifier token
+    return create_member_expr(parser->arena, left, member, line, col);
+  case TOK_PLUSPLUS:
+  case TOK_MINUSMINUS: {
+    UnaryOp op = (current.type_ == TOK_PLUSPLUS) ? UNOP_POST_INC : UNOP_POST_DEC;
+    p_advance(parser); // Consume the token
+    return create_unary_expr(parser->arena, op, left, line, col);
+  }
+  default:
+    fprintf(stderr, "Unexpected token for prefix expression: %s\n",
+            current.value);
+    return NULL; // Handle unexpected token 
+  }
 }
 
 Expr *array_expr(Parser *parser) {

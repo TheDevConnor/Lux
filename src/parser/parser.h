@@ -35,6 +35,15 @@ typedef enum {
   BP_PRIMARY      // Primary expressions (literals, variables)
 } BindingPower;
 
+static const LiteralType PRIMARY_LITERAL_TYPE_MAP[] = {
+  [TOK_NUMBER]      = LITERAL_INT,
+  [TOK_STRING]      = LITERAL_STRING,
+  [TOK_CHAR_LITERAL] = LITERAL_CHAR,
+  [TOK_TRUE]       = LITERAL_BOOL,
+  [TOK_FALSE]      = LITERAL_BOOL,
+  [TOK_IDENTIFIER] = LITERAL_IDENT,
+};
+
 static const BinaryOp TOKEN_TO_BINOP_MAP[] = {
   [TOK_PLUS]  = BINOP_ADD,
   [TOK_MINUS] = BINOP_SUB,
@@ -51,6 +60,15 @@ static const BinaryOp TOKEN_TO_BINOP_MAP[] = {
   [TOK_AMP]   = BINOP_BIT_AND,
   [TOK_PIPE]  = BINOP_BIT_OR,
   [TOK_CARET] = BINOP_BIT_XOR,
+};
+
+static const UnaryOp TOKEN_TO_UNOP_MAP[] = {
+  [TOK_BANG]       = UNOP_NOT,
+  [TOK_TILDE]      = UNOP_BIT_NOT,
+  [TOK_PLUS]       = UNOP_POS,
+  [TOK_MINUS]      = UNOP_NEG,
+  [TOK_PLUSPLUS]   = UNOP_PRE_INC,
+  [TOK_MINUSMINUS] = UNOP_PRE_DEC,
 };
 
 typedef struct {
@@ -119,3 +137,4 @@ Stmt *infinite_loop_stmt(Parser *parser, int line, int col);
 Stmt *for_loop_stmt(Parser *parser, int line, int col);
 Stmt *loop_stmt(Parser *parser);
 Stmt *if_stmt(Parser *parser);
+Stmt *break_continue_stmt(Parser *parser, bool is_continue);

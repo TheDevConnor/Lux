@@ -172,11 +172,13 @@ Expr *led(Parser *parser, Expr *left, BindingPower bp) {
     return binary(parser, left, bp);
   case TOK_LPAREN:
     return call_expr(parser, left, bp);
-  case TOK_LBRACKET:
+  case TOK_EQUAL:
     return assign_expr(parser, left, bp);
   case TOK_DOT:
   case TOK_PLUSPLUS:
   case TOK_MINUSMINUS:
+  case TOK_LBRACKET:
+    // Handle member access, postfix increment/decrement, and indexing
     return prefix_expr(parser, left, bp);
   default:
     p_advance(parser);
@@ -222,6 +224,9 @@ Stmt *parse_stmt(Parser *parser) {
     return print_stmt(parser, false);
   case TOK_PRINTLN:
     return print_stmt(parser, true);
+  case TOK_CONTINUE:
+  case TOK_BREAK:
+    return break_continue_stmt(parser, p_current(parser).type_ == TOK_CONTINUE);
   default:
     return expr_stmt(
         parser); // expression statements handle their own semicolon

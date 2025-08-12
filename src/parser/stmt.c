@@ -157,23 +157,6 @@ Stmt *enum_stmt(Parser *parser, const char *name, bool is_public) {
                                members.count, is_public, line, col);
 }
 
-/*
-  const Person = struct {
-  pub:
-    name: str,
-    age: int,
-    email: str,
-
-    init = fn (self: Person) void {
-      // Constructor logic here
-    }
-  priv:
-    ssn: str,
-
-    // Constructor logic here
-  };
-*/
-
 Stmt *struct_stmt(Parser *parser, const char *name, bool is_public) {
   int line = p_current(parser).line;
   int col = p_current(parser).col;
@@ -530,4 +513,16 @@ Stmt *print_stmt(Parser *parser, bool ln) {
 
   return create_print_stmt(parser->arena, (Expr **)expressions.data,
                            expressions.count, ln, line, col);
+}
+
+Stmt *break_continue_stmt(Parser *parser, bool is_continue) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  p_consume(parser, is_continue ? TOK_CONTINUE : TOK_BREAK,
+            is_continue ? "Expected 'continue' keyword" : "Expected 'break' keyword");
+  p_consume(parser, TOK_SEMICOLON,
+            "Expected semicolon after break/continue statement");
+
+  return create_break_continue_stmt(parser->arena, is_continue, line, col);
 }
