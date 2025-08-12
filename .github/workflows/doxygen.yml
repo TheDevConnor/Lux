@@ -3,7 +3,7 @@ name: Generate Doxygen Documentation
 on:
   push:
     branches:
-      - main  # or your default branch
+      - main
 
 jobs:
   build:
@@ -13,7 +13,7 @@ jobs:
     - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Install Doxygen
+    - name: Install Doxygen and Graphviz
       run: sudo apt-get update && sudo apt-get install -y doxygen graphviz
 
     - name: Run Doxygen
@@ -29,3 +29,14 @@ jobs:
         user_email: 'github-actions[bot]@users.noreply.github.com'
         commit_message: 'Update Doxygen documentation'
         keep_files: false
+        enable_jekyll: false
+
+    - name: Enable GitHub Pages via API
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        curl -X POST \
+          -H "Authorization: token $GITHUB_TOKEN" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${{ github.repository }}/pages \
+          -d '{"source":{"branch":"gh-pages","path":"/"}}'
