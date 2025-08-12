@@ -1,5 +1,5 @@
 <map id="src/parser/parser_utils.c" name="src/parser/parser_utils.c">
-<area shape="rect" id="Node000001" title=" " alt="" coords="40,5,204,30"/>
+<area shape="rect" id="Node000001" title="Utility functions for the parser module." alt="" coords="40,5,204,30"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,78,66,103"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="110,33,63,70,60,66,106,28"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="90,78,154,103"/>

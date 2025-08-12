@@ -81,6 +81,9 @@ $(function() {
   <div class="headertitle"><div class="title">expr.c File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Expression parsing implementation for the programming language compiler.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;stdlib.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
@@ -90,7 +93,7 @@ Include dependency graph for expr.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="parser_2expr_8c__incl.png" border="0" usemap="#asrc_2parser_2expr_8c" loading="lazy" alt=""/></div>
 <map name="asrc_2parser_2expr_8c" id="asrc_2parser_2expr_8c">
-<area shape="rect" title=" " alt="" coords="105,5,225,30"/>
+<area shape="rect" title="Expression parsing implementation for the programming language compiler." alt="" coords="105,5,225,30"/>
 <area shape="rect" title=" " alt="" coords="5,78,66,103"/>
 <area shape="poly" title=" " alt="" coords="145,33,71,73,68,68,142,28"/>
 <area shape="rect" title=" " alt="" coords="89,78,152,103"/>
@@ -124,23 +127,40 @@ Include dependency graph for expr.c:</div>
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a481c538e520948ab138a8c5b0a8324c6" id="r_a481c538e520948ab138a8c5b0a8324c6"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a481c538e520948ab138a8c5b0a8324c6">primary</a> (<a class="el" href="structParser.html">Parser</a> *parser)</td></tr>
-<tr class="memdesc:a481c538e520948ab138a8c5b0a8324c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a primary expression (literal, identifier).  <br /></td></tr>
+<tr class="memdesc:a481c538e520948ab138a8c5b0a8324c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses primary expressions (literals and identifiers)  <br /></td></tr>
 <tr class="memitem:a517fa2b63adec675d032991a3a712572" id="r_a517fa2b63adec675d032991a3a712572"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a517fa2b63adec675d032991a3a712572">unary</a> (<a class="el" href="structParser.html">Parser</a> *parser)</td></tr>
-<tr class="memdesc:a517fa2b63adec675d032991a3a712572"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a unary expression.  <br /></td></tr>
+<tr class="memdesc:a517fa2b63adec675d032991a3a712572"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses unary expressions (prefix operators)  <br /></td></tr>
 <tr class="memitem:a1ecf965f76c333d977e1ffafbef4174e" id="r_a1ecf965f76c333d977e1ffafbef4174e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1ecf965f76c333d977e1ffafbef4174e">grouping</a> (<a class="el" href="structParser.html">Parser</a> *parser)</td></tr>
-<tr class="memdesc:a1ecf965f76c333d977e1ffafbef4174e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a grouped expression (parentheses).  <br /></td></tr>
+<tr class="memdesc:a1ecf965f76c333d977e1ffafbef4174e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses grouped expressions (parenthesized expressions)  <br /></td></tr>
 <tr class="memitem:aae76f2e2da0e519b78628915240200dd" id="r_aae76f2e2da0e519b78628915240200dd"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aae76f2e2da0e519b78628915240200dd">binary</a> (<a class="el" href="structParser.html">Parser</a> *parser, <a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *left, <a class="el" href="parser_8h.html#afda66df955be06c6d47c751fc63ebc0e">BindingPower</a> bp)</td></tr>
-<tr class="memdesc:aae76f2e2da0e519b78628915240200dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a binary expression.  <br /></td></tr>
+<tr class="memdesc:aae76f2e2da0e519b78628915240200dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses binary expressions (infix operators)  <br /></td></tr>
 <tr class="memitem:a77a8786dfb25898d7c4ffbc0ca8eafcf" id="r_a77a8786dfb25898d7c4ffbc0ca8eafcf"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a77a8786dfb25898d7c4ffbc0ca8eafcf">call_expr</a> (<a class="el" href="structParser.html">Parser</a> *parser, <a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *left, <a class="el" href="parser_8h.html#afda66df955be06c6d47c751fc63ebc0e">BindingPower</a> bp)</td></tr>
-<tr class="memdesc:a77a8786dfb25898d7c4ffbc0ca8eafcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a function call expression.  <br /></td></tr>
+<tr class="memdesc:a77a8786dfb25898d7c4ffbc0ca8eafcf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses function call expressions.  <br /></td></tr>
 <tr class="memitem:a683f4d2d2d297649d7b0d2d3dc3bad8e" id="r_a683f4d2d2d297649d7b0d2d3dc3bad8e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a683f4d2d2d297649d7b0d2d3dc3bad8e">assign_expr</a> (<a class="el" href="structParser.html">Parser</a> *parser, <a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *left, <a class="el" href="parser_8h.html#afda66df955be06c6d47c751fc63ebc0e">BindingPower</a> bp)</td></tr>
-<tr class="memdesc:a683f4d2d2d297649d7b0d2d3dc3bad8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an assignment expression.  <br /></td></tr>
+<tr class="memdesc:a683f4d2d2d297649d7b0d2d3dc3bad8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses assignment expressions.  <br /></td></tr>
 <tr class="memitem:a6ec4a015146e7598655f260ecb559a84" id="r_a6ec4a015146e7598655f260ecb559a84"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6ec4a015146e7598655f260ecb559a84">prefix_expr</a> (<a class="el" href="structParser.html">Parser</a> *parser, <a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *left, <a class="el" href="parser_8h.html#afda66df955be06c6d47c751fc63ebc0e">BindingPower</a> bp)</td></tr>
-<tr class="memdesc:a6ec4a015146e7598655f260ecb559a84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses a prefix expression (member access, postfix operators, indexing).  <br /></td></tr>
+<tr class="memdesc:a6ec4a015146e7598655f260ecb559a84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses prefix expressions (member access, indexing, postfix operators)  <br /></td></tr>
 <tr class="memitem:ade768344c2d92f84219dfbddb9d37987" id="r_ade768344c2d92f84219dfbddb9d37987"><td class="memItemLeft" align="right" valign="top"><a class="el" href="ast_8h.html#a9392eba3b24c6cb6afff1173735ac359">Expr</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ade768344c2d92f84219dfbddb9d37987">array_expr</a> (<a class="el" href="structParser.html">Parser</a> *parser)</td></tr>
-<tr class="memdesc:ade768344c2d92f84219dfbddb9d37987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses an array literal expression.  <br /></td></tr>
+<tr class="memdesc:ade768344c2d92f84219dfbddb9d37987"><td class="mdescLeft">&#160;</td><td class="mdescRight">Parses array literal expressions.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Expression parsing implementation for the programming language compiler. </p>
+<p>This file contains implementations for parsing all types of expressions in the programming language. It works in conjunction with the Pratt parser implementation in <a class="el" href="parser_8c.html" title="Implementation of the parser module for the programming language compiler.">parser.c</a> to handle operator precedence and associativity correctly.</p>
+<p>The expression parser handles:</p><ul>
+<li>Primary expressions: literals, identifiers</li>
+<li>Unary expressions: prefix and postfix operators</li>
+<li>Binary expressions: arithmetic, logical, comparison operators</li>
+<li>Function call expressions with argument lists</li>
+<li>Assignment expressions</li>
+<li>Member access and array indexing expressions</li>
+<li>Grouping expressions with parentheses</li>
+<li>Array literal expressions</li>
+</ul>
+<p>All parsing functions follow the Pratt parser pattern, where expressions are built recursively based on operator precedence (binding power). The functions correspond to null denotation (nud) and left denotation (led) operations.</p>
+<dl class="section author"><dt>Author</dt><dd>Connor Harris </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>2025 </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.0 </dd></dl>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="ade768344c2d92f84219dfbddb9d37987" name="ade768344c2d92f84219dfbddb9d37987"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ade768344c2d92f84219dfbddb9d37987">&#9670;&#160;</a></span>array_expr()</h2>
 
@@ -156,14 +176,26 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses an array literal expression. </p>
+<p>Parses array literal expressions. </p>
+<p>Parses an array literal expression.</p>
+<p>This function handles array literal syntax with square brackets containing a comma-separated list of expressions: <span class="tt">[expr1, expr2, expr3, ...]</span>. Empty arrays are allowed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed array expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created array expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Array literals can contain any number of expressions (including zero) </dd>
+<dd>
+Elements are separated by commas with optional trailing comma support </dd>
+<dd>
+Each element can be any valid expression (literals, identifiers, function calls, etc.) </dd>
+<dd>
+Memory for the element array is managed using growable arrays </dd>
+<dd>
+Empty arrays are valid: <span class="tt">[]</span></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a28bbedff4d2051636a3b72f4e893c0dd">create_array_expr()</a>, <a class="el" href="parser_8h.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="structGrowableArray.html" title="Growable array backed by an arena allocator.">GrowableArray</a> </dd></dl>
 
 </div>
 </div>
@@ -191,16 +223,26 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses an assignment expression. </p>
+<p>Parses assignment expressions. </p>
+<p>Parses an assignment expression.</p>
+<p>This function handles assignment operations where a value is assigned to a variable or other assignable expression (lvalue). The left operand must be a valid assignment target.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
-    <tr><td class="paramname">left</td><td>Left expression node. </td></tr>
-    <tr><td class="paramname">bp</td><td>Binding power. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left-hand side expression being assigned to (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context (unused in this function)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed assignment expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created assignment expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Assignment is right-associative with low precedence </dd>
+<dd>
+The left operand should be an lvalue (identifier, member access, index) </dd>
+<dd>
+The right operand is parsed with BP_ASSIGN precedence for right-associativity </dd>
+<dd>
+Validation of assignment targets is typically done during semantic analysis</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a00cc73883336df2dfb1e4e4b471d288f">create_assignment_expr()</a>, <a class="el" href="parser_8h.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="parser_8h.html#a9a2a8ba5bea0c6ee41058bf6f8eb6178" title="Report a parser error with detailed location info.">parser_error()</a> </dd></dl>
 
 </div>
 </div>
@@ -228,16 +270,28 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses a binary expression. </p>
+<p>Parses binary expressions (infix operators) </p>
+<p>Parses a binary expression.</p>
+<p>This function handles all binary infix operators including arithmetic (+, -, *, /), comparison (==, !=, &lt;, &gt;, &lt;=, &gt;=), logical (&amp;&amp;, ||), and bitwise (&amp;, |, ^) operators. It's called as part of the left denotation (led) process in the Pratt parser.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
-    <tr><td class="paramname">left</td><td>Left expression node. </td></tr>
-    <tr><td class="paramname">bp</td><td>Binding power. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left operand expression (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context for precedence handling</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created binary expression AST node</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is part of the Pratt parser's led (left denotation) mechanism </dd>
+<dd>
+The left operand is already parsed by the time this function is called </dd>
+<dd>
+The right operand is parsed with the current binding power to handle precedence </dd>
+<dd>
+Operator associativity is handled by the binding power passed to parse_expr </dd>
+<dd>
+Uses a lookup table to map token types to binary operator types</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a7147d252c953b63df28b15dabc8ea285">create_binary_expr()</a>, <a class="el" href="parser_8h.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="ast_8h.html#a751965739ae765593a89b5fd608d480c">BinaryOp</a>, <a class="el" href="parser_8h.html#afda66df955be06c6d47c751fc63ebc0e" title="Binding power (precedence) levels for expression parsing.">BindingPower</a> </dd></dl>
 
 </div>
 </div>
@@ -265,16 +319,28 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses a function call expression. </p>
+<p>Parses function call expressions. </p>
+<p>Parses a function call expression.</p>
+<p>This function handles function call syntax where the left operand is the function to call and the arguments are provided in parentheses. It supports zero or more arguments separated by commas.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
-    <tr><td class="paramname">left</td><td>Left expression node. </td></tr>
-    <tr><td class="paramname">bp</td><td>Binding power. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The function expression to call (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context (unused in this function)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed call expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created function call expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Function calls have very high precedence (BP_CALL) </dd>
+<dd>
+Arguments are stored in a growable array and can be of any expression type </dd>
+<dd>
+Empty argument lists are allowed: <span class="tt">function()</span> </dd>
+<dd>
+Arguments are separated by commas with optional trailing comma handling </dd>
+<dd>
+The function being called (left operand) can be any expression (identifier, member access, etc.)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#ae0ffb62e012dd1c9f61cc84d939186dd">create_call_expr()</a>, <a class="el" href="parser_8h.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="structGrowableArray.html" title="Growable array backed by an arena allocator.">GrowableArray</a> </dd></dl>
 
 </div>
 </div>
@@ -293,14 +359,24 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses a grouped expression (parentheses). </p>
+<p>Parses grouped expressions (parenthesized expressions) </p>
+<p>Parses a grouped expression (parentheses).</p>
+<p>This function handles expressions enclosed in parentheses, which are used to override the default operator precedence. The parentheses themselves don't create a separate AST node; they just influence parsing order.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the expression AST node inside the parentheses, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Parentheses don't create additional AST nodes - they only affect parsing order </dd>
+<dd>
+The inner expression is parsed with BP_LOWEST to allow any expression inside </dd>
+<dd>
+Both opening and closing parentheses are consumed and required </dd>
+<dd>
+Nested parentheses are handled naturally through recursive expression parsing</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#aa7af0b51959be1abcc6af1869796e4a2">create_grouping_expr()</a>, <a class="el" href="parser_8h.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="parser_8h.html#a8ae2c122d273b1681a60ee873efe2a4f" title="Consume a token of the specified type, or report an error.">p_consume()</a> </dd></dl>
 
 </div>
 </div>
@@ -328,16 +404,33 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses a prefix expression (member access, postfix operators, indexing). </p>
+<p>Parses prefix expressions (member access, indexing, postfix operators) </p>
+<p>Parses a prefix expression (member access, postfix operators, indexing).</p>
+<p>This function handles expressions that operate on a left operand:</p><ul>
+<li>Member access: <span class="tt">object.member</span></li>
+<li>Array indexing: <span class="tt">array[index]</span></li>
+<li>Postfix increment/decrement: <span class="tt">variable++</span>, <span class="tt">variable--</span></li>
+</ul>
+<p>Despite the name "prefix", this function handles postfix and infix operations that take a left operand. It's part of the led (left denotation) mechanism.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
-    <tr><td class="paramname">left</td><td>Left expression node. </td></tr>
-    <tr><td class="paramname">bp</td><td>Binding power. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left operand expression (object, array, or variable) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context (unused in this function)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed prefix expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the appropriate expression AST node (member, index, or unary), or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Despite the name, this handles postfix and member access operations </dd>
+<dd>
+Member access requires an identifier after the dot </dd>
+<dd>
+Array indexing can use any expression as the index </dd>
+<dd>
+Postfix increment/decrement create unary expressions with special operators </dd>
+<dd>
+All operations have high precedence (BP_CALL level)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#ae91465355deb23d350db38bad7ccf8bf">create_index_expr()</a>, <a class="el" href="ast_8h.html#a9b43fac7667a29730620575fd4ecde03">create_member_expr()</a>, <a class="el" href="ast_8h.html#ae5611431d21a9c94961e338eac2a5543">create_unary_expr()</a> </dd></dl>
 
 </div>
 </div>
@@ -356,14 +449,28 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses a primary expression (literal, identifier). </p>
+<p>Parses primary expressions (literals and identifiers) </p>
+<p>Parses a primary expression (literal, identifier).</p>
+<p>This function handles the most basic expressions that don't have any operators: integer literals, floating-point literals, string literals, character literals, boolean literals, and identifiers. It uses a lookup table to map token types to literal types and handles the appropriate conversion and memory allocation for each type.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created literal or identifier expression AST node, or NULL if the current token is not a valid primary expression</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Primary expressions are the "atoms" of the expression language </dd>
+<dd>
+Memory for literal values is allocated using the arena allocator </dd>
+<dd>
+String literals are copied to ensure they remain valid after parsing </dd>
+<dd>
+Identifiers are handled separately and create identifier expression nodes </dd>
+<dd>
+Numeric conversions use standard library functions (strtoll, strtod) </dd>
+<dd>
+Boolean literals are converted from "true"/"false" string comparisons</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a3fe1e61e4cbaa650ee0303706f5c730a">create_literal_expr()</a>, <a class="el" href="ast_8h.html#aa428edcfee9f652c053e31e0135acbd6">create_identifier_expr()</a>, <a class="el" href="parser_8h.html#a8779384c9ac7a618c2b851cb11d1598c" title="Retrieves the name string from the current token (for identifiers).">get_name()</a> </dd></dl>
 
 </div>
 </div>
@@ -382,14 +489,24 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Parses a unary expression. </p>
+<p>Parses unary expressions (prefix operators) </p>
+<p>Parses a unary expression.</p>
+<p>This function handles prefix unary operators such as negation (-), logical NOT (!), unary plus (+), and prefix increment/decrement (++, &ndash;). It uses a lookup table to map token types to unary operator types and recursively parses the operand with appropriate precedence.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">parser</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created unary expression AST node, or NULL if the current token is not a valid unary operator</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Unary expressions have higher precedence than most binary operators </dd>
+<dd>
+The operand is parsed with BP_UNARY precedence to handle operator nesting </dd>
+<dd>
+Supports both arithmetic unary operators (-, +) and logical operators (!) </dd>
+<dd>
+Prefix increment/decrement operators are handled here (postfix in prefix_expr)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#ae5611431d21a9c94961e338eac2a5543">create_unary_expr()</a>, <a class="el" href="parser_8h.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="ast_8h.html#ac0e6f7f17047750fd114b6634912dca4">UnaryOp</a> </dd></dl>
 
 </div>
 </div>

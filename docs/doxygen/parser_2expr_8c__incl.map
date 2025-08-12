@@ -1,5 +1,5 @@
 <map id="src/parser/expr.c" name="src/parser/expr.c">
-<area shape="rect" id="Node000001" title=" " alt="" coords="105,5,225,30"/>
+<area shape="rect" id="Node000001" title="Expression parsing implementation for the programming language compiler." alt="" coords="105,5,225,30"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,78,66,103"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,33,71,73,68,68,142,28"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="89,78,152,103"/>

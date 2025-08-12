@@ -81,6 +81,9 @@ $(function() {
   <div class="headertitle"><div class="title">parser_utils.c File Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Utility functions for the parser module.  
+<a href="#details">More...</a></p>
 <div class="textblock"><code>#include &lt;stdio.h&gt;</code><br />
 <code>#include &lt;string.h&gt;</code><br />
 <code>#include &quot;<a class="el" href="parser_8h_source.html">parser.h</a>&quot;</code><br />
@@ -89,7 +92,7 @@ Include dependency graph for parser_utils.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="parser__utils_8c__incl.png" border="0" usemap="#asrc_2parser_2parser__utils_8c" loading="lazy" alt=""/></div>
 <map name="asrc_2parser_2parser__utils_8c" id="asrc_2parser_2parser__utils_8c">
-<area shape="rect" title=" " alt="" coords="40,5,204,30"/>
+<area shape="rect" title="Utility functions for the parser module." alt="" coords="40,5,204,30"/>
 <area shape="rect" title=" " alt="" coords="5,78,66,103"/>
 <area shape="poly" title=" " alt="" coords="110,33,63,70,60,66,106,28"/>
 <area shape="rect" title=" " alt="" coords="90,78,154,103"/>
@@ -121,19 +124,32 @@ Include dependency graph for parser_utils.c:</div>
 <tr class="heading"><td colspan="2"><h2 id="header-func-members" class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ad438bd01c47ce6a0824f58f003cb81e5" id="r_ad438bd01c47ce6a0824f58f003cb81e5"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad438bd01c47ce6a0824f58f003cb81e5">p_has_tokens</a> (<a class="el" href="structParser.html">Parser</a> *psr)</td></tr>
-<tr class="memdesc:ad438bd01c47ce6a0824f58f003cb81e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if the parser has more tokens to process.  <br /></td></tr>
+<tr class="memdesc:ad438bd01c47ce6a0824f58f003cb81e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Checks if there are more tokens available for parsing.  <br /></td></tr>
 <tr class="memitem:a12fe3f2a756479a093d29f08946c57d7" id="r_a12fe3f2a756479a093d29f08946c57d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structToken.html">Token</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a12fe3f2a756479a093d29f08946c57d7">p_peek</a> (<a class="el" href="structParser.html">Parser</a> *psr, size_t offset)</td></tr>
-<tr class="memdesc:a12fe3f2a756479a093d29f08946c57d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Peeks at a token at a given offset from the current position.  <br /></td></tr>
+<tr class="memdesc:a12fe3f2a756479a093d29f08946c57d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Peeks at a token at the specified offset from current position.  <br /></td></tr>
 <tr class="memitem:a7fbcabd9ce88ca44946533a7aaaa68a4" id="r_a7fbcabd9ce88ca44946533a7aaaa68a4"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structToken.html">Token</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7fbcabd9ce88ca44946533a7aaaa68a4">p_current</a> (<a class="el" href="structParser.html">Parser</a> *psr)</td></tr>
-<tr class="memdesc:a7fbcabd9ce88ca44946533a7aaaa68a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current token the parser is looking at.  <br /></td></tr>
+<tr class="memdesc:a7fbcabd9ce88ca44946533a7aaaa68a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current token without advancing the parser position.  <br /></td></tr>
 <tr class="memitem:ab4f10f4ace5bea57b54d84c5088d349e" id="r_ab4f10f4ace5bea57b54d84c5088d349e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structToken.html">Token</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab4f10f4ace5bea57b54d84c5088d349e">p_advance</a> (<a class="el" href="structParser.html">Parser</a> *psr)</td></tr>
-<tr class="memdesc:ab4f10f4ace5bea57b54d84c5088d349e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances the parser to the next token.  <br /></td></tr>
+<tr class="memdesc:ab4f10f4ace5bea57b54d84c5088d349e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Advances to the next token and returns the current token.  <br /></td></tr>
 <tr class="memitem:a8ae2c122d273b1681a60ee873efe2a4f" id="r_a8ae2c122d273b1681a60ee873efe2a4f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structToken.html">Token</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8ae2c122d273b1681a60ee873efe2a4f">p_consume</a> (<a class="el" href="structParser.html">Parser</a> *psr, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921">TokenType</a> type, const char *error_msg)</td></tr>
-<tr class="memdesc:a8ae2c122d273b1681a60ee873efe2a4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Consume a token of the specified type, or report an error.  <br /></td></tr>
+<tr class="memdesc:a8ae2c122d273b1681a60ee873efe2a4f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Consumes a token of the expected type or reports an error.  <br /></td></tr>
 <tr class="memitem:a8779384c9ac7a618c2b851cb11d1598c" id="r_a8779384c9ac7a618c2b851cb11d1598c"><td class="memItemLeft" align="right" valign="top">char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8779384c9ac7a618c2b851cb11d1598c">get_name</a> (<a class="el" href="structParser.html">Parser</a> *psr)</td></tr>
-<tr class="memdesc:a8779384c9ac7a618c2b851cb11d1598c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieves the name string from the current token (for identifiers).  <br /></td></tr>
+<tr class="memdesc:a8779384c9ac7a618c2b851cb11d1598c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Extracts and duplicates the current token's string value.  <br /></td></tr>
 </table>
-<a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
+<a name="details" id="details"></a><h2 id="header-details" class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Utility functions for the parser module. </p>
+<p>This file contains essential utility functions that provide the core infrastructure for token navigation and manipulation during parsing. These functions abstract the low-level details of token stream management and provide a clean interface for parser operations.</p>
+<p>The utilities include:</p><ul>
+<li><a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> stream navigation (current, peek, advance)</li>
+<li><a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> consumption with error reporting</li>
+<li><a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> validation and bounds checking</li>
+<li>String extraction and memory management for identifiers</li>
+</ul>
+<p>All functions are designed to be safe and handle edge cases like end-of-stream conditions gracefully by returning EOF tokens.</p>
+<dl class="section author"><dt>Author</dt><dd>[Your Name] </dd></dl>
+<dl class="section date"><dt>Date</dt><dd>[Current Date] </dd></dl>
+<dl class="section version"><dt>Version</dt><dd>1.0 </dd></dl>
+</div><a name="doc-func-members" id="doc-func-members"></a><h2 id="header-doc-func-members" class="groupheader">Function Documentation</h2>
 <a id="a8779384c9ac7a618c2b851cb11d1598c" name="a8779384c9ac7a618c2b851cb11d1598c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8779384c9ac7a618c2b851cb11d1598c">&#9670;&#160;</a></span>get_name()</h2>
 
@@ -149,14 +165,27 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Retrieves the name string from the current token (for identifiers). </p>
+<p>Extracts and duplicates the current token's string value. </p>
+<p>Retrieves the name string from the current token (for identifiers).</p>
+<p>This function creates a null-terminated string copy of the current token's value using the arena allocator. It's primarily used for extracting identifier names, string literals, and other textual token content that needs to be preserved in the AST.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">psr</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Pointer to the token's string value. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to a null-terminated string containing the current token's value, allocated using the parser's arena allocator</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The returned string is allocated using <a class="el" href="memory_8c.html#a4a743cb5b88ba3486983a0dad9c46932" title="Allocates memory from the arena allocator with automatic buffer growth.">arena_alloc()</a> for automatic memory management </dd>
+<dd>
+The string is properly null-terminated for safe use with standard string functions </dd>
+<dd>
+The original token value is copied, so the returned string is independent </dd>
+<dd>
+Memory is automatically managed by the arena - no manual deallocation needed</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This function assumes the current token has a valid value field </dd>
+<dd>
+Should only be called when you know the current token contains string data</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8h.html#a532b199d177d1142acd910987d972af5" title="Get the value string of the current token.">CURRENT_TOKEN_VALUE()</a>, <a class="el" href="parser_8h.html#ace48720acc4b922f947e0d57df9b3f36" title="Get the length of the current token&#39;s lexeme.">CURRENT_TOKEN_LENGTH()</a>, <a class="el" href="memory_8c.html#a4a743cb5b88ba3486983a0dad9c46932" title="Allocates memory from the arena allocator with automatic buffer growth.">arena_alloc()</a> </dd></dl>
 
 </div>
 </div>
@@ -175,14 +204,23 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Advances the parser to the next token. </p>
+<p>Advances to the next token and returns the current token. </p>
+<p>Advances the parser to the next token.</p>
+<p>This function moves the parser position forward by one token and returns the token that was current before advancing. This is the primary mechanism for consuming tokens during parsing.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">psr</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The token advanced past. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The token that was current before advancing, or EOF token if already at the end of the token stream</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The parser position is incremented only if there are tokens available </dd>
+<dd>
+Safe to call at end of stream - returns EOF token and doesn't advance </dd>
+<dd>
+This is a mutating operation that changes parser state</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>After calling this function, subsequent calls to <a class="el" href="parser_8h.html#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a> will return the next token in the stream</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8h.html#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="parser_8h.html#ad438bd01c47ce6a0824f58f003cb81e5" title="Checks if the parser has more tokens to process.">p_has_tokens()</a>, <a class="el" href="parser_8h.html#a8ae2c122d273b1681a60ee873efe2a4f" title="Consume a token of the specified type, or report an error.">p_consume()</a> </dd></dl>
 
 </div>
 </div>
@@ -210,16 +248,27 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Consume a token of the specified type, or report an error. </p>
+<p>Consumes a token of the expected type or reports an error. </p>
+<p>Consume a token of the specified type, or report an error.</p>
+<p>This function is used when the parser expects a specific token type at the current position. If the current token matches the expected type, it advances and returns the token. If not, it reports a syntax error with the provided error message.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">psr</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
-    <tr><td class="paramname">type</td><td>Expected token type. </td></tr>
-    <tr><td class="paramname">error_msg</td><td>Error message if token is not the expected type. </td></tr>
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">type</td><td>The expected token type that should be at the current position </td></tr>
+    <tr><td class="paramname">error_msg</td><td>Error message to display if the token doesn't match</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The consumed token. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The consumed token if it matches the expected type, or an EOF token if there's a mismatch (indicating an error)</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function combines token validation and consumption in one operation </dd>
+<dd>
+Error reporting includes current line, column, and token length information </dd>
+<dd>
+The parser position advances only on successful token match </dd>
+<dd>
+On error, the parser position remains unchanged</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Always check the return value's type if you need to handle parsing errors</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8h.html#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="parser_8h.html#ab4f10f4ace5bea57b54d84c5088d349e" title="Advances the parser to the next token.">p_advance()</a>, <a class="el" href="parser_8h.html#a9a2a8ba5bea0c6ee41058bf6f8eb6178" title="Report a parser error with detailed location info.">parser_error()</a>, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921" title="Enumeration of all possible token types recognized by the lexer.">TokenType</a> </dd></dl>
 
 </div>
 </div>
@@ -238,14 +287,22 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Returns the current token the parser is looking at. </p>
+<p>Gets the current token without advancing the parser position. </p>
+<p>Returns the current token the parser is looking at.</p>
+<p>This function returns the token at the current parser position without modifying the parser state. It's the most frequently used function for examining the current token during parsing.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">psr</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The current token. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Current token, or an EOF token if at the end of the token stream</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is safe to call even when at the end of the token stream </dd>
+<dd>
+The returned token contains all token information: type, value, position, etc. </dd>
+<dd>
+Does not modify parser state - can be called multiple times safely</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8h.html#ab4f10f4ace5bea57b54d84c5088d349e" title="Advances the parser to the next token.">p_advance()</a>, <a class="el" href="parser_8h.html#a12fe3f2a756479a093d29f08946c57d7" title="Peeks at a token at a given offset from the current position.">p_peek()</a>, <a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> </dd></dl>
 
 </div>
 </div>
@@ -264,14 +321,22 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Checks if the parser has more tokens to process. </p>
+<p>Checks if there are more tokens available for parsing. </p>
+<p>Checks if the parser has more tokens to process.</p>
+<p>This function determines whether the parser has reached the end of the token stream. It's used throughout the parser to control parsing loops and prevent buffer overruns when accessing tokens.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">psr</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>true if more tokens are available, false otherwise. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true if there are more tokens to process (and current token is not EOF), false if at end of stream or current token is EOF</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function performs two checks:<ol type="1">
+<li>Position is within the token array bounds</li>
+<li>Current token is not TOK_EOF (which marks end of input)</li>
+</ol>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8h.html#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="parser_8h.html#ab4f10f4ace5bea57b54d84c5088d349e" title="Advances the parser to the next token.">p_advance()</a> </dd></dl>
 
 </div>
 </div>
@@ -294,15 +359,24 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Peeks at a token at a given offset from the current position. </p>
+<p>Peeks at a token at the specified offset from current position. </p>
+<p>Peeks at a token at a given offset from the current position.</p>
+<p>This function allows looking ahead in the token stream without advancing the current position. It's useful for making parsing decisions based on upcoming tokens (lookahead parsing).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">psr</td><td><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a> pointer. </td></tr>
-    <tr><td class="paramname">offset</td><td>Offset from current token. </td></tr>
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">offset</td><td>Number of positions ahead to look (0 = current, 1 = next, etc.)</td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The token at the given offset. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> at the specified offset, or an EOF token if the offset goes beyond the end of the token stream</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Common usage patterns:<ul>
+<li><span class="tt">p_peek(parser, 0)</span> is equivalent to <span class="tt">p_current(parser)</span></li>
+<li><span class="tt">p_peek(parser, 1)</span> looks at the next token</li>
+<li>Safe to use with any offset; returns EOF token for out-of-bounds access</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8h.html#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a>, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921aee5e9bd304d0b8dba470b61e1643dcd8">TOK_EOF</a> </dd></dl>
 
 </div>
 </div>

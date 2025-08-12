@@ -126,13 +126,13 @@ This graph shows which files directly or indirectly include this file:</div>
 <area shape="rect" title="Recursive descent and Pratt parser for the Zura language." alt="" coords="371,5,503,30"/>
 <area shape="rect" href="run_8c.html" title="Implements the main build run logic: reading source, lexing, parsing, error reporting,..." alt="" coords="5,78,117,103"/>
 <area shape="poly" title=" " alt="" coords="360,36,117,81,116,76,359,31"/>
-<area shape="rect" href="parser_2expr_8c.html" title=" " alt="" coords="141,78,261,103"/>
+<area shape="rect" href="parser_2expr_8c.html" title="Expression parsing implementation for the programming language compiler." alt="" coords="141,78,261,103"/>
 <area shape="poly" title=" " alt="" coords="384,37,241,80,239,75,383,32"/>
-<area shape="rect" href="parser_8c.html" title=" " alt="" coords="286,78,418,103"/>
+<area shape="rect" href="parser_8c.html" title="Implementation of the parser module for the programming language compiler." alt="" coords="286,78,418,103"/>
 <area shape="poly" title=" " alt="" coords="413,42,367,80,364,76,410,38"/>
-<area shape="rect" href="parser__utils_8c.html" title=" " alt="" coords="442,78,605,103"/>
+<area shape="rect" href="parser__utils_8c.html" title="Utility functions for the parser module." alt="" coords="442,78,605,103"/>
 <area shape="poly" title=" " alt="" coords="465,38,511,76,508,80,461,42"/>
-<area shape="rect" href="parser_2stmt_8c.html" title=" " alt="" coords="629,78,749,103"/>
+<area shape="rect" href="parser_2stmt_8c.html" title="Statement parsing implementation for the programming language compiler." alt="" coords="629,78,749,103"/>
 <area shape="poly" title=" " alt="" coords="494,32,648,75,647,80,492,37"/>
 <area shape="rect" href="parser_2type_8c.html" title=" " alt="" coords="773,78,893,103"/>
 <area shape="poly" title=" " alt="" coords="518,31,773,76,772,81,517,36"/>
@@ -281,7 +281,7 @@ Functions</h2></td></tr>
 <li>Parsing types including pointers and arrays.</li>
 <li>Error reporting with detailed location info.</li>
 </ul>
-<dl class="section author"><dt>Author</dt><dd>YourName </dd></dl>
+<dl class="section author"><dt>Author</dt><dd>Connor Harris </dd></dl>
 <dl class="section date"><dt>Date</dt><dd>2025 </dd></dl>
 </div><a name="doc-define-members" id="doc-define-members"></a><h2 id="header-doc-define-members" class="groupheader">Macro Definition Documentation</h2>
 <a id="ace48720acc4b922f947e0d57df9b3f36" name="ace48720acc4b922f947e0d57df9b3f36"></a>
@@ -299,7 +299,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">((int)<a class="code hl_function" href="#a7fbcabd9ce88ca44946533a7aaaa68a4">p_current</a>(parser).<a class="code hl_variable" href="structToken.html#a92efe240d733a46c7065c768735f9c02">length</a>)</div>
-<div class="ttc" id="aparser_8h_html_a7fbcabd9ce88ca44946533a7aaaa68a4"><div class="ttname"><a href="#a7fbcabd9ce88ca44946533a7aaaa68a4">p_current</a></div><div class="ttdeci">Token p_current(Parser *psr)</div><div class="ttdoc">Returns the current token the parser is looking at.</div><div class="ttdef"><b>Definition</b> parser_utils.c:16</div></div>
+<div class="ttc" id="aparser_8h_html_a7fbcabd9ce88ca44946533a7aaaa68a4"><div class="ttname"><a href="#a7fbcabd9ce88ca44946533a7aaaa68a4">p_current</a></div><div class="ttdeci">Token p_current(Parser *psr)</div><div class="ttdoc">Returns the current token the parser is looking at.</div><div class="ttdef"><b>Definition</b> parser_utils.c:94</div></div>
 <div class="ttc" id="astructToken_html_a92efe240d733a46c7065c768735f9c02"><div class="ttname"><a href="structToken.html#a92efe240d733a46c7065c768735f9c02">Token::length</a></div><div class="ttdeci">int length</div><div class="ttdef"><b>Definition</b> lexer.h:120</div></div>
 </div><!-- fragment -->
 <p>Get the length of the current token's lexeme. </p>
@@ -452,7 +452,26 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed array expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed array expression node.</dd></dl>
+<p>Parses an array literal expression.</p>
+<p>This function handles array literal syntax with square brackets containing a comma-separated list of expressions: <span class="tt">[expr1, expr2, expr3, ...]</span>. Empty arrays are allowed.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created array expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Array literals can contain any number of expressions (including zero) </dd>
+<dd>
+Elements are separated by commas with optional trailing comma support </dd>
+<dd>
+Each element can be any valid expression (literals, identifiers, function calls, etc.) </dd>
+<dd>
+Memory for the element array is managed using growable arrays </dd>
+<dd>
+Empty arrays are valid: <span class="tt">[]</span></dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a28bbedff4d2051636a3b72f4e893c0dd">create_array_expr()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="structGrowableArray.html" title="Growable array backed by an arena allocator.">GrowableArray</a> </dd></dl>
 
 </div>
 </div>
@@ -515,7 +534,26 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed assignment expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed assignment expression node.</dd></dl>
+<p>Parses an assignment expression.</p>
+<p>This function handles assignment operations where a value is assigned to a variable or other assignable expression (lvalue). The left operand must be a valid assignment target.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left-hand side expression being assigned to (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context (unused in this function)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created assignment expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Assignment is right-associative with low precedence </dd>
+<dd>
+The left operand should be an lvalue (identifier, member access, index) </dd>
+<dd>
+The right operand is parsed with BP_ASSIGN precedence for right-associativity </dd>
+<dd>
+Validation of assignment targets is typically done during semantic analysis</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a00cc73883336df2dfb1e4e4b471d288f">create_assignment_expr()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="#a9a2a8ba5bea0c6ee41058bf6f8eb6178" title="Report a parser error with detailed location info.">parser_error()</a> </dd></dl>
 
 </div>
 </div>
@@ -552,7 +590,28 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Parses a binary expression.</p>
+<p>This function handles all binary infix operators including arithmetic (+, -, *, /), comparison (==, !=, &lt;, &gt;, &lt;=, &gt;=), logical (&amp;&amp;, ||), and bitwise (&amp;, |, ^) operators. It's called as part of the left denotation (led) process in the Pratt parser.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left operand expression (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context for precedence handling</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created binary expression AST node</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is part of the Pratt parser's led (left denotation) mechanism </dd>
+<dd>
+The left operand is already parsed by the time this function is called </dd>
+<dd>
+The right operand is parsed with the current binding power to handle precedence </dd>
+<dd>
+Operator associativity is handled by the binding power passed to parse_expr </dd>
+<dd>
+Uses a lookup table to map token types to binary operator types</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a7147d252c953b63df28b15dabc8ea285">create_binary_expr()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="ast_8h.html#a751965739ae765593a89b5fd608d480c">BinaryOp</a>, <a class="el" href="#afda66df955be06c6d47c751fc63ebc0e" title="Binding power (precedence) levels for expression parsing.">BindingPower</a> </dd></dl>
 
 </div>
 </div>
@@ -578,7 +637,23 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles block statements with the syntax: <span class="tt">{ statement1; statement2; ... }</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the block statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Empty blocks are allowed and create a valid block statement with 0 statements </dd>
+<dd>
+Each statement in the block is parsed recursively using <a class="el" href="parser_8c.html#aad4d5835f66e6e7e08a1358b18152665" title="Parses a single statement.">parse_stmt()</a> </dd>
+<dd>
+Handles memory allocation for the statement array using growable arrays </dd>
+<dd>
+Continues parsing on individual statement failures (for error recovery)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8c.html#aad4d5835f66e6e7e08a1358b18152665" title="Parses a single statement.">parse_stmt()</a>, <a class="el" href="ast_8h.html#a4b6dd8ee39bf3322ff5b72a72043b952">create_block_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -609,7 +684,28 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Parses a break or continue statement.</p>
+<p>Handles loop control statements with the syntax:</p><ul>
+<li><span class="tt">break;</span> - Exit the current loop</li>
+<li><span class="tt">continue;</span> - Skip to the next iteration of the current loop</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">is_continue</td><td>Whether this is a continue (true) or break (false) statement</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the break/continue statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Both statements require semicolon terminators </dd>
+<dd>
+These statements are only valid within loop contexts (enforced at semantic analysis) </dd>
+<dd>
+Break exits the innermost enclosing loop </dd>
+<dd>
+Continue skips to the next iteration of the innermost enclosing loop</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a78d2104b91bf39995ecd1116aa617391">create_break_continue_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -646,7 +742,28 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed call expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed call expression node.</dd></dl>
+<p>Parses a function call expression.</p>
+<p>This function handles function call syntax where the left operand is the function to call and the arguments are provided in parentheses. It supports zero or more arguments separated by commas.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The function expression to call (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context (unused in this function)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created function call expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Function calls have very high precedence (BP_CALL) </dd>
+<dd>
+Arguments are stored in a growable array and can be of any expression type </dd>
+<dd>
+Empty argument lists are allowed: <span class="tt">function()</span> </dd>
+<dd>
+Arguments are separated by commas with optional trailing comma handling </dd>
+<dd>
+The function being called (left operand) can be any expression (identifier, member access, etc.)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#ae0ffb62e012dd1c9f61cc84d939186dd">create_call_expr()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="structGrowableArray.html" title="Growable array backed by an arena allocator.">GrowableArray</a> </dd></dl>
 
 </div>
 </div>
@@ -677,7 +794,29 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles multiple forms of constant declarations:</p><ul>
+<li><span class="tt">const name = value;</span> - <a class="el" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a> inferred from value</li>
+<li><span class="tt">const name: <a class="el" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a> = value;</span> - Explicit type annotation</li>
+<li><span class="tt">const name = fn ...</span> - Function declaration</li>
+<li><span class="tt">const name = struct ...</span> - Struct declaration <br  />
+</li>
+<li><span class="tt">const name = enum ...</span> - Enum declaration</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">is_public</td><td>Whether this declaration has public visibility</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the appropriate declaration statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>For simple constants, creates a variable declaration with immutable flag </dd>
+<dd>
+For complex types (functions, structs, enums), delegates to specialized parsers </dd>
+<dd>
+If no type is specified, it defaults to the type of the value</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_2stmt_8c.html#a1d805e55bb21e6bc022ed7a418445cbe" title="Parses a function declaration statement.">fn_stmt()</a>, <a class="el" href="parser_2stmt_8c.html#a0b1d180c582c2a00245cc9c146764c16" title="Parses a structure declaration statement.">struct_stmt()</a>, <a class="el" href="parser_2stmt_8c.html#ae6d0cb28037eca83f6e6326afee5e4c7" title="Parses an enumeration declaration statement.">enum_stmt()</a>, <a class="el" href="ast_8h.html#a4cda058317dc36ea7f21ddb85a0bd142">create_var_decl_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -714,7 +853,24 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Parses an enum declaration statement.</p>
+<p>Handles enum declarations with the syntax: <span class="tt">enum { member1, member2, member3, ... };</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">name</td><td>Enum name (already parsed by caller) </td></tr>
+    <tr><td class="paramname">is_public</td><td>Whether this enum has public visibility</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the enum declaration AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Enum members are identifiers separated by commas </dd>
+<dd>
+Trailing commas are allowed but not required </dd>
+<dd>
+Requires a semicolon terminator after the closing brace</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a8d0892096b8ad36acb26511899af8ab9">create_enum_decl_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -740,7 +896,19 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>An expression statement consists of any expression followed by a semicolon. This is used for statements that evaluate an expression for its side effects, such as function calls or assignment expressions.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created expression statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Captures line and column information at the start of parsing </dd>
+<dd>
+Requires a semicolon terminator</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8c.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression using the Pratt parsing algorithm.">parse_expr()</a>, <a class="el" href="ast_8h.html#a6f4fb0b4c5f6ece63493dfaa38ffa49f">create_expr_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -777,7 +945,25 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles function declarations with the syntax: <span class="tt">fn(param1: Type1, param2: Type2, ...) ReturnType { body }</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">name</td><td>Function name (already parsed by caller) </td></tr>
+    <tr><td class="paramname">is_public</td><td>Whether this function has public visibility</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the function declaration AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Function parameters are stored as parallel arrays of names and types </dd>
+<dd>
+Return type is required and parsed after the parameter list </dd>
+<dd>
+Function body must be a block statement </dd>
+<dd>
+Memory for parameter arrays is allocated using the arena allocator</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8c.html#a16d4d98cf3fc80e10331bcd1d8b77e26" title="Parses a type annotation.">parse_type()</a>, <a class="el" href="parser_2stmt_8c.html#a398fc7e43b145f2332fbb0711e59b471" title="Parses a block statement.">block_stmt()</a>, <a class="el" href="ast_8h.html#a7a80f1f818e59af30946fb78bccbdc08">create_func_decl_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -814,7 +1000,26 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles for loops with the syntax: </p><div class="fragment"><div class="line">loop [i: <span class="keywordtype">int</span> = 0, j: <span class="keywordtype">int</span> = 1](condition) { ... }</div>
+<div class="line">loop [i: <span class="keywordtype">int</span> = 0, j: <span class="keywordtype">int</span> = 1](condition) : (optional_condition) { ... }</div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">line</td><td>Line number where the loop statement starts </td></tr>
+    <tr><td class="paramname">col</td><td>Column number where the loop statement starts</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the for loop statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Supports multiple initializer variables separated by commas </dd>
+<dd>
+Main condition is required and parenthesized </dd>
+<dd>
+Optional secondary condition can be provided after a colon </dd>
+<dd>
+Loop body must be a block statement</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_2stmt_8c.html#a5284c9cf5b5109eba774765169161808" title="Parses a loop initializer declaration.">loop_init()</a>, <a class="el" href="parser_8c.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression using the Pratt parsing algorithm.">parse_expr()</a>, <a class="el" href="parser_2stmt_8c.html#a398fc7e43b145f2332fbb0711e59b471" title="Parses a block statement.">block_stmt()</a>, <a class="el" href="ast_8h.html#ac3fbdea59dc3076b3651d6b7aa7b3911">create_for_loop_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -840,7 +1045,31 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Binding power enum value. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Binding power enum value.</dd></dl>
+<p>Gets the binding power (precedence) of a token type.</p>
+<p>This function is crucial for the Pratt parser implementation. It returns the binding power (precedence level) for different operators, which determines the order of operations during expression parsing.</p>
+<p>Higher binding power values indicate higher precedence operators.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">kind</td><td>The token type to get binding power for</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="#afda66df955be06c6d47c751fc63ebc0e" title="Binding power (precedence) levels for expression parsing.">BindingPower</a> enumeration value representing the precedence level Returns BP_NONE for tokens that don't have binding power</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Precedence levels (highest to lowest):<ul>
+<li>BP_CALL: Function calls, member access, indexing</li>
+<li>BP_POSTFIX: Postfix increment/decrement</li>
+<li>BP_PRODUCT: Multiplication, division</li>
+<li>BP_SUM: Addition, subtraction</li>
+<li>BP_RELATIONAL: Comparison operators</li>
+<li>BP_EQUALITY: Equality and inequality</li>
+<li>BP_BITWISE_AND, BP_BITWISE_XOR, BP_BITWISE_OR: Bitwise operations</li>
+<li>BP_LOGICAL_AND, BP_LOGICAL_OR: Logical operations</li>
+<li>BP_TERNARY: Ternary conditional operator</li>
+<li>BP_ASSIGN: Assignment operators</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#afda66df955be06c6d47c751fc63ebc0e" title="Binding power (precedence) levels for expression parsing.">BindingPower</a>, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921" title="Enumeration of all possible token types recognized by the lexer.">TokenType</a> </dd></dl>
 
 </div>
 </div>
@@ -866,7 +1095,27 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Pointer to the token's string value. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the token's string value.</dd></dl>
+<p>Retrieves the name string from the current token (for identifiers).</p>
+<p>This function creates a null-terminated string copy of the current token's value using the arena allocator. It's primarily used for extracting identifier names, string literals, and other textual token content that needs to be preserved in the AST.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to a null-terminated string containing the current token's value, allocated using the parser's arena allocator</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The returned string is allocated using <a class="el" href="memory_8c.html#a4a743cb5b88ba3486983a0dad9c46932" title="Allocates memory from the arena allocator with automatic buffer growth.">arena_alloc()</a> for automatic memory management </dd>
+<dd>
+The string is properly null-terminated for safe use with standard string functions </dd>
+<dd>
+The original token value is copied, so the returned string is independent </dd>
+<dd>
+Memory is automatically managed by the arena - no manual deallocation needed</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>This function assumes the current token has a valid value field </dd>
+<dd>
+Should only be called when you know the current token contains string data</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a532b199d177d1142acd910987d972af5" title="Get the value string of the current token.">CURRENT_TOKEN_VALUE()</a>, <a class="el" href="#ace48720acc4b922f947e0d57df9b3f36" title="Get the length of the current token&#39;s lexeme.">CURRENT_TOKEN_LENGTH()</a>, <a class="el" href="memory_8c.html#a4a743cb5b88ba3486983a0dad9c46932" title="Allocates memory from the arena allocator with automatic buffer growth.">arena_alloc()</a> </dd></dl>
 
 </div>
 </div>
@@ -892,7 +1141,24 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Parses a grouped expression (parentheses).</p>
+<p>This function handles expressions enclosed in parentheses, which are used to override the default operator precedence. The parentheses themselves don't create a separate AST node; they just influence parsing order.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the expression AST node inside the parentheses, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Parentheses don't create additional AST nodes - they only affect parsing order </dd>
+<dd>
+The inner expression is parsed with BP_LOWEST to allow any expression inside </dd>
+<dd>
+Both opening and closing parentheses are consumed and required </dd>
+<dd>
+Nested parentheses are handled naturally through recursive expression parsing</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#aa7af0b51959be1abcc6af1869796e4a2">create_grouping_expr()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="#a8ae2c122d273b1681a60ee873efe2a4f" title="Consume a token of the specified type, or report an error.">p_consume()</a> </dd></dl>
 
 </div>
 </div>
@@ -918,7 +1184,29 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Parses an if statement.</p>
+<p>Handles complex conditional statements with multiple branches: </p><div class="fragment"><div class="line"><span class="keywordflow">if</span> (condition1) { ... }</div>
+<div class="line">elif (condition2) { ... }</div>
+<div class="line">elif (condition3) { ... }</div>
+<div class="line"><span class="keywordflow">else</span> { ... }</div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the if statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Supports multiple elif clauses </dd>
+<dd>
+Else clause is optional </dd>
+<dd>
+Each condition must be parenthesized </dd>
+<dd>
+Each branch must be a block statement </dd>
+<dd>
+Elif statements are collected in an array rather than nested recursively</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="#a398fc7e43b145f2332fbb0711e59b471" title="Parses a block statement.">block_stmt()</a>, <a class="el" href="ast_8h.html#abd68c7483a6120a06b4b408eadd4965e">create_if_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -955,7 +1243,21 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles infinite loops with the syntax: <span class="tt">loop { ... }</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">line</td><td>Line number where the loop statement starts </td></tr>
+    <tr><td class="paramname">col</td><td>Column number where the loop statement starts</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the infinite loop statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The loop body must be a block statement </dd>
+<dd>
+This creates a loop that runs indefinitely unless broken by break/return</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_2stmt_8c.html#a398fc7e43b145f2332fbb0711e59b471" title="Parses a block statement.">block_stmt()</a>, <a class="el" href="ast_8h.html#a887c557131cd93997884c28885168ee7">create_infinite_loop_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -992,7 +1294,28 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Pratt parser function for left denotation (infix/postfix parsing).</p>
+<p>This is part of the Pratt parser implementation. The "led" function handles tokens that can appear after an expression has been parsed (binary operators and postfix operators).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left operand expression (already parsed) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the parsed expression AST node incorporating the left operand, or the original left expression if no valid LED is found</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Handles:<ul>
+<li>Binary arithmetic and logical operators: +, -, *, /, ==, !=, etc.</li>
+<li>Function calls: function(args)</li>
+<li>Assignment: variable = value</li>
+<li>Member access: object.member</li>
+<li>Postfix operators: variable++, variable&ndash;</li>
+<li>Array indexing: array[index]</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a39ffb04f9526d5ee88fa488db078cbc1" title="Pratt parser function for null denotation (prefix parsing).">nud()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="#aae76f2e2da0e519b78628915240200dd" title="Parses a binary expression.">binary()</a>, <a class="el" href="#a77a8786dfb25898d7c4ffbc0ca8eafcf" title="Parses a function call expression.">call_expr()</a>, <a class="el" href="#a683f4d2d2d297649d7b0d2d3dc3bad8e" title="Parses an assignment expression.">assign_expr()</a>, <a class="el" href="#a6ec4a015146e7598655f260ecb559a84" title="Parses a prefix expression (member access, postfix operators, indexing).">prefix_expr()</a> </dd></dl>
 
 </div>
 </div>
@@ -1018,7 +1341,27 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Parses a loop statement.</p>
+<p>Dispatcher function that determines the type of loop based on the following tokens and delegates to the appropriate specialized parser:</p>
+<ul>
+<li><span class="tt">loop { ... }</span> → infinite loop</li>
+<li><span class="tt">loop [initializers](...) { ... }</span> → for loop <br  />
+</li>
+<li><span class="tt">loop (condition) { ... }</span> → while loop</li>
+<li><span class="tt">loop (condition) : (optional_condition) { ... }</span> → while loop with secondary condition</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the appropriate loop statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The specific loop type is determined by the token following 'loop' </dd>
+<dd>
+All loop bodies must be block statements</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a733ecd3287cefe3f8128a70d3db2e0fd" title="Parses an infinite loop statement.">infinite_loop_stmt()</a>, <a class="el" href="#a3453df19c4bcb4b00371410abf3962e0" title="Parses a for loop statement.">for_loop_stmt()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="#a398fc7e43b145f2332fbb0711e59b471" title="Parses a block statement.">block_stmt()</a>, <a class="el" href="ast_8h.html#a51dd617007d1bdca9777987287afc847">create_loop_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -1044,7 +1387,24 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Pratt parser function for null denotation (prefix parsing).</p>
+<p>This is part of the Pratt parser implementation. The "nud" function handles tokens that can appear at the beginning of an expression (prefix operators and primary expressions like literals and identifiers).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the parsed expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Handles:<ul>
+<li>Primary expressions: numbers, strings, identifiers</li>
+<li>Prefix unary operators: -, +, !, ++, &ndash;</li>
+<li>Grouped expressions: (expression)</li>
+<li>Array literals: [expression, ...]</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ad715ebb051a669c00dc55cdcd31bed2d" title="Pratt parser function for left denotation (infix/postfix parsing).">led()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="#a481c538e520948ab138a8c5b0a8324c6" title="Parses a primary expression (literal, identifier).">primary()</a>, <a class="el" href="#a517fa2b63adec675d032991a3a712572" title="Parses a unary expression.">unary()</a>, <a class="el" href="#a1ecf965f76c333d977e1ffafbef4174e" title="Parses a grouped expression (parentheses).">grouping()</a>, <a class="el" href="#ade768344c2d92f84219dfbddb9d37987" title="Parses an array literal expression.">array_expr()</a> </dd></dl>
 
 </div>
 </div>
@@ -1070,7 +1430,23 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The token advanced past. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The token advanced past.</dd></dl>
+<p>Advances the parser to the next token.</p>
+<p>This function moves the parser position forward by one token and returns the token that was current before advancing. This is the primary mechanism for consuming tokens during parsing.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The token that was current before advancing, or EOF token if already at the end of the token stream</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The parser position is incremented only if there are tokens available </dd>
+<dd>
+Safe to call at end of stream - returns EOF token and doesn't advance </dd>
+<dd>
+This is a mutating operation that changes parser state</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>After calling this function, subsequent calls to <a class="el" href="#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a> will return the next token in the stream</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="#ad438bd01c47ce6a0824f58f003cb81e5" title="Checks if the parser has more tokens to process.">p_has_tokens()</a>, <a class="el" href="#a8ae2c122d273b1681a60ee873efe2a4f" title="Consume a token of the specified type, or report an error.">p_consume()</a> </dd></dl>
 
 </div>
 </div>
@@ -1107,7 +1483,27 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The consumed token. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The consumed token.</dd></dl>
+<p>Consume a token of the specified type, or report an error.</p>
+<p>This function is used when the parser expects a specific token type at the current position. If the current token matches the expected type, it advances and returns the token. If not, it reports a syntax error with the provided error message.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">type</td><td>The expected token type that should be at the current position </td></tr>
+    <tr><td class="paramname">error_msg</td><td>Error message to display if the token doesn't match</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The consumed token if it matches the expected type, or an EOF token if there's a mismatch (indicating an error)</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function combines token validation and consumption in one operation </dd>
+<dd>
+Error reporting includes current line, column, and token length information </dd>
+<dd>
+The parser position advances only on successful token match </dd>
+<dd>
+On error, the parser position remains unchanged</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Always check the return value's type if you need to handle parsing errors</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="#ab4f10f4ace5bea57b54d84c5088d349e" title="Advances the parser to the next token.">p_advance()</a>, <a class="el" href="#a9a2a8ba5bea0c6ee41058bf6f8eb6178" title="Report a parser error with detailed location info.">parser_error()</a>, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921" title="Enumeration of all possible token types recognized by the lexer.">TokenType</a> </dd></dl>
 
 </div>
 </div>
@@ -1133,7 +1529,22 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The current token. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The current token.</dd></dl>
+<p>Returns the current token the parser is looking at.</p>
+<p>This function returns the token at the current parser position without modifying the parser state. It's the most frequently used function for examining the current token during parsing.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Current token, or an EOF token if at the end of the token stream</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is safe to call even when at the end of the token stream </dd>
+<dd>
+The returned token contains all token information: type, value, position, etc. </dd>
+<dd>
+Does not modify parser state - can be called multiple times safely</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#ab4f10f4ace5bea57b54d84c5088d349e" title="Advances the parser to the next token.">p_advance()</a>, <a class="el" href="#a12fe3f2a756479a093d29f08946c57d7" title="Peeks at a token at a given offset from the current position.">p_peek()</a>, <a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> </dd></dl>
 
 </div>
 </div>
@@ -1159,7 +1570,22 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>true if more tokens are available, false otherwise. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true if more tokens are available, false otherwise.</dd></dl>
+<p>Checks if the parser has more tokens to process.</p>
+<p>This function determines whether the parser has reached the end of the token stream. It's used throughout the parser to control parsing loops and prevent buffer overruns when accessing tokens.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true if there are more tokens to process (and current token is not EOF), false if at end of stream or current token is EOF</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function performs two checks:<ol type="1">
+<li>Position is within the token array bounds</li>
+<li>Current token is not TOK_EOF (which marks end of input)</li>
+</ol>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="#ab4f10f4ace5bea57b54d84c5088d349e" title="Advances the parser to the next token.">p_advance()</a> </dd></dl>
 
 </div>
 </div>
@@ -1190,7 +1616,24 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>The token at the given offset. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>The token at the given offset.</dd></dl>
+<p>Peeks at a token at a given offset from the current position.</p>
+<p>This function allows looking ahead in the token stream without advancing the current position. It's useful for making parsing decisions based on upcoming tokens (lookahead parsing).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">offset</td><td>Number of positions ahead to look (0 = current, 1 = next, etc.)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd><a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a> at the specified offset, or an EOF token if the offset goes beyond the end of the token stream</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Common usage patterns:<ul>
+<li><span class="tt">p_peek(parser, 0)</span> is equivalent to <span class="tt">p_current(parser)</span></li>
+<li><span class="tt">p_peek(parser, 1)</span> looks at the next token</li>
+<li>Safe to use with any offset; returns EOF token for out-of-bounds access</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a7fbcabd9ce88ca44946533a7aaaa68a4" title="Returns the current token the parser is looking at.">p_current()</a>, <a class="el" href="structToken.html" title="Represents a single token extracted by the lexer.">Token</a>, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921aee5e9bd304d0b8dba470b61e1643dcd8">TOK_EOF</a> </dd></dl>
 
 </div>
 </div>
@@ -1221,7 +1664,21 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Pointer to the root AST statement node (program). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the root AST statement node (program).</dd></dl>
+<p>Parses a full program from tokens into an AST of statements.</p>
+<p>This is the entry point for the parser. It takes a growable array of tokens and converts them into a complete program AST node containing all parsed statements.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">tks</td><td>Growable array containing all tokens from the lexer </td></tr>
+    <tr><td class="paramname">arena</td><td>Arena allocator for memory management during parsing</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the root AST node (Program node) containing all parsed statements, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The function estimates the initial capacity for statements based on token count </dd>
+<dd>
+All memory allocations use the provided arena allocator</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="structParser.html" title="Parser state holding token stream and current position.">Parser</a>, <a class="el" href="#aad4d5835f66e6e7e08a1358b18152665" title="Parses a single statement.">parse_stmt()</a>, <a class="el" href="ast_8h.html#a60c38b33bb0195508a6cd65fb541e226">create_program_node()</a> </dd></dl>
 
 </div>
 </div>
@@ -1252,7 +1709,27 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Parses an expression with a given minimum binding power.</p>
+<p>This is the core expression parsing function that implements the Pratt parser algorithm. It handles operator precedence and associativity automatically through the binding power mechanism.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">bp</td><td>Minimum binding power - only operators with higher binding power will be consumed by this call</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the parsed expression AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The algorithm works by:<ol type="1">
+<li>Getting the left expression using <a class="el" href="#a39ffb04f9526d5ee88fa488db078cbc1" title="Pratt parser function for null denotation (prefix parsing).">nud()</a></li>
+<li>While the next operator has higher binding power than bp:<ul>
+<li>Use <a class="el" href="#ad715ebb051a669c00dc55cdcd31bed2d" title="Pratt parser function for left denotation (infix/postfix parsing).">led()</a> to extend the expression with the operator</li>
+</ul>
+</li>
+<li>Return the final expression</li>
+</ol>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a39ffb04f9526d5ee88fa488db078cbc1" title="Pratt parser function for null denotation (prefix parsing).">nud()</a>, <a class="el" href="#ad715ebb051a669c00dc55cdcd31bed2d" title="Pratt parser function for left denotation (infix/postfix parsing).">led()</a>, <a class="el" href="#abd32c60384ae40c357cc28e65fd764d1" title="Gets the binding power (precedence) of a token type.">get_bp()</a>, <a class="el" href="#afda66df955be06c6d47c751fc63ebc0e" title="Binding power (precedence) levels for expression parsing.">BindingPower</a> </dd></dl>
 
 </div>
 </div>
@@ -1278,7 +1755,25 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>This function dispatches to the appropriate statement parsing function based on the current token. It also handles visibility modifiers (public/private) that can appear before certain statement types.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the parsed statement AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Handles:<ul>
+<li>Variable declarations: const, var</li>
+<li>Control flow: return, if, loop, break, continue</li>
+<li>Block statements: { ... }</li>
+<li>Print statements: print, println</li>
+<li>Expression statements: any expression followed by semicolon</li>
+<li>Visibility modifiers: public, private (applied to declarations)</li>
+</ul>
+</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#acd0470a765c07f4aa6855db5449e351a" title="Parses a constant declaration statement.">const_stmt()</a>, <a class="el" href="#a74b60c0d077f19dca00679311b5ce1d9" title="Parses a variable declaration statement.">var_stmt()</a>, <a class="el" href="#a65feab14f178a93af29954494842495c" title="Parses a return statement.">return_stmt()</a>, <a class="el" href="#a398fc7e43b145f2332fbb0711e59b471" title="Parses a block statement.">block_stmt()</a>, <a class="el" href="#a5a2c054597dd672f140bd9859e51da10" title="Parses an if statement.">if_stmt()</a>, <a class="el" href="#a116eace6cdf11c0f5a066af2e7c069b1" title="Parses a loop statement.">loop_stmt()</a>, <a class="el" href="#a5dc127de3e1e39ab9270bd87fe3733a6" title="Parses a print statement.">print_stmt()</a>, <a class="el" href="#ab63fdeaaa163c06ed9af09d86379b060" title="Parses a break or continue statement.">break_continue_stmt()</a>, <a class="el" href="#a25a630a2b0ae343cd5bd2016c545a2ac" title="Parses an expression statement.">expr_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -1304,7 +1799,25 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed type node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed type node.</dd></dl>
+<p>Parses a type expression.</p>
+<p>This function parses type expressions used in variable declarations, function parameters, return types, etc. It handles primitive types, pointer types, array types, and user-defined types.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the parsed <a class="el" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a> AST node, or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Handles:<ul>
+<li>Primitive types: int, uint, float, bool, string, void, char</li>
+<li>Pointer types: *type</li>
+<li>Array types: [size]type or []type</li>
+<li>User-defined types: identified by TOK_IDENTIFIER</li>
+</ul>
+</dd></dl>
+<dl class="section warning"><dt>Warning</dt><dd>Prints error message to stderr for unexpected tokens</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a4b598fef0adda01f89712c89e337c315" title="Type parsing null denotation function.">tnud()</a>, <a class="el" href="#ac9cffb5ed1ef3cd27b0dbcd511044919" title="Type parsing left denotation function.">tled()</a>, <a class="el" href="lexer_8h.html#aa520fbf142ba1e7e659590c07da31921" title="Enumeration of all possible token types recognized by the lexer.">TokenType</a> </dd></dl>
 
 </div>
 </div>
@@ -1361,10 +1874,26 @@ Functions</h2></td></tr>
     <tr><td class="paramname">msg</td><td>Error message. </td></tr>
     <tr><td class="paramname">line</td><td>Line number of error. </td></tr>
     <tr><td class="paramname">col</td><td>Column number of error. </td></tr>
-    <tr><td class="paramname">tk_length</td><td>Length of the token causing the error. </td></tr>
+    <tr><td class="paramname">tk_length</td><td>Length of the token causing the error.</td></tr>
   </table>
   </dd>
 </dl>
+<p>Report a parser error with detailed location info.</p>
+<p>Creates and adds an error to the global error system with information about where the error occurred in the source code, including line and column information.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">psr</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">error_type</td><td>String describing the type of error (e.g., "SyntaxError") </td></tr>
+    <tr><td class="paramname">file</td><td>Path to the source file where the error occurred </td></tr>
+    <tr><td class="paramname">msg</td><td>Detailed error message describing what went wrong </td></tr>
+    <tr><td class="paramname">line</td><td>Line number where the error occurred (1-based) </td></tr>
+    <tr><td class="paramname">col</td><td>Column number where the error occurred (1-based) </td></tr>
+    <tr><td class="paramname">tk_length</td><td>Length of the token that caused the error</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section note"><dt>Note</dt><dd>This function uses the arena allocator to duplicate the line text </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="structErrorInformation.html" title="Stores detailed information about an error.">ErrorInformation</a>, <a class="el" href="error_8c.html#a4f3d659181bf27a69270daa8d5ab0658" title="Adds an error to the internal error list.">error_add()</a> </dd></dl>
 
 </div>
 </div>
@@ -1427,7 +1956,33 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed prefix expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed prefix expression node.</dd></dl>
+<p>Parses a prefix expression (member access, postfix operators, indexing).</p>
+<p>This function handles expressions that operate on a left operand:</p><ul>
+<li>Member access: <span class="tt">object.member</span></li>
+<li>Array indexing: <span class="tt">array[index]</span></li>
+<li>Postfix increment/decrement: <span class="tt">variable++</span>, <span class="tt">variable--</span></li>
+</ul>
+<p>Despite the name "prefix", this function handles postfix and infix operations that take a left operand. It's part of the led (left denotation) mechanism.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">left</td><td>The left operand expression (object, array, or variable) </td></tr>
+    <tr><td class="paramname">bp</td><td>The current binding power context (unused in this function)</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the appropriate expression AST node (member, index, or unary), or NULL if parsing fails</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Despite the name, this handles postfix and member access operations </dd>
+<dd>
+Member access requires an identifier after the dot </dd>
+<dd>
+Array indexing can use any expression as the index </dd>
+<dd>
+Postfix increment/decrement create unary expressions with special operators </dd>
+<dd>
+All operations have high precedence (BP_CALL level)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#ae91465355deb23d350db38bad7ccf8bf">create_index_expr()</a>, <a class="el" href="ast_8h.html#a9b43fac7667a29730620575fd4ecde03">create_member_expr()</a>, <a class="el" href="ast_8h.html#ae5611431d21a9c94961e338eac2a5543">create_unary_expr()</a> </dd></dl>
 
 </div>
 </div>
@@ -1453,7 +2008,28 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Parses a primary expression (literal, identifier).</p>
+<p>This function handles the most basic expressions that don't have any operators: integer literals, floating-point literals, string literals, character literals, boolean literals, and identifiers. It uses a lookup table to map token types to literal types and handles the appropriate conversion and memory allocation for each type.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created literal or identifier expression AST node, or NULL if the current token is not a valid primary expression</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Primary expressions are the "atoms" of the expression language </dd>
+<dd>
+Memory for literal values is allocated using the arena allocator </dd>
+<dd>
+String literals are copied to ensure they remain valid after parsing </dd>
+<dd>
+Identifiers are handled separately and create identifier expression nodes </dd>
+<dd>
+Numeric conversions use standard library functions (strtoll, strtod) </dd>
+<dd>
+Boolean literals are converted from "true"/"false" string comparisons</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#a3fe1e61e4cbaa650ee0303706f5c730a">create_literal_expr()</a>, <a class="el" href="ast_8h.html#aa428edcfee9f652c053e31e0135acbd6">create_identifier_expr()</a>, <a class="el" href="#a8779384c9ac7a618c2b851cb11d1598c" title="Retrieves the name string from the current token (for identifiers).">get_name()</a> </dd></dl>
 
 </div>
 </div>
@@ -1484,7 +2060,28 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Parses a print statement.</p>
+<p>Handles output statements with the syntax:</p><ul>
+<li><span class="tt">print(expr1, expr2, ...);</span></li>
+<li><span class="tt">println(expr1, expr2, ...);</span></li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">ln</td><td>Whether this is a println (true) or print (false) statement</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the print statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Supports multiple expressions separated by commas </dd>
+<dd>
+println automatically adds a newline after output </dd>
+<dd>
+Empty argument lists are allowed: <span class="tt">print();</span> </dd>
+<dd>
+All expressions are evaluated and their values are printed</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="ast_8h.html#a2ad8995fdc7934f9a74a094ab9c9aee5">create_print_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -1510,7 +2107,22 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles return statements with optional return values:</p><ul>
+<li><span class="tt">return;</span> - Return with no value (void return)</li>
+<li><span class="tt">return expression;</span> - Return with a value</li>
+</ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the return statement AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>The return value is optional; if not present, creates a void return </dd>
+<dd>
+Requires a semicolon terminator</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8c.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression using the Pratt parsing algorithm.">parse_expr()</a>, <a class="el" href="ast_8h.html#a764e77cfafaf89f6b6332e9818906749">create_return_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -1547,7 +2159,33 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Parses a struct declaration statement.</p>
+<p>Handles struct declarations with public/private member visibility: </p><div class="fragment"><div class="line"><span class="keyword">struct </span>{</div>
+<div class="line">  <span class="keyword">public</span>:</div>
+<div class="line">    field1: Type1,</div>
+<div class="line">    method1 = fn() <a class="code hl_typedef" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a> { ... }</div>
+<div class="line">  <span class="keyword">private</span>:</div>
+<div class="line">    field2: Type2,</div>
+<div class="line">};</div>
+<div class="ttc" id="aast_8h_html_ab4c2d65407b5483fbc6d02144073c2f3"><div class="ttname"><a href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a></div><div class="ttdeci">AstNode Type</div><div class="ttdef"><b>Definition</b> ast.h:337</div></div>
+</div><!-- fragment --><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">name</td><td>Struct name (already parsed by caller) </td></tr>
+    <tr><td class="paramname">is_public</td><td>Whether this struct has public visibility</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the struct declaration AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Members are separated into public and private arrays </dd>
+<dd>
+Supports both data fields (name: <a class="el" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a>) and methods (name = fn ...) </dd>
+<dd>
+Visibility defaults to public unless explicitly changed </dd>
+<dd>
+Visibility changes affect all subsequent members until changed again</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="#a1d805e55bb21e6bc022ed7a418445cbe" title="Parses a function declaration statement.">fn_stmt()</a>, <a class="el" href="ast_8h.html#a84db041dc07a72b792eca01dd457dbf2">create_field_decl_stmt()</a>, <a class="el" href="ast_8h.html#ad98975f9f8c56eda7704eb4b3d13997a">create_struct_decl_stmt()</a> </dd></dl>
 
 </div>
 </div>
@@ -1667,7 +2305,24 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed expression node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed expression node.</dd></dl>
+<p>Parses a unary expression.</p>
+<p>This function handles prefix unary operators such as negation (-), logical NOT (!), unary plus (+), and prefix increment/decrement (++, &ndash;). It uses a lookup table to map token types to unary operator types and recursively parses the operand with appropriate precedence.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the created unary expression AST node, or NULL if the current token is not a valid unary operator</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Unary expressions have higher precedence than most binary operators </dd>
+<dd>
+The operand is parsed with BP_UNARY precedence to handle operator nesting </dd>
+<dd>
+Supports both arithmetic unary operators (-, +) and logical operators (!) </dd>
+<dd>
+Prefix increment/decrement operators are handled here (postfix in prefix_expr)</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="ast_8h.html#ae5611431d21a9c94961e338eac2a5543">create_unary_expr()</a>, <a class="el" href="#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression with a given minimum binding power.">parse_expr()</a>, <a class="el" href="ast_8h.html#ac0e6f7f17047750fd114b6634912dca4">UnaryOp</a> </dd></dl>
 
 </div>
 </div>
@@ -1698,7 +2353,24 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>Parsed statement node. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>Parsed statement node.</dd></dl>
+<p>Handles variable declarations with the syntax: <span class="tt">var name: <a class="el" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a> = value;</span></p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">parser</td><td>Pointer to the parser instance </td></tr>
+    <tr><td class="paramname">is_public</td><td>Whether this variable has public visibility</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>Pointer to the variable declaration AST node, or NULL on failure</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>Variables are mutable by default (unlike constants) </dd>
+<dd>
+<a class="el" href="ast_8h.html#ab4c2d65407b5483fbc6d02144073c2f3">Type</a> annotation is required </dd>
+<dd>
+Initial value assignment is required </dd>
+<dd>
+Creates a variable declaration with is_mutable set to true</dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="parser_8c.html#a16d4d98cf3fc80e10331bcd1d8b77e26" title="Parses a type annotation.">parse_type()</a>, <a class="el" href="parser_8c.html#a2701baa126589d22ff03eb7ebbada5f5" title="Parses an expression using the Pratt parsing algorithm.">parse_expr()</a>, <a class="el" href="ast_8h.html#a4cda058317dc36ea7f21ddb85a0bd142">create_var_decl_stmt()</a> </dd></dl>
 
 </div>
 </div>

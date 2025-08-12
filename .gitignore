@@ -1,3 +1,9 @@
 build
 lux
 *.exe
+
+# Ignore Doxygen output
+docs/doxygen/
+docs/html/
+docs/latex/
+docs/xml/

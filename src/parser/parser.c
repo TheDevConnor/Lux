@@ -1,3 +1,22 @@
+/**
+ * @file parser.c
+ * @brief Implementation of the parser module for the programming language compiler
+ * 
+ * This file contains the core parsing functionality that converts a stream of tokens
+ * into an Abstract Syntax Tree (AST). The parser uses a Pratt parser approach for
+ * handling operator precedence and associativity in expressions.
+ * 
+ * The parser supports:
+ * - Statement parsing (variables, functions, control flow, etc.)
+ * - Expression parsing with proper operator precedence
+ * - Type parsing for type annotations
+ * - Error reporting with source location information
+ * 
+ * @author Connor Harris
+ * @date 2025
+ * @version 1.0
+ */
+
 #include <stdalign.h>
 #include <stdio.h>
 
@@ -6,6 +25,23 @@
 #include "../c_libs/memory/memory.h"
 #include "parser.h"
 
+/**
+ * @brief Reports a parser error with detailed location information
+ * 
+ * Creates and adds an error to the global error system with information about
+ * where the error occurred in the source code, including line and column information.
+ * 
+ * @param psr Pointer to the parser instance
+ * @param error_type String describing the type of error (e.g., "SyntaxError")
+ * @param file Path to the source file where the error occurred
+ * @param msg Detailed error message describing what went wrong
+ * @param line Line number where the error occurred (1-based)
+ * @param col Column number where the error occurred (1-based)
+ * @param tk_length Length of the token that caused the error
+ * 
+ * @note This function uses the arena allocator to duplicate the line text
+ * @see ErrorInformation, error_add()
+ */
 void parser_error(Parser *psr, const char *error_type, const char *file,
                   const char *msg, int line, int col, int tk_length) {
   // Use the same approach as the lexer to get the line text
@@ -26,6 +62,23 @@ void parser_error(Parser *psr, const char *error_type, const char *file,
   error_add(err);
 }
 
+/**
+ * @brief Main parsing function that converts tokens into an AST
+ * 
+ * This is the entry point for the parser. It takes a growable array of tokens
+ * and converts them into a complete program AST node containing all parsed statements.
+ * 
+ * @param tks Growable array containing all tokens from the lexer
+ * @param arena Arena allocator for memory management during parsing
+ * 
+ * @return Pointer to the root AST node (Program node) containing all parsed statements,
+ *         or NULL if parsing fails
+ * 
+ * @note The function estimates the initial capacity for statements based on token count
+ * @note All memory allocations use the provided arena allocator
+ * 
+ * @see Parser, parse_stmt(), create_program_node()
+ */
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
   size_t estimated_stmts = (tks->count / 4) + 10;
 
@@ -70,6 +123,34 @@ Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
                              0, 0);
 }
 
+/**
+ * @brief Gets the binding power (precedence) for a given token type
+ * 
+ * This function is crucial for the Pratt parser implementation. It returns
+ * the binding power (precedence level) for different operators, which determines
+ * the order of operations during expression parsing.
+ * 
+ * Higher binding power values indicate higher precedence operators.
+ * 
+ * @param kind The token type to get binding power for
+ * 
+ * @return BindingPower enumeration value representing the precedence level
+ *         Returns BP_NONE for tokens that don't have binding power
+ * 
+ * @note Precedence levels (highest to lowest):
+ *       - BP_CALL: Function calls, member access, indexing
+ *       - BP_POSTFIX: Postfix increment/decrement
+ *       - BP_PRODUCT: Multiplication, division
+ *       - BP_SUM: Addition, subtraction
+ *       - BP_RELATIONAL: Comparison operators
+ *       - BP_EQUALITY: Equality and inequality
+ *       - BP_BITWISE_AND, BP_BITWISE_XOR, BP_BITWISE_OR: Bitwise operations
+ *       - BP_LOGICAL_AND, BP_LOGICAL_OR: Logical operations
+ *       - BP_TERNARY: Ternary conditional operator
+ *       - BP_ASSIGN: Assignment operators
+ * 
+ * @see BindingPower, TokenType
+ */
 BindingPower get_bp(TokenType kind) {
   switch (kind) {
   // Assignment
@@ -130,6 +211,25 @@ BindingPower get_bp(TokenType kind) {
   }
 }
 
+/**
+ * @brief Null Denotation - handles prefix expressions and primary expressions
+ * 
+ * This is part of the Pratt parser implementation. The "nud" function handles
+ * tokens that can appear at the beginning of an expression (prefix operators
+ * and primary expressions like literals and identifiers).
+ * 
+ * @param parser Pointer to the parser instance
+ * 
+ * @return Pointer to the parsed expression AST node, or NULL if parsing fails
+ * 
+ * @note Handles:
+ *       - Primary expressions: numbers, strings, identifiers
+ *       - Prefix unary operators: -, +, !, ++, --
+ *       - Grouped expressions: (expression)
+ *       - Array literals: [expression, ...]
+ * 
+ * @see led(), parse_expr(), primary(), unary(), grouping(), array_expr()
+ */
 Expr *nud(Parser *parser) {
   switch (p_current(parser).type_) {
   case TOK_NUMBER:
@@ -152,6 +252,30 @@ Expr *nud(Parser *parser) {
   }
 }
 
+/**
+ * @brief Left Denotation - handles binary and postfix expressions
+ * 
+ * This is part of the Pratt parser implementation. The "led" function handles
+ * tokens that can appear after an expression has been parsed (binary operators
+ * and postfix operators).
+ * 
+ * @param parser Pointer to the parser instance
+ * @param left The left operand expression (already parsed)
+ * @param bp The current binding power context
+ * 
+ * @return Pointer to the parsed expression AST node incorporating the left operand,
+ *         or the original left expression if no valid LED is found
+ * 
+ * @note Handles:
+ *       - Binary arithmetic and logical operators: +, -, *, /, ==, !=, etc.
+ *       - Function calls: function(args)
+ *       - Assignment: variable = value
+ *       - Member access: object.member
+ *       - Postfix operators: variable++, variable--
+ *       - Array indexing: array[index]
+ * 
+ * @see nud(), parse_expr(), binary(), call_expr(), assign_expr(), prefix_expr()
+ */
 Expr *led(Parser *parser, Expr *left, BindingPower bp) {
   switch (p_current(parser).type_) {
   case TOK_PLUS:
@@ -186,6 +310,27 @@ Expr *led(Parser *parser, Expr *left, BindingPower bp) {
   }
 }
 
+/**
+ * @brief Parses an expression using the Pratt parsing algorithm
+ * 
+ * This is the core expression parsing function that implements the Pratt parser
+ * algorithm. It handles operator precedence and associativity automatically
+ * through the binding power mechanism.
+ * 
+ * @param parser Pointer to the parser instance
+ * @param bp Minimum binding power - only operators with higher binding power
+ *           will be consumed by this call
+ * 
+ * @return Pointer to the parsed expression AST node, or NULL if parsing fails
+ * 
+ * @note The algorithm works by:
+ *       1. Getting the left expression using nud()
+ *       2. While the next operator has higher binding power than bp:
+ *          - Use led() to extend the expression with the operator
+ *       3. Return the final expression
+ * 
+ * @see nud(), led(), get_bp(), BindingPower
+ */
 Expr *parse_expr(Parser *parser, BindingPower bp) {
   Expr *left = nud(parser);
 
@@ -196,9 +341,32 @@ Expr *parse_expr(Parser *parser, BindingPower bp) {
   return left;
 }
 
+/**
+ * @brief Parses a single statement
+ * 
+ * This function dispatches to the appropriate statement parsing function based
+ * on the current token. It also handles visibility modifiers (public/private)
+ * that can appear before certain statement types.
+ * 
+ * @param parser Pointer to the parser instance
+ * 
+ * @return Pointer to the parsed statement AST node, or NULL if parsing fails
+ * 
+ * @note Handles:
+ *       - Variable declarations: const, var
+ *       - Control flow: return, if, loop, break, continue
+ *       - Block statements: { ... }
+ *       - Print statements: print, println
+ *       - Expression statements: any expression followed by semicolon
+ *       - Visibility modifiers: public, private (applied to declarations)
+ * 
+ * @see const_stmt(), var_stmt(), return_stmt(), block_stmt(), if_stmt(), 
+ *      loop_stmt(), print_stmt(), break_continue_stmt(), expr_stmt()
+ */
 Stmt *parse_stmt(Parser *parser) {
   bool is_public = false;
 
+  // Handle visibility modifiers
   if (p_current(parser).type_ == TOK_PUBLIC) {
     is_public = true;
     p_advance(parser);
@@ -233,6 +401,27 @@ Stmt *parse_stmt(Parser *parser) {
   }
 }
 
+/**
+ * @brief Parses a type annotation
+ * 
+ * This function parses type expressions used in variable declarations,
+ * function parameters, return types, etc. It handles primitive types,
+ * pointer types, array types, and user-defined types.
+ * 
+ * @param parser Pointer to the parser instance
+ * 
+ * @return Pointer to the parsed Type AST node, or NULL if parsing fails
+ * 
+ * @note Handles:
+ *       - Primitive types: int, uint, float, bool, string, void, char
+ *       - Pointer types: *type
+ *       - Array types: [size]type or []type
+ *       - User-defined types: identified by TOK_IDENTIFIER
+ * 
+ * @warning Prints error message to stderr for unexpected tokens
+ * 
+ * @see tnud(), tled(), TokenType
+ */
 Type *parse_type(Parser *parser) {
   TokenType tok = p_current(parser).type_;
 

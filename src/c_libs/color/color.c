@@ -13,8 +13,8 @@
  *
  * @note The function uses platform-specific APIs and environment variables.
  *
- * @author
- * @date
+ * @author Connor Harris
+ * @date 2025
  */
 
 #include <stdio.h>

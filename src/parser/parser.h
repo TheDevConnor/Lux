@@ -12,7 +12,7 @@
  * - Parsing types including pointers and arrays.
  * - Error reporting with detailed location info.
  *
- * @author YourName
+ * @author Connor Harris
  * @date 2025
  */
 

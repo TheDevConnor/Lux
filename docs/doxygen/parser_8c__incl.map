@@ -1,5 +1,5 @@
 <map id="src/parser/parser.c" name="src/parser/parser.c">
-<area shape="rect" id="Node000001" title=" " alt="" coords="147,5,280,30"/>
+<area shape="rect" id="Node000001" title="Implementation of the parser module for the programming language compiler." alt="" coords="147,5,280,30"/>
 <area shape="rect" id="Node000002" title=" " alt="" coords="5,296,83,321"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,32,104,50,85,63,69,80,55,103,45,129,35,185,36,238,41,280,36,281,31,238,30,184,39,128,50,101,65,76,81,59,102,45,146,27"/>
 <area shape="rect" id="Node000003" title=" " alt="" coords="79,78,140,103"/>
