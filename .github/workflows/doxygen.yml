@@ -23,13 +23,14 @@ jobs:
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./docs/html
+        publish_dir: ./docs/doxygen
         publish_branch: gh-pages
         user_name: 'github-actions[bot]'
         user_email: 'github-actions[bot]@users.noreply.github.com'
         commit_message: 'Update Doxygen documentation'
-        keep_files: false
-        enable_jekyll: false
+        keep_files: false        # DON'T keep previous files
+        force_orphan: true       # Optional: force orphan branch for fresh history
+        enable_jekyll: false     # No Jekyll on gh-pages
 
     - name: Enable GitHub Pages via API
       env:
