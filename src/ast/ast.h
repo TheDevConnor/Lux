@@ -233,6 +233,7 @@ struct AstNode {
         struct {
           const char *name;
           AstNode *type; // Changed from Type* to AstNode*
+          AstNode *function; // Changed from Stmt* to AstNode*
           bool is_public; // Whether the field is public
         } field_decl;
 
@@ -360,7 +361,7 @@ AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, 
 AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, bool is_public, size_t line, size_t column);
 AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type,  bool is_public, AstNode *body, size_t line, size_t column);
 AstNode *create_struct_decl_stmt(ArenaAllocator *arena, const char *name, AstNode **public_members, size_t public_count, AstNode **private_members, size_t private_count, bool is_piblic, size_t line, size_t column);
-AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *type, bool is_public, size_t line, size_t column);
+AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *type, AstNode *function, bool is_public, size_t line, size_t column);
 AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, bool is_public, size_t line, size_t column);
 AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode **elif_stmts, int elif_count, AstNode *else_stmt, size_t line, size_t column);
 

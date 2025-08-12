@@ -1,9 +1,10 @@
 const Person = struct {
-pub: 
     name: str,
     age: int, 
-priv: 
-    ssn: str
+
+    init = fn () void {
+        return 6 + 7;
+    },
 };
 
 pub const main = fn () int {

@@ -48,10 +48,11 @@ AstNode *create_struct_decl_stmt(ArenaAllocator *arena, const char *name, AstNod
   return node;
 }
 
-AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *type, bool is_public, size_t line, size_t column) {
+AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *type, AstNode *function, bool is_public, size_t line, size_t column) {
   AstNode *node = create_stmt_node(arena, AST_STMT_FIELD_DECL, line, column);
   node->stmt.field_decl.name = name;
   node->stmt.field_decl.type = type;
+  node->stmt.field_decl.function = function;
   node->stmt.field_decl.is_public = is_public;
   return node;
 }

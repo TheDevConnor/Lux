@@ -469,6 +469,14 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     print_ast(node->stmt.field_decl.type, next_prefix, true, false);
     print_prefix(next_prefix, true);
     printf(GRAY("Is Public: %s\n"), node->stmt.field_decl.is_public ? "true" : "false");
+    if (node->stmt.field_decl.function) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Function: \n"));
+      print_ast(node->stmt.field_decl.function, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no function>\n"));
+    }
     break;
   
   case AST_STMT_BLOCK:
