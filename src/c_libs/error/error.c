@@ -1,3 +1,12 @@
+/**
+ * @file error.c
+ * @brief Implementation of error reporting and diagnostics functions.
+ *
+ * This module manages an internal list of errors, supports generating
+ * source line context from tokens, and prints detailed error reports
+ * with color highlighting.
+ */
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
@@ -11,6 +20,19 @@
 static ErrorInformation error_list[MAX_ERRORS];
 static int error_count = 0;
 
+/**
+ * @brief Generates the full source line text for a given line number.
+ *
+ * It reconstructs the line by concatenating token values and whitespace
+ * for all tokens on the target line, allocating the string in the arena.
+ *
+ * @param arena Arena allocator for allocating the returned string.
+ * @param tokens Array of tokens from the source.
+ * @param token_count Number of tokens.
+ * @param target_line The line number to generate.
+ * @return Pointer to a null-terminated string containing the source line,
+ *         or empty string if line not found or error occurs.
+ */
 const char *generate_line(ArenaAllocator *arena, Token *tokens, int token_count, int target_line) {
     if (target_line < 0 || !tokens) return "";
     
@@ -47,17 +69,34 @@ const char *generate_line(ArenaAllocator *arena, Token *tokens, int token_count,
     return result;
 }
 
-
+/**
+ * @brief Adds an error to the internal error list.
+ *
+ * If the list is full (>= MAX_ERRORS), the error is ignored.
+ *
+ * @param err The ErrorInformation to add.
+ */
 void error_add(ErrorInformation err) {
     if (error_count < MAX_ERRORS) {
         error_list[error_count++] = err;
     }
 }
 
+/**
+ * @brief Clears all accumulated errors from the error list.
+ */
 void error_clear(void) {
     error_count = 0;
 }
 
+/**
+ * @brief Helper function to convert a line number to a zero-padded string.
+ *
+ * Used for formatting line number indicators.
+ *
+ * @param line The line number.
+ * @return Pointer to a static buffer containing the zero-padded string.
+ */
 const char *convert_line_to_string(int line) {
     static char buffer[16];
     
@@ -74,6 +113,13 @@ const char *convert_line_to_string(int line) {
     return buffer;
 }
 
+/**
+ * @brief Prints a caret (^) indicator under the error position in the source line.
+ *
+ * @param col Column number where the error starts.
+ * @param len Length of the token or range to highlight.
+ * @param line The source line number.
+ */
 static void print_indicator(int col, int len, int line) {
     printf(GRAY(" %s | "), convert_line_to_string(line));
     for (int i = 1; i < col; i++) printf(" ");
@@ -81,9 +127,14 @@ static void print_indicator(int col, int len, int line) {
     printf(STYLE_RESET "\n");
 }
 
+/**
+ * @brief Prints the source line with line number and color formatting.
+ *
+ * @param line Line number.
+ * @param text The line text to print.
+ */
 static void print_source_line(int line, const char *text) {
     if (text) {
-        // printf("%s%2d |%s ", GRAY(""), line, STYLE_RESET);
         printf(GRAY(" %d | "), line);
         printf(BOLD_WHITE("%s\n"), text);
     } else {
@@ -91,6 +142,14 @@ static void print_source_line(int line, const char *text) {
     }
 }
 
+/**
+ * @brief Prints all accumulated errors with detailed formatting and color.
+ *
+ * Displays error type, message, file and line info, source snippet, caret
+ * indicator, and optional label, note, and help messages.
+ *
+ * @return true if errors were reported, false if no errors exist.
+ */
 bool error_report(void) {
     if (error_count == 0) return false;
 

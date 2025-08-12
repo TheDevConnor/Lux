@@ -1,3 +1,11 @@
+/**
+ * @file lexer.c
+ * @brief Implements the lexical analysis functions for tokenizing source code.
+ *
+ * Contains the logic to identify tokens, skip whitespace and comments,
+ * recognize keywords and symbols, and report errors.
+ */
+
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -7,12 +15,18 @@
 #include "../c_libs/memory/memory.h"
 #include "lexer.h"
 
+/** @internal Macro to compare string to a key of known length */
 #define STR_EQUALS_LEN(str, key, len)                                          \
   (strncmp(str, key, len) == 0 && key[len] == '\0')
+
+/** @internal Macro to check if next two chars match given pair */
 #define MATCH_NEXT(lx, a, b) (peek(lx, 0) == (a) && peek(lx, 1) == (b))
+
+/** @internal Macro to construct a token */
 #define MAKE_TOKEN(type, start, lx, length, whitespace_len)                    \
   make_token(type, start, lx->line, lx->col - 1, length, whitespace_len)
 
+/** @internal Symbol to token type mapping */
 static const SymbolEntry symbols[] = {
     {"(", TOK_LPAREN},      {")", TOK_RPAREN},       {"{", TOK_LBRACE},
     {"}", TOK_RBRACE},      {"[", TOK_LBRACKET},     {"]", TOK_RBRACKET},
@@ -28,6 +42,7 @@ static const SymbolEntry symbols[] = {
     {"<<", TOK_SHIFT_LEFT}, {">>", TOK_SHIFT_RIGHT},
 };
 
+/** @internal Keyword text to token type mapping */
 static const KeywordEntry keywords[] = {
     {"if", TOK_IF},
     {"else", TOK_ELSE},
@@ -58,6 +73,18 @@ static const KeywordEntry keywords[] = {
     {"const", TOK_CONST},
 };
 
+/**
+ * @brief Adds a lexer error to the global error list.
+ *
+ * @param lx Lexer instance pointer
+ * @param error_type Description of the error type
+ * @param file Source file path
+ * @param msg Error message
+ * @param line_text Source code line text where error occurred
+ * @param line Line number of the error
+ * @param col Column number of the error
+ * @param tk_length Length of the token causing the error
+ */
 void report_lexer_error(Lexer *lx, const char *error_type, const char *file,
                         const char *msg, const char *line_text, int line,
                         int col, int tk_length) {
@@ -76,12 +103,18 @@ void report_lexer_error(Lexer *lx, const char *error_type, const char *file,
   error_add(err);
 }
 
+/**
+ * @brief Retrieves the text of a specific line from the full source.
+ *
+ * @param source Full source code string
+ * @param target_line Line number to extract (1-based)
+ * @return Pointer to static buffer containing the line text
+ */
 const char *get_line_text_from_source(const char *source, int target_line) {
   static char line_buffer[1024];
-  const char *start = source; // Always start from beginning of source
+  const char *start = source;
   int current_line = 1;
 
-  // Skip to the beginning of the target line
   while (current_line < target_line && *start != '\0') {
     if (*start == '\n') {
       current_line++;
@@ -94,7 +127,6 @@ const char *get_line_text_from_source(const char *source, int target_line) {
     return line_buffer;
   }
 
-  // Extract the complete line
   int i = 0;
   while (*start != '\0' && *start != '\n' && i < (int)sizeof(line_buffer) - 1) {
     line_buffer[i++] = *start++;
@@ -104,6 +136,14 @@ const char *get_line_text_from_source(const char *source, int target_line) {
   return line_buffer;
 }
 
+/**
+ * @internal
+ * @brief Looks up if a string matches a keyword token.
+ *
+ * @param str Pointer to string to match
+ * @param length Length of the string
+ * @return TokenType keyword token if found, else TOK_IDENTIFIER
+ */
 static TokenType lookup_keyword(const char *str, int length) {
   for (int i = 0; i < (int)(sizeof(keywords) / sizeof(*keywords)); ++i) {
     if (STR_EQUALS_LEN(str, keywords[i].text, length)) {
@@ -113,6 +153,14 @@ static TokenType lookup_keyword(const char *str, int length) {
   return TOK_IDENTIFIER;
 }
 
+/**
+ * @internal
+ * @brief Looks up if a string matches a symbol token.
+ *
+ * @param str Pointer to string to match
+ * @param length Length of the string
+ * @return TokenType symbol token if found, else TOK_SYMBOL
+ */
 static TokenType lookup_symbol(const char *str, int length) {
   for (int i = 0; i < (int)(sizeof(symbols) / sizeof(*symbols)); ++i) {
     if (STR_EQUALS_LEN(str, symbols[i].text, length)) {
@@ -122,6 +170,13 @@ static TokenType lookup_symbol(const char *str, int length) {
   return TOK_SYMBOL;
 }
 
+/**
+ * @brief Initializes a Lexer struct for scanning the given source code.
+ *
+ * @param lexer Pointer to Lexer struct to initialize
+ * @param source Source code string
+ * @param arena Arena allocator to allocate tokens and strings
+ */
 void init_lexer(Lexer *lexer, const char *source, ArenaAllocator *arena) {
   lexer->arena = arena;
   lexer->src = source;
@@ -130,8 +185,32 @@ void init_lexer(Lexer *lexer, const char *source, ArenaAllocator *arena) {
   lexer->col = 0;
 }
 
+/**
+ * @internal
+ * @brief Peeks ahead in the input stream by a given offset.
+ *
+ * @param lx Pointer to Lexer
+ * @param offset Number of characters to peek forward
+ * @return The character at the peek position
+ */
 char peek(Lexer *lx, int offset) { return lx->current[offset]; }
+
+/**
+ * @internal
+ * @brief Checks if lexer reached end of input.
+ *
+ * @param lx Pointer to Lexer
+ * @return true if at end, false otherwise
+ */
 bool is_at_end(Lexer *lx) { return *lx->current == '\0'; }
+
+/**
+ * @internal
+ * @brief Advances the lexer by one character, updating line and column counters.
+ *
+ * @param lx Pointer to Lexer
+ * @return The character that was advanced past
+ */
 char advance(Lexer *lx) {
   char c = *lx->current++;
   if (c == '\n') {
@@ -143,11 +222,29 @@ char advance(Lexer *lx) {
   return c;
 }
 
+/**
+ * @brief Constructs a Token object.
+ *
+ * @param type Token type
+ * @param start Pointer to start of token text
+ * @param line Line number
+ * @param col Column number
+ * @param length Length of token text
+ * @param whitespace_len Length of leading whitespace
+ * @return Token struct initialized with given values
+ */
 Token make_token(TokenType type, const char *start, int line, int col,
                  int length, int whitespace_len) {
   return (Token){type, start, line, col, length, whitespace_len};
 }
 
+/**
+ * @internal
+ * @brief Skips over a multiline comment block.
+ *
+ * @param lx Pointer to Lexer
+ * @return Number of characters skipped
+ */
 int skip_multiline_comment(Lexer *lx) {
   int count = 0;
   advance(lx); // skip '/'
@@ -164,6 +261,13 @@ int skip_multiline_comment(Lexer *lx) {
   return count + 2;
 }
 
+/**
+ * @internal
+ * @brief Skips over whitespace and single-line or multiline comments.
+ *
+ * @param lx Pointer to Lexer
+ * @return Total count of skipped characters
+ */
 int skip_whitespace(Lexer *lx) {
   int count = 0;
   while (!is_at_end(lx)) {
@@ -187,6 +291,12 @@ int skip_whitespace(Lexer *lx) {
   return count;
 }
 
+/**
+ * @brief Retrieves the next token from the input stream.
+ *
+ * @param lx Pointer to Lexer instance
+ * @return Next token found in the input
+ */
 Token next_token(Lexer *lx) {
   int wh_count = skip_whitespace(lx);
   if (is_at_end(lx)) {
@@ -237,11 +347,12 @@ Token next_token(Lexer *lx) {
     }
   }
 
-  // Fallback: single-character symbol
+  // Single-character symbol fallback
   TokenType single_type = lookup_symbol(start, 1);
   if (single_type != TOK_SYMBOL)
     return MAKE_TOKEN(single_type, start, lx, 1, wh_count);
 
+  // Error token if none matched
   static char error_msg[64];
   snprintf(error_msg, sizeof(error_msg), "Token not found: '%c'", c);
   report_lexer_error(lx, "LexerError", "unknown_file", error_msg,

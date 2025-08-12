@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['save_0',['save',['../structBuildConfig.html#aa98d594debd07e0aac8e2a121f0cc790',1,'BuildConfig']]],
+  ['size_1',['size',['../structAstNode.html#aaf2282696fca57ffad7bb5bb1273fdfd',1,'AstNode::size'],['../structBuffer.html#a24e94f119f4b386771c78cf37aaff41b',1,'Buffer::size']]],
+  ['skip_5fmultiline_5fcomment_2',['skip_multiline_comment',['../lexer_8c.html#a2b80b49f47406cbac91503596128b326',1,'lexer.c']]],
+  ['skip_5fwhitespace_3',['skip_whitespace',['../lexer_8c.html#afcb8086a56884cb45a116ba1b93ffcf3',1,'lexer.c']]],
+  ['source_4',['source',['../structBuildConfig.html#a34b28b87cfca24bf2f31f8a24bc9c270',1,'BuildConfig']]],
+  ['src_5',['src',['../structLexer.html#a3401563c6c2af46bce8d2ee6da777ded',1,'Lexer']]],
+  ['started_6',['Getting Started',['../index.html#getting_started',1,'']]],
+  ['statements_7',['statements',['../structAstNode.html#af1664b5613246cb2c5b6ce66bbf6598d',1,'AstNode']]],
+  ['status_8',['Project Status',['../index.html#status',1,'']]],
+  ['stmt_9',['Stmt',['../ast_8h.html#a04c02a467e5a9ad042686282af900150',1,'ast.h']]],
+  ['stmt_10',['stmt',['../structAstNode.html#a9d642e3c641b0d4652952ac283867913',1,'AstNode']]],
+  ['stmt_2ec_11',['stmt.c',['../ast_2ast__definistions_2stmt_8c.html',1,'(Global Namespace)'],['../parser_2stmt_8c.html',1,'(Global Namespace)']]],
+  ['stmt_5fcount_12',['stmt_count',['../structAstNode.html#aa036bc0416ba3ba87a10435aa4ce7a04',1,'AstNode']]],
+  ['str_5fequals_5flen_13',['STR_EQUALS_LEN',['../lexer_8c.html#a1a0d2fcbe75dbb2f716266a969771a6e',1,'lexer.c']]],
+  ['string_5fval_14',['string_val',['../structAstNode.html#a7d0f3d41dcd42b2b98136cfc7adfbbb0',1,'AstNode']]],
+  ['struct_5fdecl_15',['struct_decl',['../structAstNode.html#a699f2833ff3d46c7b53cf9d530483bf0',1,'AstNode']]],
+  ['struct_5fstmt_16',['struct_stmt',['../parser_8h.html#a0b1d180c582c2a00245cc9c146764c16',1,'struct_stmt(Parser *parser, const char *name, bool is_public):&#160;stmt.c'],['../parser_2stmt_8c.html#a0b1d180c582c2a00245cc9c146764c16',1,'struct_stmt(Parser *parser, const char *name, bool is_public):&#160;stmt.c']]],
+  ['style_5fbold_17',['STYLE_BOLD',['../color_8h.html#a7ce3d6fee94f21c9e3d0ffdd90aadc2e',1,'color.h']]],
+  ['style_5fcolorize_18',['STYLE_COLORIZE',['../color_8h.html#adea95afe18e2790d780ce8e5ae92d994',1,'color.h']]],
+  ['style_5freset_19',['STYLE_RESET',['../color_8h.html#a0afe503629a0074b6d24bbce318f85f2',1,'color.h']]],
+  ['style_5funderline_20',['STYLE_UNDERLINE',['../color_8h.html#aa31af162c6b8377774e81ea49d1d5ae8',1,'color.h']]],
+  ['symbolentry_21',['SymbolEntry',['../structSymbolEntry.html',1,'']]]
+];

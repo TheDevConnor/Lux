@@ -1,3 +1,22 @@
+/**
+ * @file color.c
+ * @brief Implementation of terminal color support detection.
+ *
+ * This module provides the function `terminal_supports_color()` which detects
+ * if the current terminal supports ANSI color escape sequences. It caches
+ * the result to avoid redundant system calls.
+ *
+ * On Windows, it attempts to enable ANSI support on modern terminals (Windows Terminal,
+ * VS Code terminal, ConEmu, Cmder) by enabling virtual terminal processing.
+ * On Unix-like systems, it checks environment variables and terminal capabilities
+ * to determine color support.
+ *
+ * @note The function uses platform-specific APIs and environment variables.
+ *
+ * @author
+ * @date
+ */
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -13,6 +32,25 @@
 #include <unistd.h>
 #endif
 
+/**
+ * @brief Checks if the current terminal supports ANSI color escape sequences.
+ *
+ * This function determines whether the terminal connected to standard output
+ * supports colored output using ANSI escape sequences.
+ * 
+ * The result is cached after the first call for efficiency.
+ *
+ * On Windows:
+ * - Detects Windows Terminal, VS Code terminal, ConEmu, Cmder via environment variables.
+ * - Attempts to enable ANSI escape code processing via the console API.
+ * - Checks Windows version for fallback support.
+ *
+ * On Unix/Linux:
+ * - Checks TERM environment variable for common terminal types supporting color.
+ * - Uses `tput colors` command to verify the number of colors supported.
+ *
+ * @return true if ANSI color output is supported, false otherwise.
+ */
 bool terminal_supports_color(void) {
     static int cached_result = -1;
     
@@ -127,8 +165,15 @@ bool terminal_supports_color(void) {
 #endif
 }
 
-/* Optional: Windows-specific function to enable color support */
 #ifdef _WIN32
+/**
+ * @brief Enables ANSI color support on Windows consoles if possible.
+ *
+ * Attempts to enable virtual terminal processing on the standard output
+ * console handle to allow ANSI escape sequences.
+ *
+ * @return true if ANSI escape sequences were successfully enabled, false otherwise.
+ */
 bool enable_windows_color_support(void) {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     if (hOut == INVALID_HANDLE_VALUE) {

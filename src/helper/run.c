@@ -1,8 +1,25 @@
+/**
+ * @file run.c
+ * @brief Implements the main build run logic: reading source, lexing,
+ *        parsing, error reporting, and printing AST.
+ */
+
 #include "../c_libs/error/error.h"
 #include "../parser/parser.h"
 #include "../ast/ast_utils.h"
 #include "help.h"
 
+/**
+ * @brief Runs the build process using given configuration and allocator.
+ *
+ * Reads the source file, lexes tokens into a growable array,
+ * reports errors if any, parses AST, reports errors again,
+ * prints AST, and outputs build status.
+ *
+ * @param config BuildConfig structure with user options.
+ * @param allocator ArenaAllocator for memory allocation.
+ * @return true if build succeeded, false if errors or failures occurred.
+ */
 bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   const char *source = read_file(config.filepath);
   if (!source) {

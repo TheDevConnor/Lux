@@ -1,3 +1,20 @@
+/**
+ * @file memory.c
+ * @brief Implementation of arena allocator and growable array utilities.
+ *
+ * This module implements a memory arena allocator that reduces overhead by
+ * allocating large buffers and serving sequential allocations from them.
+ * It also provides a growable array type that uses the arena for backing storage.
+ *
+ * Features:
+ * - Dynamic buffer sizing with growth factor.
+ * - Aligned allocations.
+ * - Reset and free all buffers at once.
+ * - Debug print support for allocations and frees.
+ *
+ * @see memory.h
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include "memory.h"
@@ -18,13 +35,31 @@
 #define DEBUG_PRINT(...) do { fprintf(stderr, __VA_ARGS__); } while(0)
 #endif
 
-/* Helper function to get maximum of two values */
+/**
+ * @brief Returns the maximum of two size_t values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The larger of a and b.
+ */
 static inline size_t max_size(size_t a, size_t b) { return (a > b) ? a : b; }
 
-/* Helper function to get minimum of two values */
+/**
+ * @brief Returns the minimum of two size_t values.
+ * @param a First value.
+ * @param b Second value.
+ * @return The smaller of a and b.
+ */
 static inline size_t min_size(size_t a, size_t b) { return (a < b) ? a : b; }
 
-/* Calculate next buffer size with growth factor */
+/**
+ * @brief Calculates the next buffer size for arena allocation using growth factors.
+ *
+ * Ensures the new size respects minimum and maximum buffer size constraints.
+ *
+ * @param current_size Current buffer size.
+ * @param requested_size Minimum requested size for the new buffer.
+ * @return The computed next buffer size.
+ */
 static size_t calculate_next_buffer_size(size_t current_size, size_t requested_size) {
     size_t next_size = max_size(current_size * ARENA_GROWTH_FACTOR, requested_size);
     next_size = max_size(next_size, ARENA_MIN_BUFFER_SIZE);
@@ -32,7 +67,15 @@ static size_t calculate_next_buffer_size(size_t current_size, size_t requested_s
     return next_size;
 }
 
-/* Create a new buffer with specified size and alignment */
+/**
+ * @brief Creates a new aligned buffer for the arena allocator.
+ *
+ * Allocates memory for a Buffer struct plus usable space aligned according to the alignment.
+ *
+ * @param s Size of usable memory requested.
+ * @param alignment Alignment requirement for the usable memory.
+ * @return Pointer to the new Buffer on success, or NULL on failure.
+ */
 Buffer *buffer_create(size_t s, size_t alignment) {
     if (alignment == 0)
         alignment = 1024;
@@ -71,12 +114,19 @@ Buffer *buffer_create(size_t s, size_t alignment) {
     return buf;
 }
 
-/* Initialize arena allocator with dynamic growth */
+/**
+ * @brief Initializes an ArenaAllocator with a specified initial buffer size.
+ *
+ * Allocates the first buffer and sets initial parameters.
+ *
+ * @param arena Pointer to the ArenaAllocator to initialize.
+ * @param initial_size Initial buffer size to allocate (will be clamped to minimum size).
+ * @return 0 on success, -1 on failure.
+ */
 int arena_allocator_init(ArenaAllocator *arena, size_t initial_size) {
     if (!arena)
         return -1;
 
-    // Ensure minimum size
     initial_size = max_size(initial_size, ARENA_MIN_BUFFER_SIZE);
 
     arena->buffer = buffer_create(initial_size, 1024);
@@ -94,7 +144,15 @@ int arena_allocator_init(ArenaAllocator *arena, size_t initial_size) {
     return 0;
 }
 
-/* Allocate a new buffer and add it to the chain */
+/**
+ * @brief Adds a new buffer to the arena's linked list with at least min_size.
+ *
+ * Allocates a new buffer, adds it to the chain, and updates the allocator metadata.
+ *
+ * @param arena Pointer to the ArenaAllocator.
+ * @param min_size Minimum size of the buffer to allocate.
+ * @return Pointer to the new Buffer, or NULL on allocation failure.
+ */
 static Buffer* arena_add_buffer(ArenaAllocator *arena, size_t min_size) {
     size_t buffer_size = calculate_next_buffer_size(arena->next_buffer_size, min_size);
     
@@ -104,7 +162,6 @@ static Buffer* arena_add_buffer(ArenaAllocator *arena, size_t min_size) {
         return NULL;
     }
 
-    // Add to the end of the chain
     Buffer *current = arena->head;
     while (current->next) {
         current = current->next;
@@ -120,7 +177,19 @@ static Buffer* arena_add_buffer(ArenaAllocator *arena, size_t min_size) {
     return new_buffer;
 }
 
-/* Allocate memory from arena with automatic growth */
+/**
+ * @brief Allocates memory from the arena allocator with automatic buffer growth.
+ *
+ * Attempts to allocate aligned memory from current buffers. If insufficient space,
+ * it moves to the next buffer or allocates a new one.
+ *
+ * Large allocations create dedicated buffers.
+ *
+ * @param arena Pointer to the ArenaAllocator.
+ * @param size Number of bytes to allocate.
+ * @param alignment Memory alignment requirement.
+ * @return Pointer to allocated memory or NULL on failure.
+ */
 void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
     if (!arena || !arena->buffer)
         return NULL;
@@ -128,7 +197,6 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
     if (alignment == 0)
         alignment = alignof(max_align_t);
 
-    // For very large allocations, create a dedicated buffer
     if (size > ARENA_MAX_BUFFER_SIZE / 4) {
         Buffer *dedicated_buffer = arena_add_buffer(arena, size);
         if (!dedicated_buffer)
@@ -139,12 +207,10 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
         return dedicated_buffer->ptr;
     }
 
-    // Try to allocate from current buffer
     while (1) {
         size_t aligned_offset = (arena->offset + (alignment - 1)) & ~(alignment - 1);
 
         if (aligned_offset + size <= arena->buffer->size) {
-            // Allocation fits in current buffer
             void *ptr = arena->buffer->ptr + aligned_offset;
             arena->offset = aligned_offset + size;
             
@@ -153,7 +219,6 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
             return ptr;
         }
 
-        // Current buffer is full, try next buffer
         if (arena->buffer->next) {
             arena->buffer = arena->buffer->next;
             arena->offset = 0;
@@ -162,7 +227,6 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
             continue;
         }
 
-        // No next buffer exists, create a new one
         Buffer *new_buffer = arena_add_buffer(arena, size);
         if (!new_buffer) {
             DEBUG_PRINT("arena_alloc: FAILED to add new buffer for %zu bytes\n", size);
@@ -173,11 +237,16 @@ void *arena_alloc(ArenaAllocator *arena, size_t size, size_t alignment) {
         arena->offset = 0;
         DEBUG_PRINT("arena_alloc: switched to new buffer %p (size %zu)\n",
                     (void *)arena->buffer, arena->buffer->size);
-        // Continue the loop to allocate from the new buffer
     }
 }
 
-/* Reset arena to initial state (reuse allocated buffers) */
+/**
+ * @brief Resets the arena allocator, making all buffers reusable.
+ *
+ * Does not free memory; resets the current allocation offset and buffer pointer.
+ *
+ * @param arena Pointer to the ArenaAllocator to reset.
+ */
 void arena_reset(ArenaAllocator *arena) {
     if (!arena)
         return;
@@ -187,7 +256,11 @@ void arena_reset(ArenaAllocator *arena) {
     DEBUG_PRINT("arena_reset: reset to first buffer %p\n", (void *)arena->head);
 }
 
-/* Free all memory and cleanup arena */
+/**
+ * @brief Frees all buffers and resets the arena allocator.
+ *
+ * @param arena Pointer to the ArenaAllocator to destroy.
+ */
 void arena_destroy(ArenaAllocator *arena) {
     if (!arena)
         return;
@@ -213,14 +286,26 @@ void arena_destroy(ArenaAllocator *arena) {
     arena->total_allocated = 0;
 }
 
-/* Get total allocated memory across all buffers */
+/**
+ * @brief Returns the total number of bytes allocated across all buffers.
+ *
+ * @param arena Pointer to the ArenaAllocator.
+ * @return Total allocated bytes, or 0 if arena is NULL.
+ */
 size_t arena_get_total_allocated(ArenaAllocator *arena) {
     if (!arena)
         return 0;
     return arena->total_allocated;
 }
 
-/* Print arena statistics */
+/**
+ * @brief Prints statistics about the arena allocator to stderr.
+ *
+ * Includes number of buffers, total allocated memory, current buffer and offset,
+ * and the planned size for the next buffer.
+ *
+ * @param arena Pointer to the ArenaAllocator.
+ */
 void arena_print_stats(ArenaAllocator *arena) {
     if (!arena) {
         fprintf(stderr, "Arena is NULL\n");
@@ -247,7 +332,13 @@ void arena_print_stats(ArenaAllocator *arena) {
     fprintf(stderr, "  Next buffer size: %zu bytes\n", arena->next_buffer_size);
 }
 
-/* Duplicate string in arena */
+/**
+ * @brief Duplicates a null-terminated string into arena-allocated memory.
+ *
+ * @param arena Pointer to the ArenaAllocator.
+ * @param src Null-terminated source string.
+ * @return Pointer to the duplicated string in arena memory, or NULL on failure.
+ */
 char *arena_strdup(ArenaAllocator *arena, const char *src) {
     size_t len = strlen(src) + 1;
     char *dst = arena_alloc(arena, len, alignof(char));
@@ -255,11 +346,21 @@ char *arena_strdup(ArenaAllocator *arena, const char *src) {
     return dst;
 }
 
-/* Initialize growable array with proper alignment */
+/**
+ * @brief Initializes a GrowableArray backed by an arena allocator.
+ *
+ * Allocates initial storage for the array and sets metadata.
+ *
+ * @param arr Pointer to the GrowableArray to initialize.
+ * @param arena Pointer to the ArenaAllocator for backing storage.
+ * @param initial_capacity Initial number of elements to allocate space for.
+ * @param item_size Size in bytes of each element.
+ * @return true on success, false on failure.
+ */
 bool growable_array_init(GrowableArray *arr, ArenaAllocator *arena,
                          size_t initial_capacity, size_t item_size) {
     if (initial_capacity == 0)
-        initial_capacity = 4;  // Minimum capacity
+        initial_capacity = 4;
 
     size_t alignment = (item_size == sizeof(void*)) ? alignof(void*) : 
                       (item_size >= alignof(max_align_t)) ? alignof(max_align_t) : item_size;
@@ -285,7 +386,15 @@ bool growable_array_init(GrowableArray *arr, ArenaAllocator *arena,
     return true;
 }
 
-/* Push new item to growable array with automatic growth */
+/**
+ * @brief Pushes a new element onto the growable array, resizing if necessary.
+ *
+ * Automatically doubles the array capacity and copies existing elements
+ * into new arena memory when full.
+ *
+ * @param arr Pointer to the GrowableArray.
+ * @return Pointer to the newly allocated element slot, or NULL on failure.
+ */
 void *growable_array_push(GrowableArray *arr) {
     if (arr->count >= arr->capacity) {
         size_t new_capacity = arr->capacity * 2;
@@ -303,16 +412,13 @@ void *growable_array_push(GrowableArray *arr) {
                     "(old cap=%zu → new cap=%zu, item_size=%zu)\n",
                     arr->data, new_block, arr->capacity, new_capacity, arr->item_size);
 
-        // Copy existing data
         memcpy(new_block, arr->data, arr->count * arr->item_size);
-        
-        // Update array metadata
         arr->data = new_block;
         arr->capacity = new_capacity;
     }
 
     void *slot = (char *)arr->data + (arr->count * arr->item_size);
-    arr->count += 1;
+    arr->count++;
     
     DEBUG_PRINT("growable_array_push: pushed item at index %zu (address %p)\n",
                 arr->count - 1, slot);

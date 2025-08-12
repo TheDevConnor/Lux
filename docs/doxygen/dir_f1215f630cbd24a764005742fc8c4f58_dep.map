@@ -1,0 +1,14 @@
+<map id="src/c_libs" name="src/c_libs">
+<area shape="rect" id="node1" href="dir_e1aa690b4af0a0538ec65649b0390051.html" title="lexer" alt="" coords="205,135,254,159"/>
+<area shape="rect" id="node3" href="dir_c16eb08eccd7a5191a85f2e8f30cad1a.html" title="color" alt="" coords="38,135,87,159"/>
+<area shape="rect" id="node4" href="dir_7c7dbecbac5663ebf34a702f0866e5af.html" title="error" alt="" coords="123,62,170,87"/>
+<area shape="poly" id="edge2" href="dir_000005_000007.html" alt="" coords="162,85,206,122,203,126,159,89"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000005_000007.html" title="2" alt="" coords="204,109,211,123"/>
+<area shape="poly" id="edge1" href="dir_000005_000003.html" alt="" coords="135,89,89,127,86,123,131,85"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000005_000003.html" title="1" alt="" coords="92,122,99,136"/>
+<area shape="rect" id="node5" href="dir_e2ac13024a11c4f0559ea4265f716055.html" title="memory" alt="" coords="112,135,181,159"/>
+<area shape="poly" id="edge3" href="dir_000005_000008.html" alt="" coords="149,87,149,119,144,119,144,87"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000005_000008.html" title="2" alt="" coords="152,109,159,123"/>
+<area shape="rect" id="clust2" href="dir_f1215f630cbd24a764005742fc8c4f58.html" alt="" coords="27,51,192,170"/>
+<area shape="rect" id="clust1" href="dir_68267d1309a1af8e8297ef4c3efbcdba.html" title="src" alt="" coords="16,16,264,181"/>
+</map>
