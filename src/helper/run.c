@@ -5,6 +5,7 @@
  */
 
 #include "../c_libs/error/error.h"
+#include "../typechecker/type.h"
 #include "../parser/parser.h"
 #include "../ast/ast_utils.h"
 #include "help.h"
@@ -57,8 +58,12 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
     free((void *)source);
     return false;
   }
-  
   print_ast(root, "", true, true);
+
+  Scope global_scope;
+  init_scope(&global_scope, NULL, allocator);
+
+  bool success = typecheck(root, &global_scope, allocator);
 
   if (config.name)
     printf("Building target: %s\n", config.name);
