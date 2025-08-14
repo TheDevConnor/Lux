@@ -1,20 +1,3 @@
-pub const main = fn () int {
-    let arr: [int; 5] = [5, 9, 2, 8, 1];
-    let len: int = 5;
-
-    loop [i: int = 0, j: int = 0](i < len) : (++j) {
-        if (j >= len - i - 1) {
-            j = 0;
-            i++;
-            continue;
-        }
-
-        if (arr[j] > arr[j + 1]) {
-            let tmp: int = arr[j];
-            arr[j] = arr[j + 1];
-            arr[j + 1] = tmp;
-        }
-    }
-
-    return 0;
+const main = fn () int {
+    let x: int = 0;
 }

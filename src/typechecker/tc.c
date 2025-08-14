@@ -3,31 +3,26 @@
 #include "type.h"
 
 bool typecheck(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    // This function will implement the type checking logic
-    // For now, we will just return true to indicate success
-    // In a real implementation, this would contain the logic to check types
-    // based on the AST node and the current scope.
-
-    scope_add_symbol(scope, "x", NULL, true, true, arena);
-    scope_add_symbol(scope, "y", NULL, false, true, arena);
-
-    Symbol *s = scope_lookup(scope, "x");
-    if (s) {
-        printf("Found: %s of type %p, public: %d, mutable: %d\n",
-               s->name, s->type, s->is_public, s->is_mutable);
-    }
-
-    s = scope_lookup(scope, "y");
-    if (s) {
-        printf("Found: %s of type %p, public: %d, mutable: %d\n",
-               s->name, s->type, s->is_public, s->is_mutable);
+    if (!node) {
+        fprintf(stderr, "Error: Null AST node\n");
+        return false;
     }
     
-    // Example: Check if node is NULL
-    if (node == NULL) {
-        return false; // Error: Null node
+    switch (node->category) {
+        case Node_Category_STMT:
+            return typecheck_statement(node, scope, arena);
+        
+        case Node_Category_EXPR: {
+            AstNode *result_type = typecheck_expression(node, scope, arena);
+            return result_type != NULL;
+        }
+        
+        case Node_Category_TYPE:
+            // Types themselves don't need typechecking, they're valid by construction
+            return true;
+        
+        default:
+            fprintf(stderr, "Error: Unknown node category\n");
+            return false;
     }
-
-    // Placeholder for actual type checking logic
-    return true; // Indicate successful type checking
 }
