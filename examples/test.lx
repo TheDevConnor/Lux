@@ -1,3 +1,9 @@
+const add = fn (a: int, b: int) int {
+    return a + b;
+}
+
+const X: int = 0;
+
 const main = fn () int {
     let x: int = 0;
 }

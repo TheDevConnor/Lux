@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "../ast/ast_utils.h"
 #include "type.h"
 
 bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
@@ -89,16 +90,81 @@ bool typecheck_var_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
                            node->stmt.var_decl.is_mutable, arena);
 }
 
-// Utility functions
-
 // Stub implementations for remaining functions
 bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    // TODO: Implement function declaration typechecking
     const char *name = node->stmt.func_decl.name;
-    return scope_add_symbol(scope, name, create_basic_type(arena, "function", 0, 0),
-                           node->stmt.func_decl.is_public, false, arena);
+    AstNode *return_type = node->stmt.func_decl.return_type;
+    AstNode **param_types = node->stmt.func_decl.param_types;
+    char **param_names = node->stmt.func_decl.param_names;
+    size_t param_count = node->stmt.func_decl.param_count;
+    AstNode *body = node->stmt.func_decl.body;
+    
+    // 1. Validate return type exists and is valid
+    if (!return_type || return_type->category != Node_Category_TYPE) {
+        fprintf(stderr, "Error: Function '%s' has invalid return type at line %zu\n", 
+                name, node->line);
+        return false;
+    }
+    
+    // 2. Validate all parameter types
+    for (size_t i = 0; i < param_count; i++) {
+        const char *p_name = param_names[i];
+        AstNode *p_type = param_types[i];
+        
+        if (!p_name || !p_type) {
+            fprintf(stderr, "Error: Function '%s' has invalid parameter %zu at line %zu\n",
+                    name, i, node->line);
+            return false;
+        }
+        
+        if (p_type->category != Node_Category_TYPE) {
+            fprintf(stderr, "Error: Parameter '%s' in function '%s' has invalid type at line %zu\n",
+                    p_name, name, node->line);
+            return false;
+        }
+    }
+    
+    // 3. Create function type for the symbol table
+    AstNode *func_type = create_function_type(arena, param_types, param_count, return_type, 
+                                              node->line, node->column);
+    
+    // 4. Add function to current scope BEFORE checking body (for recursion)
+    if (!scope_add_symbol(scope, name, func_type, node->stmt.func_decl.is_public, false, arena)) {
+        return false;
+    }
+    
+    // 5. Create function scope for parameters and body
+    Scope *func_scope = create_child_scope(scope, name, arena);
+    func_scope->is_function_scope = true;
+    func_scope->associated_node = node;
+    
+    // 6. Add parameters to function scope
+    for (size_t i = 0; i < param_count; i++) {
+        const char *p_name = param_names[i];
+        AstNode *p_type = param_types[i];
+        
+        if (!scope_add_symbol(func_scope, p_name, p_type, false, true, arena)) {
+            fprintf(stderr, "Error: Could not add parameter '%s' to function '%s' scope\n",
+                    p_name, name);
+            return false;
+        }
+    }
+    
+    // 7. Typecheck function body in the function scope
+    if (body) {
+        if (!typecheck_statement(body, func_scope, arena)) {
+            fprintf(stderr, "Error: Function '%s' body failed typechecking\n", name);
+            return false;
+        }
+        
+        // 8. Validate return statements match declared return type
+        if (!validate_function_returns(body, return_type, arena)) {
+            fprintf(stderr, "Error: Function '%s' has mismatched return types\n", name);
+            return false;
+        }
+    }
+    return true;
 }
-
 bool typecheck_struct_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     // TODO: Implement struct declaration typechecking
     const char *name = node->stmt.struct_decl.name;
