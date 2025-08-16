@@ -317,7 +317,7 @@ AstNode *typecheck_call_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena)
  * 
  * @see collect_return_statements
  */
-bool validate_function_returns(AstNode *body, AstNode *expected_return_type, ArenaAllocator *arena);
+bool validate_function_returns(AstNode *body, AstNode *expected_return_type, ArenaAllocator *arena, Scope *scope);
 
 /**
  * @brief Collects all return statements from an AST subtree

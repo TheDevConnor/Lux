@@ -26,16 +26,11 @@ bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
             return typecheck_enum_decl(stmt, scope, arena);
         
         case AST_STMT_EXPRESSION: {
-            AstNode *expr_type = typecheck_expression(stmt->stmt.expr_stmt.expression, scope, arena);
-            return expr_type != NULL;
+            return typecheck_expression(stmt->stmt.expr_stmt.expression, scope, arena);
         }
         
         case AST_STMT_RETURN: {
-            if (stmt->stmt.return_stmt.value) {
-                AstNode *return_type = typecheck_expression(stmt->stmt.return_stmt.value, scope, arena);
-                return return_type != NULL;
-                // TODO: Check against function's declared return type
-            }
+            // No need to handle this here because we pool all the returns together and seperate it in to a different phase.
             return true;
         }
         
@@ -158,13 +153,14 @@ bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
         }
         
         // 8. Validate return statements match declared return type
-        if (!validate_function_returns(body, return_type, arena)) {
+        if (!validate_function_returns(body, return_type, arena, func_scope)) {
             fprintf(stderr, "Error: Function '%s' has mismatched return types\n", name);
             return false;
         }
     }
     return true;
 }
+
 bool typecheck_struct_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     // TODO: Implement struct declaration typechecking
     const char *name = node->stmt.struct_decl.name;

@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "../ast/ast_utils.h"
 #include "type.h"
 
 /**
@@ -236,7 +237,7 @@ void collect_return_statements(AstNode *node, AstNode ***returns, size_t *return
     }
 }
 
-bool validate_function_returns(AstNode *body, AstNode *expected_return_type, ArenaAllocator *arena) {
+bool validate_function_returns(AstNode *body, AstNode *expected_return_type, ArenaAllocator *arena, Scope *scope) {
     if (!body || !expected_return_type) return false;
     
     // Collect all return statements in the function body
@@ -244,8 +245,6 @@ bool validate_function_returns(AstNode *body, AstNode *expected_return_type, Are
     size_t return_count = 0;
     
     collect_return_statements(body, &return_stmts, &return_count, arena);
-    
-    printf("    Found %zu return statements\n", return_count);
     
     // Check if function should return void
     bool expects_void = (expected_return_type->type == AST_TYPE_BASIC && 
@@ -264,17 +263,11 @@ bool validate_function_returns(AstNode *body, AstNode *expected_return_type, Are
     
     // For non-void functions, check all return values match expected type
     for (size_t i = 0; i < return_count; i++) {
-        AstNode *return_value = return_stmts[i]->stmt.return_stmt.value;
+        AstNode *return_value = typecheck_expression(return_stmts[i]->stmt.return_stmt.value, scope, arena);
+        TypeMatchResult result = types_match(expected_return_type, return_value);
         
-        if (!return_value) {
-            fprintf(stderr, "    Error: Non-void function must return a value\n");
-            return false;
-        }
-        
-        // For now, we'll just check that there IS a return value
-        // In a full implementation, you'd typecheck the return expression
-        // and compare it against expected_return_type
-        printf("    Return statement %zu: has return value\n", i);
+        if (result == TYPE_MATCH_NONE) return false;
+        continue;
     }
     
     return true;

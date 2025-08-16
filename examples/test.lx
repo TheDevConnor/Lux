@@ -1,5 +1,5 @@
 const add = fn (a: int, b: int) int {
-    return a + b;
+    return a + "b";
 }
 
 const X: int = 0;
