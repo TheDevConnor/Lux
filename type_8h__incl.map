@@ -1,0 +1,16 @@
+<map id="src/typechecker/type.h" name="src/typechecker/type.h">
+<area shape="rect" id="Node000001" title="Type checking and symbol table management for AST nodes." alt="" coords="77,5,246,31"/>
+<area shape="rect" id="Node000002" href="$ast_8h.html" title=" " alt="" coords="75,79,165,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,32,136,68,131,65,152,30"/>
+<area shape="rect" id="Node000005" href="$memory_8h.html" title="Arena allocator and growable array utilities for fast memory management." alt="" coords="130,152,329,177"/>
+<area shape="poly" id="edge8_Node000001_Node000005" title=" " alt="" coords="169,30,221,138,216,141,164,32"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="104,225,187,251"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="121,105,118,137,121,177,134,212,129,214,116,178,113,137,116,104"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,225,80,251"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="116,106,58,215,53,212,111,103"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="139,102,201,142,198,147,136,106"/>
+<area shape="poly" id="edge7_Node000005_Node000003" title=" " alt="" coords="218,179,171,218,168,214,214,175"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="200,180,87,223,85,218,198,175"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="211,225,298,251"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="236,177,249,212,244,213,231,179"/>
+</map>

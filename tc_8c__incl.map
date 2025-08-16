@@ -1,0 +1,20 @@
+<map id="src/typechecker/tc.c" name="src/typechecker/tc.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="47,5,198,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="45,79,112,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,32,95,68,91,66,113,30"/>
+<area shape="rect" id="Node000003" href="$type_8h.html" title="Type checking and symbol table management for AST nodes." alt="" coords="137,79,199,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="132,30,156,66,151,69,128,32"/>
+<area shape="rect" id="Node000004" href="$ast_8h.html" title=" " alt="" coords="75,152,165,177"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="162,106,138,142,133,139,158,103"/>
+<area shape="rect" id="Node000007" href="$memory_8h.html" title="Arena allocator and growable array utilities for fast memory management." alt="" coords="130,225,329,251"/>
+<area shape="poly" id="edge10_Node000003_Node000007" title=" " alt="" coords="175,103,221,211,217,214,171,105"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="104,299,187,324"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="121,178,118,211,121,250,134,285,129,287,116,251,113,211,116,177"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="5,299,80,324"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="116,179,58,288,53,285,111,177"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="139,175,201,215,198,220,136,180"/>
+<area shape="poly" id="edge9_Node000007_Node000005" title=" " alt="" coords="218,253,171,292,168,287,214,249"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="200,253,87,296,85,291,198,248"/>
+<area shape="rect" id="Node000008" title=" " alt="" coords="211,299,298,324"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="236,250,249,285,244,287,231,252"/>
+</map>

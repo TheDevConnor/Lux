@@ -1,0 +1,26 @@
+<map id="src/typechecker/type.c" name="src/typechecker/type.c">
+<area shape="rect" id="Node000001" title="Implementation of type checking and symbol table management functions." alt="" coords="79,5,247,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,76,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,33,74,74,71,69,142,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="89,152,155,177"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="160,32,142,79,128,139,123,138,137,78,155,30"/>
+<area shape="rect" id="Node000004" href="$ast__utils_8h.html" title=" " alt="" coords="151,79,277,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="174,29,200,66,196,69,170,33"/>
+<area shape="rect" id="Node000010" href="$type_8h.html" title="Type checking and symbol table management for AST nodes." alt="" coords="301,79,364,104"/>
+<area shape="poly" id="edge12_Node000001_Node000010" title=" " alt="" coords="192,28,293,71,291,76,190,33"/>
+<area shape="poly" id="edge11_Node000004_Node000003" title=" " alt="" coords="201,106,149,146,146,141,198,102"/>
+<area shape="rect" id="Node000005" href="$ast_8h.html" title=" " alt="" coords="187,152,241,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="217,104,217,138,211,138,211,104"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="221,299,303,324"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="219,177,238,250,253,285,248,287,233,252,214,178"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="122,299,197,324"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="212,179,171,287,166,285,207,177"/>
+<area shape="rect" id="Node000008" href="$memory_8h.html" title="Arena allocator and growable array utilities for fast memory management." alt="" coords="247,225,445,251"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="236,175,314,216,311,221,234,180"/>
+<area shape="poly" id="edge10_Node000008_Node000006" title=" " alt="" coords="334,253,288,292,285,287,331,249"/>
+<area shape="poly" id="edge8_Node000008_Node000007" title=" " alt="" coords="317,253,203,296,202,291,315,248"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="328,299,415,324"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="353,250,365,285,360,287,348,252"/>
+<area shape="poly" id="edge13_Node000010_Node000005" title=" " alt="" coords="315,106,247,147,244,142,312,102"/>
+<area shape="poly" id="edge14_Node000010_Node000008" title=" " alt="" coords="336,104,346,211,341,212,331,105"/>
+</map>

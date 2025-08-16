@@ -1,0 +1,23 @@
+<map id="src/typechecker/scope.c" name="src/typechecker/scope.c">
+<area shape="rect" id="Node000001" title="Implementation of scope and symbol table management functions." alt="" coords="79,5,257,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,72,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="148,33,73,74,71,69,146,28"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="97,79,167,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="164,32,146,68,142,65,160,30"/>
+<area shape="rect" id="Node000004" href="$memory_8h.html" title="Arena allocator and growable array utilities for fast memory management." alt="" coords="106,225,305,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="173,30,181,78,204,212,199,212,176,79,167,31"/>
+<area shape="rect" id="Node000008" href="$type_8h.html" title="Type checking and symbol table management for AST nodes." alt="" coords="243,79,306,104"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="187,28,247,69,244,73,184,33"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="252,299,327,324"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="221,249,267,287,263,292,217,253"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="141,299,227,324"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="204,252,194,286,189,285,199,250"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="351,299,433,324"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="236,248,350,291,348,296,234,253"/>
+<area shape="poly" id="edge12_Node000008_Node000004" title=" " alt="" coords="271,106,219,214,214,212,267,103"/>
+<area shape="rect" id="Node000009" href="$ast_8h.html" title=" " alt="" coords="295,152,385,177"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="287,103,322,140,318,144,283,106"/>
+<area shape="poly" id="edge11_Node000009_Node000004" title=" " alt="" coords="320,180,241,221,238,216,317,175"/>
+<area shape="poly" id="edge10_Node000009_Node000005" title=" " alt="" coords="340,178,319,252,303,287,299,285,313,250,335,177"/>
+<area shape="poly" id="edge9_Node000009_Node000007" title=" " alt="" coords="347,177,386,285,381,287,342,179"/>
+</map>
