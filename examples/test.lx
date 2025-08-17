@@ -15,7 +15,7 @@ const main = fn () int {
 
     if (x < 5 || x > 5) { 
         let y: int = x;
-        return y; 
+        return add("1", 4);
     } else {
         return Color.RED;
     }
