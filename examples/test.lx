@@ -1,5 +1,11 @@
 const X: int = 0;
 
+const Color = enum {
+    RED,
+    GREEN,
+    BLUE,
+};
+
 const add = fn (a: int, b: int) int {
     return a + b;
 }
@@ -11,7 +17,7 @@ const main = fn () int {
         let y: int = x;
         return y; 
     } else {
-        return 1;
+        return Color.RED;
     }
 
     return X;

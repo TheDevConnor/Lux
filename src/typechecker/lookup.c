@@ -96,6 +96,9 @@ AstNode *typecheck_expression(AstNode *expr, Scope *scope, ArenaAllocator *arena
             
             return target_type;
         }
+
+        case AST_EXPR_MEMBER:
+          return typecheck_member_expr(expr, scope, arena);
         
         default:
             printf("Warning: Unhandled expression type %d\n", expr->type);

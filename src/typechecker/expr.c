@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "type.h"
 
@@ -49,4 +50,31 @@ AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope, ArenaAllocator *aren
 AstNode *typecheck_call_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
     // TODO: Implement function call typechecking
     return create_basic_type(arena, "unknown", expr->line, expr->column);
+}
+
+AstNode *typecheck_member_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    // Handle Color.RED syntax
+    const char *base_name = expr->expr.member.object->expr.identifier.name;
+    const char *member_name = expr->expr.member.member;
+    
+    // Build qualified name and look it up directly
+    size_t qualified_len = strlen(base_name) + strlen(member_name) + 2;
+    char *qualified_name = arena_alloc(arena, qualified_len, 1);
+    snprintf(qualified_name, qualified_len, "%s.%s", base_name, member_name);
+    
+    Symbol *member_symbol = scope_lookup(scope, qualified_name);
+    if (!member_symbol) {
+        // Check if the base name exists to give a better error message
+        Symbol *base_symbol = scope_lookup(scope, base_name);
+        if (!base_symbol) {
+            fprintf(stderr, "Error: Undefined identifier '%s' at line %zu\n", 
+                    base_name, expr->line);
+        } else {
+            fprintf(stderr, "Error: '%s' has no member '%s' at line %zu\n", 
+                    base_name, member_name, expr->line);
+        }
+        return NULL;
+    }
+    
+    return member_symbol->type;
 }

@@ -114,6 +114,7 @@ bool typecheck_if_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
 
 AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
 AstNode *typecheck_call_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
+AstNode *typecheck_member_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
 
 AstNode *get_enclosing_function_return_type(Scope *scope);
 

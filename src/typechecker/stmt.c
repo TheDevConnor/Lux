@@ -125,12 +125,32 @@ bool typecheck_struct_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
 }
 
 bool typecheck_enum_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-  // TODO: Implement enum declaration typechecking
-  const char *name = node->stmt.enum_decl.name;
-  return scope_add_symbol(scope, name, create_basic_type(arena, "enum", 0, 0),
-                          node->stmt.enum_decl.is_public, false, arena);
+    const char *enum_name = node->stmt.enum_decl.name;
+    char **member_names = node->stmt.enum_decl.members;
+    size_t member_count = node->stmt.enum_decl.member_count;
+    
+    // 1. Add enum name as an int type (for variable declarations like "Color c;")
+    AstNode *int_type = create_basic_type(arena, "int", node->line, node->column);
+    if (!scope_add_symbol(scope, enum_name, int_type, 
+                         node->stmt.enum_decl.is_public, false, arena)) {
+        return false;
+    }
+    
+    // 2. Add each member as an int constant with qualified names
+    for (size_t i = 0; i < member_count; i++) {
+        size_t qualified_len = strlen(enum_name) + strlen(member_names[i]) + 2;
+        char *qualified_name = arena_alloc(arena, qualified_len, 1);
+        snprintf(qualified_name, qualified_len, "%s.%s", enum_name, member_names[i]);
+        
+        // Each enum member is just an int constant
+        if (!scope_add_symbol(scope, qualified_name, int_type, true, false, arena)) {
+            fprintf(stderr, "Error: Could not add enum member '%s'\n", qualified_name);
+            return false;
+        }
+    }
+    
+    return true;
 }
-
 bool typecheck_return_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   // Find the enclosing function's return type
   AstNode *expected_return_type = get_enclosing_function_return_type(scope);
