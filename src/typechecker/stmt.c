@@ -177,3 +177,33 @@ bool typecheck_return_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
 
   return true;
 }
+
+bool typecheck_if_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
+  Scope *then_branch = create_child_scope(scope, "then_branch", arena);
+  Scope *else_branch = create_child_scope(scope, "else_branch", arena);
+
+  Type *expected =
+      create_basic_type(arena, "bool", node->stmt.if_stmt.condition->line,
+                        node->stmt.if_stmt.condition->column);
+  Type *user = typecheck_expression(node->stmt.if_stmt.condition, scope, arena);
+  TypeMatchResult condition = types_match(expected, user);
+  if (condition == TYPE_MATCH_NONE) {
+    fprintf(stderr,
+            "Error: If condition expected to be of type 'bool', but got '%s' "
+            "instead\n",
+            type_to_string(user, arena));
+    return false;
+  }
+
+  typecheck_statement(node->stmt.if_stmt.then_stmt, then_branch, arena);
+
+  // TODO: Handle elif cases
+  // for (int i = 0; i < node->stmt.if_stmt.elif_count; i++) {
+  //   typecheck_statement(node->stmt.if_stmt.elif_stmts[i], then_branch,
+  //   arena);
+  // }
+
+  typecheck_statement(node->stmt.if_stmt.else_stmt, else_branch, arena);
+
+  return true;
+}

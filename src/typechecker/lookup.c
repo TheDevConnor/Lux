@@ -24,6 +24,8 @@ bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
     return typecheck_expression(stmt->stmt.expr_stmt.expression, scope, arena);
   case AST_STMT_RETURN: 
     return typecheck_return_decl(stmt, scope, arena);
+  case AST_STMT_IF:
+    return typecheck_if_decl(stmt, scope, arena);
 
   case AST_STMT_BLOCK: {
     // Create new scope for block

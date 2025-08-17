@@ -110,6 +110,7 @@ bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
 bool typecheck_struct_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
 bool typecheck_enum_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
 bool typecheck_return_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
+bool typecheck_if_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
 
 AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
 AstNode *typecheck_call_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);

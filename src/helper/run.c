@@ -58,7 +58,7 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
     free((void *)source);
     return false;
   }
-  // print_ast(root, "", true, true);
+  print_ast(root, "", true, true);
 
   Scope root_scope;
   init_scope(&root_scope, NULL, "global", allocator);
