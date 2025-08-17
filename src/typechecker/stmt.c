@@ -1,176 +1,220 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "../ast/ast_utils.h"
 #include "type.h"
 
 bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
-    switch (stmt->type) {
-        case AST_PROGRAM:
-            for (size_t i = 0; i < stmt->stmt.program.stmt_count; i++) {
-                if (!typecheck(stmt->stmt.program.statements[i], scope, arena)) {
-                    return false;
-                }
-            }
-            return true;
-        
-        case AST_STMT_VAR_DECL:
-            return typecheck_var_decl(stmt, scope, arena);
-        
-        case AST_STMT_FUNCTION:
-            return typecheck_func_decl(stmt, scope, arena);
-        
-        case AST_STMT_STRUCT:
-            return typecheck_struct_decl(stmt, scope, arena);
-        
-        case AST_STMT_ENUM:
-            return typecheck_enum_decl(stmt, scope, arena);
-        
-        case AST_STMT_EXPRESSION: {
-            return typecheck_expression(stmt->stmt.expr_stmt.expression, scope, arena);
-        }
-        
-        case AST_STMT_RETURN: {
-            // No need to handle this here because we pool all the returns together and seperate it in to a different phase.
-            return true;
-        }
-        
-        case AST_STMT_BLOCK: {
-            // Create new scope for block
-            Scope *block_scope = create_child_scope(scope, "block", arena);
-            for (size_t i = 0; i < stmt->stmt.block.stmt_count; i++) {
-                if (!typecheck(stmt->stmt.block.statements[i], block_scope, arena)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-        
-        default:
-            printf("Warning: Unhandled statement type %d\n", stmt->type);
-            return true; // Don't fail on unimplemented statements yet
+  switch (stmt->type) {
+  case AST_PROGRAM:
+    for (size_t i = 0; i < stmt->stmt.program.stmt_count; i++) {
+      if (!typecheck(stmt->stmt.program.statements[i], scope, arena)) {
+        return false;
+      }
     }
+    return true;
+
+  case AST_STMT_VAR_DECL:
+    return typecheck_var_decl(stmt, scope, arena);
+  case AST_STMT_FUNCTION:
+    return typecheck_func_decl(stmt, scope, arena);
+  case AST_STMT_STRUCT:
+    return typecheck_struct_decl(stmt, scope, arena);
+  case AST_STMT_ENUM:
+    return typecheck_enum_decl(stmt, scope, arena);
+  case AST_STMT_EXPRESSION:
+    return typecheck_expression(stmt->stmt.expr_stmt.expression, scope, arena);
+  case AST_STMT_RETURN: 
+    return typecheck_return_decl(stmt, scope, arena);
+
+  case AST_STMT_BLOCK: {
+    // Create new scope for block
+    Scope *block_scope = create_child_scope(scope, "block", arena);
+    for (size_t i = 0; i < stmt->stmt.block.stmt_count; i++) {
+      if (!typecheck(stmt->stmt.block.statements[i], block_scope, arena)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  default:
+    printf("Warning: Unhandled statement type %d\n", stmt->type);
+    return true; // Don't fail on unimplemented statements yet
+  }
 }
 
 bool typecheck_var_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    const char *name = node->stmt.var_decl.name;
-    AstNode *declared_type = node->stmt.var_decl.var_type;
-    AstNode *initializer = node->stmt.var_decl.initializer;
-    
-    // If there's an initializer, check its type matches the declared type
-    if (initializer) {
-        AstNode *init_type = typecheck_expression(initializer, scope, arena);
-        if (!init_type) return false;
-        
-        if (declared_type) {
-            TypeMatchResult match = types_match(declared_type, init_type);
-            if (match == TYPE_MATCH_NONE) {
-                fprintf(stderr, "Error: Type mismatch in variable declaration '%s' at line %zu\n",
-                       name, node->line);
-                return false;
-            }
-        } else {
-            // Type inference - use the initializer's type
-            declared_type = init_type;
-        }
-    }
-    
-    if (!declared_type) {
-        fprintf(stderr, "Error: Variable '%s' has no type information at line %zu\n",
-               name, node->line);
+  const char *name = node->stmt.var_decl.name;
+  AstNode *declared_type = node->stmt.var_decl.var_type;
+  AstNode *initializer = node->stmt.var_decl.initializer;
+
+  // If there's an initializer, check its type matches the declared type
+  if (initializer) {
+    AstNode *init_type = typecheck_expression(initializer, scope, arena);
+    if (!init_type)
+      return false;
+
+    if (declared_type) {
+      TypeMatchResult match = types_match(declared_type, init_type);
+      if (match == TYPE_MATCH_NONE) {
+        fprintf(
+            stderr,
+            "Error: Type mismatch in variable declaration '%s' at line %zu\n",
+            name, node->line);
         return false;
+      }
+    } else {
+      // Type inference - use the initializer's type
+      declared_type = init_type;
     }
-    
-    return scope_add_symbol(scope, name, declared_type,
-                           node->stmt.var_decl.is_public,
-                           node->stmt.var_decl.is_mutable, arena);
+  }
+
+  if (!declared_type) {
+    fprintf(stderr,
+            "Error: Variable '%s' has no type information at line %zu\n", name,
+            node->line);
+    return false;
+  }
+
+  return scope_add_symbol(scope, name, declared_type,
+                          node->stmt.var_decl.is_public,
+                          node->stmt.var_decl.is_mutable, arena);
 }
 
 // Stub implementations for remaining functions
 bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    const char *name = node->stmt.func_decl.name;
-    AstNode *return_type = node->stmt.func_decl.return_type;
-    AstNode **param_types = node->stmt.func_decl.param_types;
-    char **param_names = node->stmt.func_decl.param_names;
-    size_t param_count = node->stmt.func_decl.param_count;
-    AstNode *body = node->stmt.func_decl.body;
-    
-    // 1. Validate return type exists and is valid
-    if (!return_type || return_type->category != Node_Category_TYPE) {
-        fprintf(stderr, "Error: Function '%s' has invalid return type at line %zu\n", 
-                name, node->line);
-        return false;
+  const char *name = node->stmt.func_decl.name;
+  AstNode *return_type = node->stmt.func_decl.return_type;
+  AstNode **param_types = node->stmt.func_decl.param_types;
+  char **param_names = node->stmt.func_decl.param_names;
+  size_t param_count = node->stmt.func_decl.param_count;
+  AstNode *body = node->stmt.func_decl.body;
+
+  // 1. Validate return type exists and is valid
+  if (!return_type || return_type->category != Node_Category_TYPE) {
+    fprintf(stderr,
+            "Error: Function '%s' has invalid return type at line %zu\n", name,
+            node->line);
+    return false;
+  }
+
+  // 2. Validate all parameter types
+  for (size_t i = 0; i < param_count; i++) {
+    const char *p_name = param_names[i];
+    AstNode *p_type = param_types[i];
+
+    if (!p_name || !p_type) {
+      fprintf(stderr,
+              "Error: Function '%s' has invalid parameter %zu at line %zu\n",
+              name, i, node->line);
+      return false;
     }
-    
-    // 2. Validate all parameter types
-    for (size_t i = 0; i < param_count; i++) {
-        const char *p_name = param_names[i];
-        AstNode *p_type = param_types[i];
-        
-        if (!p_name || !p_type) {
-            fprintf(stderr, "Error: Function '%s' has invalid parameter %zu at line %zu\n",
-                    name, i, node->line);
-            return false;
-        }
-        
-        if (p_type->category != Node_Category_TYPE) {
-            fprintf(stderr, "Error: Parameter '%s' in function '%s' has invalid type at line %zu\n",
-                    p_name, name, node->line);
-            return false;
-        }
+
+    if (p_type->category != Node_Category_TYPE) {
+      fprintf(stderr,
+              "Error: Parameter '%s' in function '%s' has invalid type at line "
+              "%zu\n",
+              p_name, name, node->line);
+      return false;
     }
-    
-    // 3. Create function type for the symbol table
-    AstNode *func_type = create_function_type(arena, param_types, param_count, return_type, 
-                                              node->line, node->column);
-    
-    // 4. Add function to current scope BEFORE checking body (for recursion)
-    if (!scope_add_symbol(scope, name, func_type, node->stmt.func_decl.is_public, false, arena)) {
-        return false;
+  }
+
+  // 3. Create function type for the symbol table
+  AstNode *func_type = create_function_type(
+      arena, param_types, param_count, return_type, node->line, node->column);
+
+  // 4. Add function to current scope BEFORE checking body (for recursion)
+  if (!scope_add_symbol(scope, name, func_type, node->stmt.func_decl.is_public,
+                        false, arena)) {
+    return false;
+  }
+
+  // 5. Create function scope for parameters and body
+  Scope *func_scope = create_child_scope(scope, name, arena);
+  func_scope->is_function_scope = true;
+  func_scope->associated_node = node;
+
+  // 6. Add parameters to function scope
+  for (size_t i = 0; i < param_count; i++) {
+    const char *p_name = param_names[i];
+    AstNode *p_type = param_types[i];
+
+    if (!scope_add_symbol(func_scope, p_name, p_type, false, true, arena)) {
+      fprintf(stderr,
+              "Error: Could not add parameter '%s' to function '%s' scope\n",
+              p_name, name);
+      return false;
     }
-    
-    // 5. Create function scope for parameters and body
-    Scope *func_scope = create_child_scope(scope, name, arena);
-    func_scope->is_function_scope = true;
-    func_scope->associated_node = node;
-    
-    // 6. Add parameters to function scope
-    for (size_t i = 0; i < param_count; i++) {
-        const char *p_name = param_names[i];
-        AstNode *p_type = param_types[i];
-        
-        if (!scope_add_symbol(func_scope, p_name, p_type, false, true, arena)) {
-            fprintf(stderr, "Error: Could not add parameter '%s' to function '%s' scope\n",
-                    p_name, name);
-            return false;
-        }
+  }
+
+  // 7. Typecheck function body in the function scope
+  if (body) {
+    if (!typecheck_statement(body, func_scope, arena)) {
+      fprintf(stderr, "Error: Function '%s' body failed typechecking\n", name);
+      return false;
     }
-    
-    // 7. Typecheck function body in the function scope
-    if (body) {
-        if (!typecheck_statement(body, func_scope, arena)) {
-            fprintf(stderr, "Error: Function '%s' body failed typechecking\n", name);
-            return false;
-        }
-        
-        // 8. Validate return statements match declared return type
-        if (!validate_function_returns(body, return_type, arena, func_scope)) {
-            fprintf(stderr, "Error: Function '%s' has mismatched return types\n", name);
-            return false;
-        }
-    }
-    return true;
+  }
+  return true;
 }
 
 bool typecheck_struct_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    // TODO: Implement struct declaration typechecking
-    const char *name = node->stmt.struct_decl.name;
-    return scope_add_symbol(scope, name, create_basic_type(arena, "struct", 0, 0),
-                           node->stmt.struct_decl.is_public, false, arena);
+  // TODO: Implement struct declaration typechecking
+  const char *name = node->stmt.struct_decl.name;
+  return scope_add_symbol(scope, name, create_basic_type(arena, "struct", 0, 0),
+                          node->stmt.struct_decl.is_public, false, arena);
 }
 
 bool typecheck_enum_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    // TODO: Implement enum declaration typechecking
-    const char *name = node->stmt.enum_decl.name;
-    return scope_add_symbol(scope, name, create_basic_type(arena, "enum", 0, 0),
-                           node->stmt.enum_decl.is_public, false, arena);
+  // TODO: Implement enum declaration typechecking
+  const char *name = node->stmt.enum_decl.name;
+  return scope_add_symbol(scope, name, create_basic_type(arena, "enum", 0, 0),
+                          node->stmt.enum_decl.is_public, false, arena);
+}
+
+bool typecheck_return_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
+  // Find the enclosing function's return type
+  AstNode *expected_return_type = get_enclosing_function_return_type(scope);
+  if (!expected_return_type) {
+    fprintf(stderr, "Error: Return statement outside of function at line %zu\n",
+            node->line);
+    return false;
+  }
+
+  AstNode *return_value = node->stmt.return_stmt.value;
+
+  // Check if function expects void
+  bool expects_void =
+      (expected_return_type->type == AST_TYPE_BASIC &&
+       strcmp(expected_return_type->type_data.basic.name, "void") == 0);
+
+  if (expects_void && return_value != NULL) {
+    fprintf(stderr, "Error: Void function cannot return a value at line %zu\n",
+            node->line);
+    return false;
+  }
+
+  if (!expects_void) {
+    if (!return_value) {
+      fprintf(stderr,
+              "Error: Non-void function must return a value at line %zu\n",
+              node->line);
+      return false;
+    }
+
+    // Typecheck with current scope where x is visible
+    AstNode *actual_return_type =
+        typecheck_expression(return_value, scope, arena);
+    if (!actual_return_type)
+      return false;
+
+    TypeMatchResult match =
+        types_match(expected_return_type, actual_return_type);
+    if (match == TYPE_MATCH_NONE) {
+      fprintf(stderr, "Error: Return type mismatch at line %zu\n", node->line);
+      return false;
+    }
+  }
+
+  return true;
 }

@@ -185,92 +185,14 @@ const char *type_to_string(AstNode *type, ArenaAllocator *arena) {
     }
 }
 
-void collect_return_statements(AstNode *node, AstNode ***returns, size_t *return_count, ArenaAllocator *arena) {
-    if (!node) return;
-    
-    // If this is a return statement, add it to our collection
-    if (node->category == Node_Category_STMT && node->type == AST_STMT_RETURN) {
-        // Grow the array if needed
-        *returns = arena_alloc(arena, (*return_count + 1) * sizeof(AstNode*), alignof(AstNode));
-        (*returns)[*return_count] = node;
-        (*return_count)++;
-        return; // Don't recurse into return statements
-    }
-    
-    // Recursively search through different node types
-    switch (node->category) {
-        case Node_Category_STMT:
-            switch (node->type) {
-                case AST_STMT_BLOCK:
-                    for (size_t i = 0; i < node->stmt.block.stmt_count; i++) {
-                        collect_return_statements(node->stmt.block.statements[i], returns, return_count, arena);
-                    }
-                    break;
-                    
-                case AST_STMT_IF:
-                    collect_return_statements(node->stmt.if_stmt.then_stmt, returns, return_count, arena);
-                    for (int i = 0; i < node->stmt.if_stmt.elif_count; i++) {
-                        collect_return_statements(node->stmt.if_stmt.elif_stmts[i], returns, return_count, arena);
-                    }
-                    if (node->stmt.if_stmt.else_stmt) {
-                        collect_return_statements(node->stmt.if_stmt.else_stmt, returns, return_count, arena);
-                    }
-                    break;
-                    
-                case AST_STMT_LOOP:
-                    collect_return_statements(node->stmt.loop_stmt.body, returns, return_count, arena);
-                    break;
-                    
-                case AST_STMT_FUNCTION:
-                    // Don't recurse into nested functions
-                    break;
-                    
-                default:
-                    // For other statement types, we don't expect returns
-                    break;
-            }
-            break;
-            
-        default:
-            // Expressions and types don't contain return statements
-            break;
-    }
-}
-
-bool validate_function_returns(AstNode *body, AstNode *expected_return_type, ArenaAllocator *arena, Scope *scope) {
-    if (!body || !expected_return_type) return false;
-    
-    // Collect all return statements in the function body
-    AstNode **return_stmts = NULL;
-    size_t return_count = 0;
-    
-    collect_return_statements(body, &return_stmts, &return_count, arena);
-    
-    // Check if function should return void
-    bool expects_void = (expected_return_type->type == AST_TYPE_BASIC && 
-                        strcmp(expected_return_type->type_data.basic.name, "void") == 0);
-    
-    // If expecting void, all returns should have no value
-    if (expects_void) {
-        for (size_t i = 0; i < return_count; i++) {
-            if (return_stmts[i]->stmt.return_stmt.value != NULL) {
-                fprintf(stderr, "    Error: Void function cannot return a value\n");
-                return false;
-            }
+AstNode *get_enclosing_function_return_type(Scope *scope) {
+    while (scope) {
+        if (scope->is_function_scope && scope->associated_node) {
+            return scope->associated_node->stmt.func_decl.return_type;
         }
-        return true;
+        scope = scope->parent;
     }
-    
-    // For non-void functions, check all return values match expected type
-    for (size_t i = 0; i < return_count; i++) {
-        AstNode *return_value = typecheck_expression(return_stmts[i]->stmt.return_stmt.value, scope, arena);
-        TypeMatchResult result = types_match(expected_return_type, return_value);
-        
-        if (result == TYPE_MATCH_NONE) return false;
-        continue;
-    }
-    
-    return true;
+    return NULL;
 }
 
 /**
