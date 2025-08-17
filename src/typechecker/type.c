@@ -10,30 +10,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "../ast/ast_utils.h"
 #include "type.h"
 
-/**
- * @brief Compare two AST type nodes for compatibility
- * 
- * Performs comprehensive type matching including exact matches and compatible
- * conversions. Handles basic types, pointer types, and array types with
- * recursive comparison for complex types.
- * 
- * @param type1 First type node to compare
- * @param type2 Second type node to compare
- * @return TYPE_MATCH_EXACT for identical types, TYPE_MATCH_COMPATIBLE for 
- *         implicitly convertible types, TYPE_MATCH_NONE for incompatible types
- * 
- * @details
- * Comparison rules:
- * - Identical pointers return TYPE_MATCH_EXACT
- * - Basic types: exact string match returns TYPE_MATCH_EXACT
- * - Numeric compatibility: int/float conversions return TYPE_MATCH_COMPATIBLE
- * - Pointer types: recursively compare pointee types
- * - Array types: recursively compare element types
- * - All other combinations return TYPE_MATCH_NONE
- */
 TypeMatchResult types_match(AstNode *type1, AstNode *type2) {
     // Null pointer safety check
     if (!type1 || !type2) return TYPE_MATCH_NONE;
@@ -77,18 +55,6 @@ TypeMatchResult types_match(AstNode *type1, AstNode *type2) {
     return TYPE_MATCH_NONE;
 }
 
-/**
- * @brief Check if an AST type node represents a numeric type
- * 
- * Determines whether the given type is a basic numeric type that supports
- * arithmetic operations. Currently supports int, float, double, and char types.
- * 
- * @param type AST type node to examine
- * @return true if the type is numeric (int, float, double, char), false otherwise
- * 
- * @note char is considered numeric as it can participate in arithmetic operations
- *       and has an underlying integer representation
- */
 bool is_numeric_type(AstNode *type) {
     // Validate input and ensure it's a basic type node
     if (!type || type->category != Node_Category_TYPE || type->type != AST_TYPE_BASIC) {
@@ -102,54 +68,14 @@ bool is_numeric_type(AstNode *type) {
            strcmp(name, "char") == 0;
 }
 
-/**
- * @brief Check if an AST type node represents a pointer type
- * 
- * Simple type classification function that determines if the given
- * type node represents a pointer to another type.
- * 
- * @param type AST type node to examine
- * @return true if the type is a pointer type, false otherwise
- */
 bool is_pointer_type(AstNode *type) {
     return type && type->category == Node_Category_TYPE && type->type == AST_TYPE_POINTER;
 }
 
-/**
- * @brief Check if an AST type node represents an array type
- * 
- * Simple type classification function that determines if the given
- * type node represents an array of elements.
- * 
- * @param type AST type node to examine
- * @return true if the type is an array type, false otherwise
- */
 bool is_array_type(AstNode *type) {
     return type && type->category == Node_Category_TYPE && type->type == AST_TYPE_ARRAY;
 }
 
-/**
- * @brief Convert an AST type node to a human-readable string representation
- * 
- * Generates a string representation of the type suitable for error messages,
- * debugging output, and user-facing diagnostics. Handles basic types, pointers,
- * and arrays with appropriate syntax.
- * 
- * @param type AST type node to convert
- * @param arena Arena allocator for string allocation
- * @return Allocated string representation of the type
- * 
- * @details
- * String format examples:
- * - Basic types: "int", "float", "char"
- * - Pointer types: "int*", "float*"
- * - Array types: "int[]", "float[]"
- * - Nested types: "int*[]" (array of int pointers)
- * - Invalid/unknown types: "unknown"
- * 
- * @note The returned string is allocated using the provided arena allocator
- *       and will be automatically freed when the arena is destroyed
- */
 const char *type_to_string(AstNode *type, ArenaAllocator *arena) {
     // Handle null or invalid type nodes
     if (!type || type->category != Node_Category_TYPE) {
@@ -195,30 +121,6 @@ AstNode *get_enclosing_function_return_type(Scope *scope) {
     return NULL;
 }
 
-/**
- * @brief Print detailed debug information for a scope and its hierarchy
- * 
- * Recursively prints the complete scope tree structure including symbols,
- * child scopes, and metadata. Useful for debugging scope resolution issues
- * and understanding the program's symbol table structure.
- * 
- * @param scope Root scope to start printing from
- * @param indent_level Current indentation level for nested display
- * 
- * @details
- * Output format includes:
- * - Scope name, depth, symbol count, and child count
- * - All symbols with their types and attributes (public, mutable)
- * - Recursive display of all child scopes with increased indentation
- * 
- * @note This function uses printf for output and is intended for debugging
- *       purposes only. In a production system, consider using a logging
- *       framework or redirecting output to a debug stream.
- * 
- * @warning This function performs pointer arithmetic on GrowableArray data
- *          and assumes the arrays contain Symbol and Scope* elements respectively.
- *          Ensure the arrays are properly initialized before calling this function.
- */
 void debug_print_scope(Scope *scope, int indent_level) {
     // Print current scope header with metadata
     for (int i = 0; i < indent_level; i++) printf("  ");

@@ -1,48 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../ast/ast_utils.h"
 #include "type.h"
-
-bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
-  switch (stmt->type) {
-  case AST_PROGRAM:
-    for (size_t i = 0; i < stmt->stmt.program.stmt_count; i++) {
-      if (!typecheck(stmt->stmt.program.statements[i], scope, arena)) {
-        return false;
-      }
-    }
-    return true;
-
-  case AST_STMT_VAR_DECL:
-    return typecheck_var_decl(stmt, scope, arena);
-  case AST_STMT_FUNCTION:
-    return typecheck_func_decl(stmt, scope, arena);
-  case AST_STMT_STRUCT:
-    return typecheck_struct_decl(stmt, scope, arena);
-  case AST_STMT_ENUM:
-    return typecheck_enum_decl(stmt, scope, arena);
-  case AST_STMT_EXPRESSION:
-    return typecheck_expression(stmt->stmt.expr_stmt.expression, scope, arena);
-  case AST_STMT_RETURN: 
-    return typecheck_return_decl(stmt, scope, arena);
-
-  case AST_STMT_BLOCK: {
-    // Create new scope for block
-    Scope *block_scope = create_child_scope(scope, "block", arena);
-    for (size_t i = 0; i < stmt->stmt.block.stmt_count; i++) {
-      if (!typecheck(stmt->stmt.block.statements[i], block_scope, arena)) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  default:
-    printf("Warning: Unhandled statement type %d\n", stmt->type);
-    return true; // Don't fail on unimplemented statements yet
-  }
-}
 
 bool typecheck_var_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   const char *name = node->stmt.var_decl.name;

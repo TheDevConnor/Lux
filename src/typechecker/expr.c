@@ -2,65 +2,6 @@
 
 #include "type.h"
 
-AstNode *typecheck_expression(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
-    switch (expr->type) {
-        case AST_EXPR_LITERAL: {
-            // Return appropriate type based on literal type
-            switch (expr->expr.literal.lit_type) {
-                case LITERAL_INT:
-                    return create_basic_type(arena, "int", expr->line, expr->column);
-                case LITERAL_FLOAT:
-                    return create_basic_type(arena, "float", expr->line, expr->column);
-                case LITERAL_STRING:
-                    return create_basic_type(arena, "string", expr->line, expr->column);
-                case LITERAL_BOOL:
-                    return create_basic_type(arena, "bool", expr->line, expr->column);
-                case LITERAL_CHAR:
-                    return create_basic_type(arena, "char", expr->line, expr->column);
-                case LITERAL_NULL:
-                    return create_basic_type(arena, "null", expr->line, expr->column);
-                default:
-                    return NULL;
-            }
-        }
-        
-        case AST_EXPR_IDENTIFIER: {
-            Symbol *symbol = scope_lookup(scope, expr->expr.identifier.name);
-            if (!symbol) {
-                fprintf(stderr, "Error: Undefined identifier '%s' at line %zu\n", 
-                       expr->expr.identifier.name, expr->line);
-                return NULL;
-            }
-            return symbol->type;
-        }
-        
-        case AST_EXPR_BINARY:
-            return typecheck_binary_expr(expr, scope, arena);
-        
-        case AST_EXPR_CALL:
-            return typecheck_call_expr(expr, scope, arena);
-        
-        case AST_EXPR_ASSIGNMENT: {
-            AstNode *target_type = typecheck_expression(expr->expr.assignment.target, scope, arena);
-            AstNode *value_type = typecheck_expression(expr->expr.assignment.value, scope, arena);
-            
-            if (!target_type || !value_type) return NULL;
-            
-            TypeMatchResult match = types_match(target_type, value_type);
-            if (match == TYPE_MATCH_NONE) {
-                fprintf(stderr, "Error: Type mismatch in assignment at line %zu\n", expr->line);
-                return NULL;
-            }
-            
-            return target_type;
-        }
-        
-        default:
-            printf("Warning: Unhandled expression type %d\n", expr->type);
-            return create_basic_type(arena, "unknown", expr->line, expr->column);
-    }
-}
-
 AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
     AstNode *left_type = typecheck_expression(expr->expr.binary.left, scope, arena);
     AstNode *right_type = typecheck_expression(expr->expr.binary.right, scope, arena);
