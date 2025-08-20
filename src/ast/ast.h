@@ -22,6 +22,8 @@ typedef enum {
   AST_EXPR_INDEX,      // Array/object indexing (obj[index])
   AST_EXPR_GROUPING,   // Parenthesized expressions
   AST_EXPR_ARRAY,      // [ ... ] array expressions
+  AST_EXPR_DEREF,      // *object
+  AST_EXPR_ADDR,       // &object
 
   // Statement nodes
   AST_PROGRAM,             // Program root node
@@ -186,6 +188,16 @@ struct AstNode {
           AstNode **elements; // Changed from Expr** to AstNode**
           size_t element_count;
         } array;
+
+        // Deref expression
+        struct {
+          AstNode *object;
+        } deref;
+
+        // Address expersion
+        struct {
+          AstNode *object;
+        } addr;
       };
     } expr;
 
@@ -356,29 +368,19 @@ AstNode *create_ast_node(ArenaAllocator *arena, NodeType type,
                          NodeCategory category, size_t line, size_t column);
 
 // Expression creation macros
-AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type,
-                             void *value, size_t line, size_t column);
-AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name,
-                                size_t line, size_t column);
-AstNode *create_binary_expr(ArenaAllocator *arena, BinaryOp op, Expr *left,
-                            Expr *right, size_t line, size_t column);
-AstNode *create_unary_expr(ArenaAllocator *arena, UnaryOp op, Expr *operand,
-                           size_t line, size_t column);
-AstNode *create_call_expr(ArenaAllocator *arena, Expr *callee, Expr **args,
-                          size_t arg_count, size_t line, size_t column);
-AstNode *create_assignment_expr(ArenaAllocator *arena, Expr *target,
-                                Expr *value, size_t line, size_t column);
-AstNode *create_ternary_expr(ArenaAllocator *arena, Expr *condition,
-                             Expr *then_expr, Expr *else_expr, size_t line,
-                             size_t column);
-AstNode *create_member_expr(ArenaAllocator *arena, Expr *object,
-                            const char *member, size_t line, size_t column);
-AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index,
-                           size_t line, size_t column);
-AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line,
-                              size_t column);
-AstNode *create_array_expr(ArenaAllocator *arena, Expr **elements,
-                           size_t element_count, size_t line, size_t column);
+AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *value, size_t line, size_t column);
+AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name, size_t line, size_t column);
+AstNode *create_binary_expr(ArenaAllocator *arena, BinaryOp op, Expr *left, Expr *right, size_t line, size_t column);
+AstNode *create_unary_expr(ArenaAllocator *arena, UnaryOp op, Expr *operand, size_t line, size_t column);
+AstNode *create_call_expr(ArenaAllocator *arena, Expr *callee, Expr **args, size_t arg_count, size_t line, size_t column);
+AstNode *create_assignment_expr(ArenaAllocator *arena, Expr *target, Expr *value, size_t line, size_t column);
+AstNode *create_ternary_expr(ArenaAllocator *arena, Expr *condition, Expr *then_expr, Expr *else_expr, size_t line, size_t column);
+AstNode *create_member_expr(ArenaAllocator *arena, Expr *object, const char *member, size_t line, size_t column);
+AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index, size_t line, size_t column);
+AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line, size_t column);
+AstNode *create_array_expr(ArenaAllocator *arena, Expr **elements, size_t element_count, size_t line, size_t column);
+AstNode *create_deref_expr(ArenaAllocator *arena, Expr *object, size_t line, size_t col);
+AstNode *create_addr_expr(ArenaAllocator *arena, Expr *object, size_t line, size_t col);
 
 // Statement creation macros
 AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);

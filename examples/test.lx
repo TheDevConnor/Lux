@@ -11,14 +11,8 @@ const add = fn (a: int, b: int) int {
 }
 
 const main = fn () int {
-    let x: int = 0;
+    let y: int = 50;
+    let x: *int = &y;
 
-    if (x < 5 || x > 5) { 
-        let y: int = x;
-        return add("1", 4);
-    } else {
-        return Color.RED;
-    }
-
-    return X;
+    return *x;
 }

@@ -115,3 +115,15 @@ AstNode *create_array_expr(ArenaAllocator *arena, AstNode **elements, size_t ele
     node->expr.array.element_count = element_count;
     return node;
 }
+
+AstNode *create_deref_expr(ArenaAllocator *arena, Expr *object, size_t line, size_t col) {
+  AstNode *node = create_expr(arena, AST_EXPR_DEREF, line, col);
+  node->expr.deref.object = object;
+  return node;
+}
+
+AstNode *create_addr_expr(ArenaAllocator *arena, Expr *object, size_t line, size_t col) {
+  AstNode *node = create_expr(arena, AST_EXPR_ADDR, line, col);
+  node->expr.addr.object = object;
+  return node;
+}

@@ -36,6 +36,10 @@ const char *node_type_to_string(NodeType type) {
     return "Grouping";
   case AST_EXPR_ARRAY:
     return "Array";
+  case AST_EXPR_ADDR:
+    return "ADDR";
+  case AST_EXPR_DEREF:
+    return "DEREF";
   case AST_STMT_EXPRESSION:
     return "ExprStmt";
   case AST_STMT_VAR_DECL:
@@ -414,6 +418,28 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     } else {
       print_prefix(next_prefix, true);
       printf(GRAY("<no else expression>\n"));
+    }
+    break;
+
+  case AST_EXPR_DEREF:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Deref Expression: \n"));
+    if (node->expr.deref.object) {
+      print_ast(node->expr.deref.object, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no condition>\n"));
+    }
+    break;
+
+  case AST_EXPR_ADDR:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Addr Expression: \n"));
+    if (node->expr.addr.object) {
+      print_ast(node->expr.addr.object, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no condition>\n"));
     }
     break;
 

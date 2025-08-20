@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../ast/ast_utils.h"
 #include "type.h"
 
 AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
@@ -129,4 +130,28 @@ AstNode *typecheck_member_expr(AstNode *expr, Scope *scope, ArenaAllocator *aren
     }
     
     return member_symbol->type;
+}
+
+AstNode *typecheck_deref_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    AstNode *pointer_type = typecheck_expression(expr->expr.deref.object, scope, arena);
+    if (!pointer_type) {
+        fprintf(stderr, "Error: Failed to type-check dereferenced expression at line %zu\n", expr->line);
+        return NULL;
+    }
+    if (pointer_type->type != AST_TYPE_POINTER) {
+        fprintf(stderr, "Error: Cannot dereference non-pointer type at line %zu\n", expr->line);
+        return NULL;
+    }
+    return pointer_type->type_data.pointer.pointee_type;
+}
+
+
+AstNode *typecheck_addr_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    AstNode *base_type = typecheck_expression(expr->expr.addr.object, scope, arena);
+    if (!base_type) {
+        fprintf(stderr, "Error: Failed to type-check address-of expression at line %zu\n", expr->line);
+        return NULL;
+    }
+    AstNode *pointer_type = create_pointer_type(arena, base_type, expr->line, expr->column);
+    return pointer_type;
 }

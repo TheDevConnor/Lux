@@ -99,7 +99,13 @@ AstNode *typecheck_expression(AstNode *expr, Scope *scope, ArenaAllocator *arena
 
         case AST_EXPR_MEMBER:
           return typecheck_member_expr(expr, scope, arena);
-        
+
+        case AST_EXPR_DEREF:
+          return typecheck_deref_expr(expr, scope, arena);
+
+        case AST_EXPR_ADDR:
+          return typecheck_addr_expr(expr, scope, arena);
+
         default:
             printf("Warning: Unhandled expression type %d\n", expr->type);
             return create_basic_type(arena, "unknown", expr->line, expr->column);

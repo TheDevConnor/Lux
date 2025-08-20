@@ -391,6 +391,13 @@ Stmt *var_stmt(Parser *parser, bool is_public) {
   Type *type = parse_type(parser);
   p_advance(parser); // Advance past the type token
 
+  if (p_current(parser).type_ != TOK_EQUAL) {
+      p_consume(parser, TOK_SEMICOLON,
+          "Expected semicolon after variable declaration");
+      return create_var_decl_stmt(parser->arena, name, type, NULL, true, is_public,
+                              line, col);
+  }
+
   p_consume(parser, TOK_EQUAL, "Expected '=' after variable declaration");
 
   Expr *value = parse_expr(parser, BP_LOWEST);

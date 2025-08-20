@@ -418,3 +418,23 @@ Expr *array_expr(Parser *parser) {
   return create_array_expr(parser->arena, (Expr **)elements.data,
                            elements.count, line, col);
 }
+
+Expr *deref_expr(Parser *parser) {
+  p_advance(parser); // Advance past the *  
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  Expr *object = parse_expr(parser, BP_NONE);
+
+  return create_deref_expr(parser->arena, object, line, col);
+}
+
+Expr *addr_expr(Parser *parser) {
+  p_advance(parser); // Advance past the & 
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  Expr *object = parse_expr(parser, BP_NONE);
+
+  return create_addr_expr(parser->arena, object, line, col);
+}

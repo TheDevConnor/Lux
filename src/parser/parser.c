@@ -246,6 +246,10 @@ Expr *nud(Parser *parser) {
     return grouping(parser);
   case TOK_LBRACKET:
     return array_expr(parser);
+  case TOK_STAR:
+    return deref_expr(parser);
+  case TOK_AMP:
+    return addr_expr(parser);
   default:
     p_advance(parser);
     return NULL;
