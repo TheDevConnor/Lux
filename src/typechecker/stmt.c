@@ -215,15 +215,21 @@ bool typecheck_if_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     return false;
   }
 
-  typecheck_statement(node->stmt.if_stmt.then_stmt, then_branch, arena);
+  if (node->stmt.if_stmt.then_stmt != NULL) {
+    typecheck_statement(node->stmt.if_stmt.then_stmt, then_branch, arena);
+  }
 
   // TODO: Handle elif cases
-  // for (int i = 0; i < node->stmt.if_stmt.elif_count; i++) {
-  //   typecheck_statement(node->stmt.if_stmt.elif_stmts[i], then_branch,
-  //   arena);
-  // }
+  for (int i = 0; i < node->stmt.if_stmt.elif_count; i++) {
+    if (node->stmt.if_stmt.elif_stmts[i] != NULL) {
+      typecheck_statement(node->stmt.if_stmt.elif_stmts[i], then_branch,
+      arena);
+    }
+  }
 
-  typecheck_statement(node->stmt.if_stmt.else_stmt, else_branch, arena);
+  if (node->stmt.if_stmt.else_stmt != NULL) {
+    typecheck_statement(node->stmt.if_stmt.else_stmt, else_branch, arena);
+  }
 
   return true;
 }

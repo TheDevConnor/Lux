@@ -11,6 +11,93 @@
 #include "../typechecker/type.h"
 #include "help.h"
 
+// Helper to save all output files
+void save_output_files(CodeGenContext *ctx, const char *base_name) {
+  char filename[256];
+  
+  // Save readable LLVM IR
+  snprintf(filename, sizeof(filename), "%s.ll", base_name);
+  char *ir = print_llvm_ir(ctx);
+  if (ir) {
+    FILE *f = fopen(filename, "w");
+    if (f) {
+      fprintf(f, "%s", ir);
+      fclose(f);
+      printf("✓ LLVM IR saved to %s\n", filename);
+    }
+    LLVMDisposeMessage(ir);
+  }
+
+  printf("✓ LLVM bitcode saved to %s.bc\n", base_name);
+
+  // Generate object file
+  printf("\n=== Object File Generation ===\n");
+  snprintf(filename, sizeof(filename), "%s.o", base_name);
+  if (generate_object_file(ctx, filename)) {
+    printf("✓ Object file saved to %s\n", filename);
+    
+    // Generate assembly file
+    snprintf(filename, sizeof(filename), "%s.s", base_name);
+    if (generate_assembly_file(ctx, filename)) {
+      printf("✓ Assembly file saved to %s\n", filename);
+    }
+    
+    // Link executable
+    printf("\n=== Linking ===\n");
+    snprintf(filename, sizeof(filename), "%s.o", base_name);
+    char exe_name[256];
+    snprintf(exe_name, sizeof(exe_name), "%s", base_name);
+    
+    if (link_with_ld_simple(filename, exe_name)) {
+      printf("✓ Executable created: %s\n", exe_name);
+      printf("Run with: ./%s\n", exe_name);
+    } else {
+      printf("✗ Linking failed! Manual linking options:\n");
+      printf("  gcc %s -o %s\n", filename, base_name);
+      printf("  clang %s -o %s\n", filename, base_name);
+    }
+  } else {
+    printf("✗ Object file generation failed!\n");
+  }
+}
+
+// Simplified LLVM code generation helper
+bool generate_llvm_code(AstNode *root, BuildConfig config, ArenaAllocator *allocator) {
+  printf("\n=== LLVM Code Generation ===\n");
+
+  // Initialize LLVM context
+  CodeGenContext *ctx = init_codegen_context(allocator, "main_module");
+  if (!ctx) {
+    fprintf(stderr, "Failed to initialize LLVM codegen context\n");
+    return false;
+  }
+
+  const char *base_name = config.name ? config.name : "output";
+  
+  // Generate IR
+  char bc_file[256];
+  if (config.save) {
+    snprintf(bc_file, sizeof(bc_file), "%s.bc", base_name);
+  }
+  
+  bool success = generate_llvm_ir(ctx, root, config.save ? bc_file : NULL);
+  if (!success) {
+    printf("✗ LLVM IR generation failed!\n");
+    cleanup_codegen_context(ctx);
+    return false;
+  }
+
+  printf("✓ LLVM IR generation successful!\n");
+
+  // Save files if requested
+  if (config.save) {
+    save_output_files(ctx, base_name);
+  }
+
+  cleanup_codegen_context(ctx);
+  return true;
+}
+
 /**
  * @brief Runs the build process using given configuration and allocator.
  *
@@ -54,85 +141,16 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   AstNode *root = parse(&tokens, allocator);
   if (error_report())
     goto cleanup;
-  print_ast(root, "", true, true);
+  // print_ast(root, "", true, true);
 
   Scope root_scope;
   init_scope(&root_scope, NULL, "global", allocator);
 
   bool tc = typecheck(root, &root_scope, allocator);
-  debug_print_scope(&root_scope, 0);
+  // debug_print_scope(&root_scope, 0);
 
   if (tc) {
-    printf("\n=== LLVM Code Generation ===\n");
-
-    CodeGenContext *codegen_ctx =
-        init_codegen_context(allocator, "main_module");
-    if (!codegen_ctx) {
-      fprintf(stderr, "Failed to initialize LLVM codegen context\n");
-      goto cleanup;
-    }
-
-    const char *base_name = config.name ? config.name : "output";
-    char bc_filename[256];
-    const char *output_file = NULL;
-    if (config.save) {
-      snprintf(bc_filename, sizeof(bc_filename), "%s.bc", base_name);
-      output_file = bc_filename;
-    }
-
-    bool codegen_success = generate_llvm_ir(codegen_ctx, root, output_file);
-    if (!codegen_success) {
-      printf("✗ LLVM IR generation failed!\n");
-      cleanup_codegen_context(codegen_ctx);
-      goto cleanup;
-    }
-
-    printf("✓ LLVM IR generation successful!\n");
-
-    // Print IR
-    char *ir = print_llvm_ir(codegen_ctx);
-    if (ir) {
-      printf("\nGenerated LLVM IR:\n==================\n%s\n", ir);
-      LLVMDisposeMessage(ir);
-    }
-
-    if (config.save) {
-      printf("✓ LLVM bitcode saved to %s\n", bc_filename);
-
-      char ir_filename[256], obj_filename[256], asm_filename[256];
-      snprintf(ir_filename, sizeof(ir_filename), "%s.ll", base_name);
-      snprintf(obj_filename, sizeof(obj_filename), "%s.o", base_name);
-      snprintf(asm_filename, sizeof(asm_filename), "%s.s", base_name);
-
-      char *ir_readable = print_llvm_ir(codegen_ctx);
-      if (ir_readable) {
-        FILE *ir_file = fopen(ir_filename, "w");
-        if (ir_file) {
-          fprintf(ir_file, "%s", ir_readable);
-          fclose(ir_file);
-          printf("✓ Human-readable LLVM IR saved to %s\n", ir_filename);
-        }
-        LLVMDisposeMessage(ir_readable);
-      }
-
-      printf("\n=== Object File Generation ===\n");
-      if (generate_object_file(codegen_ctx, obj_filename)) {
-        printf("✓ Object file saved to %s\n", obj_filename);
-        if (generate_assembly_file(codegen_ctx, asm_filename)) {
-          printf("✓ Assembly file saved to %s\n", asm_filename);
-        }
-        printf("\n=== Creating Executable ===\n"
-               "To create an executable, run:\n"
-               "  gcc %s -o %s\n"
-               "or\n"
-               "  clang %s -o %s\n",
-               obj_filename, base_name, obj_filename, base_name);
-      } else {
-        printf("✗ Object file generation failed!\n");
-      }
-    }
-
-    cleanup_codegen_context(codegen_ctx);
+    success = generate_llvm_code(root, config, allocator);
   } else {
     printf("Skipping LLVM code generation due to type checking errors.\n");
   }
@@ -141,8 +159,6 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
     printf("Building target: %s\n", config.name);
   if (config.clean)
     printf("Cleaning build artifacts.\n");
-
-  success = tc;
 
 cleanup:
   free((void *)source);

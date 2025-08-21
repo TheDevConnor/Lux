@@ -3,8 +3,6 @@
 LLVMTypeRef codegen_type_basic(CodeGenContext *ctx, AstNode *node) {
   const char *type_name = node->type_data.basic.name;
   if (strcmp(type_name, "int") == 0) {
-    return LLVMInt32TypeInContext(ctx->context);
-  } else if (strcmp(type_name, "i64") == 0) {
     return LLVMInt64TypeInContext(ctx->context);
   } else if (strcmp(type_name, "float") == 0) {
     return LLVMFloatTypeInContext(ctx->context);

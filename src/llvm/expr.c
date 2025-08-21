@@ -3,7 +3,7 @@
 LLVMValueRef codegen_expr_literal(CodeGenContext *ctx, AstNode *node) {
   switch (node->expr.literal.lit_type) {
   case LITERAL_INT:
-    return LLVMConstInt(LLVMInt32TypeInContext(ctx->context),
+    return LLVMConstInt(LLVMInt64TypeInContext(ctx->context),
                         node->expr.literal.value.int_val, false);
   case LITERAL_FLOAT:
     return LLVMConstReal(LLVMFloatTypeInContext(ctx->context),

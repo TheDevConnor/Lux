@@ -44,66 +44,19 @@ typedef struct {
   bool clean;           /**< Flag to clean build artifacts */
 } BuildConfig;
 
-/**
- * @brief Check if argc is at least expected number.
- *
- * @param argc Actual argc
- * @param expected Expected argc
- * @return true if argc >= expected, false otherwise
- */
 bool check_argc(int argc, int expected);
-
-/**
- * @brief Reads entire file content into memory.
- *
- * @param filename Path to the file
- * @return Pointer to file content or NULL if error
- */
 const char *read_file(const char *filename);
 
-/**
- * @brief Prints the help message describing usage and options.
- *
- * @return Always returns 0
- */
 int print_help();
-
-/**
- * @brief Prints the version string.
- *
- * @return Always returns 0
- */
 int print_version();
-
-/**
- * @brief Prints license information.
- *
- * @return Always returns 0
- */
 int print_license();
 
-/**
- * @brief Parses command-line arguments into a BuildConfig.
- *
- * @param argc Argument count
- * @param argv Argument vector
- * @param config Output config struct to fill
- * @return false if help/version/license printed or error, true otherwise
- */
 bool parse_args(int argc, char *argv[], BuildConfig *config);
-
-/**
- * @brief Runs the build given the configuration and memory allocator.
- *
- * @param config Build configuration options
- * @param allocator Arena allocator for memory management
- * @return true on success, false on failure
- */
 bool run_build(BuildConfig config, ArenaAllocator *allocator);
 
-/**
- * @brief Prints a token's textual representation and token type.
- *
- * @param t Pointer to token to print
- */
 void print_token(const Token *t);
+
+bool link_with_ld(const char *obj_filename, const char *exe_filename);
+bool get_gcc_file_path(const char *filename, char *buffer, size_t buffer_size);
+bool get_lib_paths(char *buffer, size_t buffer_size);
+bool link_with_ld_simple(const char *obj_filename, const char *exe_filename);

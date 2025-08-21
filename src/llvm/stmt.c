@@ -105,6 +105,10 @@ LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
 
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {
   for (size_t i = 0; i < node->stmt.block.stmt_count; i++) {
+    // Stop processing if we hit a terminator
+    if (LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
+      break;
+    }
     codegen_stmt(ctx, node->stmt.block.statements[i]);
   }
   return NULL;
@@ -131,13 +135,21 @@ LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node) {
   // Generate then block
   LLVMPositionBuilderAtEnd(ctx->builder, then_block);
   codegen_stmt(ctx, node->stmt.if_stmt.then_stmt);
-  LLVMBuildBr(ctx->builder, merge_block);
+  
+  // Only add branch if block isn't already terminated
+  if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
+    LLVMBuildBr(ctx->builder, merge_block);
+  }
 
   // Generate else block if it exists
   if (else_block) {
     LLVMPositionBuilderAtEnd(ctx->builder, else_block);
     codegen_stmt(ctx, node->stmt.if_stmt.else_stmt);
-    LLVMBuildBr(ctx->builder, merge_block);
+    
+    // Only add branch if block isn't already terminated
+    if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
+      LLVMBuildBr(ctx->builder, merge_block);
+    }
   }
 
   // Continue with merge block
