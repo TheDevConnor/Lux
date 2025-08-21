@@ -23,7 +23,6 @@ LLVMValueRef codegen_expr(CodeGenContext *ctx, AstNode *node) {
   }
 }
 
-// Generate code for statements
 LLVMValueRef codegen_stmt(CodeGenContext *ctx, AstNode *node) {
   if (!node || node->category != Node_Category_STMT) {
     return NULL;
@@ -49,7 +48,6 @@ LLVMValueRef codegen_stmt(CodeGenContext *ctx, AstNode *node) {
   }
 }
 
-// Generate code for types
 LLVMTypeRef codegen_type(CodeGenContext *ctx, AstNode *node) {
   if (!node || node->category != Node_Category_TYPE) {
     return NULL;

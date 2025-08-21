@@ -7,3 +7,9 @@ docs/doxygen/
 docs/html/
 docs/latex/
 docs/xml/
+
+#ignore output from llvm
+*.bc
+*.ll
+*.o
+*.s

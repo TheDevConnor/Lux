@@ -138,7 +138,6 @@ bool generate_assembly_file(CodeGenContext *ctx, const char *asm_filename) {
   return true;
 }
 
-// Symbol table operations (unchanged)
 void add_symbol(CodeGenContext *ctx, const char *name, LLVMValueRef value,
                 LLVMTypeRef type, bool is_function) {
   LLVM_Symbol *sym = (LLVM_Symbol *)arena_alloc(ctx->arena, sizeof(LLVM_Symbol),
@@ -170,6 +169,7 @@ void cleanup_codegen_context(CodeGenContext *ctx) {
     LLVMDisposeBuilder(ctx->builder);
     LLVMDisposeModule(ctx->module);
     LLVMContextDispose(ctx->context);
+    LLVMShutdown();
   }
 }
 
@@ -188,6 +188,9 @@ bool generate_llvm_ir(CodeGenContext *ctx, AstNode *ast_root,
     fprintf(stderr, "Module verification failed: %s\n", error);
     LLVMDisposeMessage(error);
     return false;
+  }
+  if (error) {
+    LLVMDisposeMessage(error); // Free if not NULL
   }
 
   // Write bitcode file if specified

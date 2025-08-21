@@ -1,6 +1,5 @@
 #include "llvm.h"
 
-// Type basic handler
 LLVMTypeRef codegen_type_basic(CodeGenContext *ctx, AstNode *node) {
   const char *type_name = node->type_data.basic.name;
   if (strcmp(type_name, "int") == 0) {
@@ -21,7 +20,6 @@ LLVMTypeRef codegen_type_basic(CodeGenContext *ctx, AstNode *node) {
   return NULL;
 }
 
-// Type pointer handler
 LLVMTypeRef codegen_type_pointer(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef pointee = codegen_type(ctx, node->type_data.pointer.pointee_type);
   if (pointee) {
@@ -30,7 +28,6 @@ LLVMTypeRef codegen_type_pointer(CodeGenContext *ctx, AstNode *node) {
   return NULL;
 }
 
-// Type array handler
 LLVMTypeRef codegen_type_array(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef element_type =
       codegen_type(ctx, node->type_data.array.element_type);
@@ -47,7 +44,6 @@ LLVMTypeRef codegen_type_array(CodeGenContext *ctx, AstNode *node) {
   return NULL;
 }
 
-// Type function handler
 LLVMTypeRef codegen_type_function(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef return_type =
       codegen_type(ctx, node->type_data.function.return_type);

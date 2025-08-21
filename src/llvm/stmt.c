@@ -7,12 +7,10 @@ LLVMValueRef codegen_stmt_program(CodeGenContext *ctx, AstNode *node) {
   return NULL;
 }
 
-// Statement expression handler
 LLVMValueRef codegen_stmt_expression(CodeGenContext *ctx, AstNode *node) {
   return codegen_expr(ctx, node->stmt.expr_stmt.expression);
 }
 
-// Statement variable declaration handler
 LLVMValueRef codegen_stmt_var_decl(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef var_type = codegen_type(ctx, node->stmt.var_decl.var_type);
   if (!var_type)
@@ -36,7 +34,6 @@ LLVMValueRef codegen_stmt_var_decl(CodeGenContext *ctx, AstNode *node) {
   return alloca;
 }
 
-// Statement function declaration handler
 LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef *param_types = (LLVMTypeRef *)arena_alloc(
       ctx->arena, sizeof(LLVMTypeRef) * node->stmt.func_decl.param_count,
@@ -94,7 +91,6 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
   return function;
 }
 
-// Statement return handler
 LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
   if (node->stmt.return_stmt.value) {
     LLVMValueRef ret_val = codegen_expr(ctx, node->stmt.return_stmt.value);
@@ -107,7 +103,6 @@ LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
   return NULL;
 }
 
-// Statement block handler
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {
   for (size_t i = 0; i < node->stmt.block.stmt_count; i++) {
     codegen_stmt(ctx, node->stmt.block.statements[i]);
@@ -115,7 +110,6 @@ LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {
   return NULL;
 }
 
-// Statement if handler
 LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node) {
   LLVMValueRef condition = codegen_expr(ctx, node->stmt.if_stmt.condition);
   if (!condition)
