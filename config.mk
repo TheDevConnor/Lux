@@ -5,6 +5,14 @@ CFLAGS   = -Wall -Wextra -std=c17 -O2
 LDFLAGS  =
 INCLUDES = -Isrc
 
+# LLVM configuration
+LLVM_CFLAGS := $(shell llvm-config --cflags)
+LLVM_LDFLAGS := $(shell llvm-config --ldflags --system-libs --libs core analysis bitwriter target)
+
+# Add LLVM flags to existing flags
+override CFLAGS += $(LLVM_CFLAGS)
+override LDFLAGS += $(LLVM_LDFLAGS)
+
 SRC_DIR  = src
 OBJ_DIR  = build
 

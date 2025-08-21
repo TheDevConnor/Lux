@@ -1,5 +1,13 @@
 include config.mk
 
+# LLVM configuration
+LLVM_CFLAGS := $(shell llvm-config --cflags)
+LLVM_LDFLAGS := $(shell llvm-config --ldflags --system-libs --libs core analysis bitwriter target)
+
+# Add LLVM flags to existing flags
+override CFLAGS += $(LLVM_CFLAGS)
+override LDFLAGS += $(LLVM_LDFLAGS)
+
 # Detect platform and define commands
 ifeq ($(OS),Windows_NT)
 	SHELL := cmd.exe
@@ -19,7 +27,7 @@ endif
 
 BIN := lux$(EXE)
 
-.PHONY: all clean
+.PHONY: all clean debug test llvm-test
 
 all: $(BIN)
 
@@ -34,6 +42,57 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 debug: CFLAGS += -g
 debug: all
 
+# Test targets
+test: $(BIN)
+	@echo "Running basic tests..."
+	./$(BIN) --help
+
+llvm-test: $(BIN)
+	@echo "Testing LLVM IR generation..."
+	@echo "fn add(a: int, b: int) -> int { return a + b; }" > test_simple.lux
+	@echo "fn main() -> int { let x: int = 42; let y: int = 24; return add(x, y); }" >> test_simple.lux
+	./$(BIN) test_simple.lux --save
+	@echo "Generated files:"
+	@ls -la *.bc *.ll 2>/dev/null || echo "No LLVM output files generated"
+	@echo "Cleaning up test file..."
+	@rm -f test_simple.lux
+
+# View generated LLVM IR
+view-ir: output.ll
+	@echo "=== Generated LLVM IR ==="
+	@cat output.ll
+
+# Run the generated LLVM bitcode with lli (LLVM interpreter)
+run-llvm: output.bc
+	@echo "Running with LLVM interpreter..."
+	lli output.bc
+
+# Compile LLVM IR to native executable
+compile-native: output.ll
+	@echo "Compiling LLVM IR to native executable..."
+	llc output.ll -o output.s
+	gcc output.s -o program
+	@echo "Native executable created: ./program"
+
 clean:
 	$(call RMDIR,$(OBJ_DIR))
 	$(call DEL,$(BIN))
+	@echo "Cleaning LLVM output files..."
+	$(call DEL,output.bc)
+	$(call DEL,output.ll)
+	$(call DEL,output.s)
+	$(call DEL,program)
+	$(call DEL,test_simple.lux)
+
+# Help target
+help:
+	@echo "Available targets:"
+	@echo "  all          - Build the compiler"
+	@echo "  debug        - Build with debug symbols"
+	@echo "  test         - Run basic tests"
+	@echo "  llvm-test    - Test LLVM IR generation"
+	@echo "  view-ir      - View generated LLVM IR"
+	@echo "  run-llvm     - Run generated bitcode with lli"
+	@echo "  compile-native - Compile LLVM IR to native executable"
+	@echo "  clean        - Remove all build artifacts and generated files"
+	@echo "  help         - Show this help"

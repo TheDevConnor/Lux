@@ -1,18 +1,16 @@
-const X: int = 0;
-
-const Color = enum {
-    RED,
-    GREEN,
-    BLUE,
-};
+;; const X: int = 0;
+;; 
+;; const Color = enum {
+;;     RED,
+;;     GREEN,
+;;     BLUE,
+;; };
 
 const add = fn (a: int, b: int) int {
     return a + b;
 }
 
 const main = fn () int {
-    let y: int = 50;
-    let x: *int = &y;
-
-    return *x;
+    let x: int = add(1, 2);
+    return x;
 }
