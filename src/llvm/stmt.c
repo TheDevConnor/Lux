@@ -13,25 +13,28 @@ LLVMValueRef codegen_stmt_expression(CodeGenContext *ctx, AstNode *node) {
 
 LLVMValueRef codegen_stmt_var_decl(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef var_type = codegen_type(ctx, node->stmt.var_decl.var_type);
-  if (!var_type)
-    return NULL;
+  if (!var_type) return NULL;
 
-  // Create alloca for the variable
-  LLVMValueRef alloca =
-      LLVMBuildAlloca(ctx->builder, var_type, node->stmt.var_decl.name);
+  LLVMValueRef var_ref;
+  if (ctx->current_function == NULL) {
+    var_ref = LLVMAddGlobal(ctx->module, var_type, node->stmt.var_decl.name);
+  } else {
+    var_ref = LLVMBuildAlloca(ctx->builder, var_type, node->stmt.var_decl.name);
+  }
 
-  // Add to symbol table
-  add_symbol(ctx, node->stmt.var_decl.name, alloca, var_type, false);
-
-  // Initialize if there's an initializer
   if (node->stmt.var_decl.initializer) {
     LLVMValueRef init_val = codegen_expr(ctx, node->stmt.var_decl.initializer);
-    if (init_val) {
-      LLVMBuildStore(ctx->builder, init_val, alloca);
+    if (init_val && ctx->current_function == NULL) {
+      LLVMSetInitializer(var_ref, init_val);
+    } else if (!init_val && ctx->current_function == NULL) {
+      LLVMSetInitializer(var_ref, LLVMConstNull(var_type));
+    } else {
+      LLVMBuildStore(ctx->builder, init_val, var_ref);
     }
   }
 
-  return alloca;
+  add_symbol(ctx, node->stmt.var_decl.name, var_ref, var_type, false);
+  return var_ref;
 }
 
 LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {

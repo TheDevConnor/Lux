@@ -141,13 +141,13 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   AstNode *root = parse(&tokens, allocator);
   if (error_report())
     goto cleanup;
-  // print_ast(root, "", true, true);
+  print_ast(root, "", true, true);
 
   Scope root_scope;
   init_scope(&root_scope, NULL, "global", allocator);
 
   bool tc = typecheck(root, &root_scope, allocator);
-  // debug_print_scope(&root_scope, 0);
+  debug_print_scope(&root_scope, 0);
 
   if (tc) {
     success = generate_llvm_code(root, config, allocator);
