@@ -50,70 +50,58 @@
  * Used to control operator precedence and associativity in Pratt parsing.
  */
 typedef enum {
-  BP_NONE = 0,       /**< No binding power */
-  BP_LOWEST,         /**< Lowest binding power */
-  BP_ASSIGN,         /**< Assignment operators (=, +=, etc.) */
-  BP_TERNARY,        /**< Ternary conditional operator (? :) */
-  BP_LOGICAL_OR,     /**< Logical OR operator (||) */
-  BP_LOGICAL_AND,    /**< Logical AND operator (&&) */
-  BP_BITWISE_OR,     /**< Bitwise OR operator (|) */
-  BP_BITWISE_XOR,    /**< Bitwise XOR operator (^) */
-  BP_BITWISE_AND,    /**< Bitwise AND operator (&) */
-  BP_EQUALITY,       /**< Equality operators (==, !=) */
-  BP_RELATIONAL,     /**< Relational operators (<, >, <=, >=) */
-  BP_SHIFT,          /**< Shift operators (<<, >>) */
-  BP_SUM,            /**< Addition and subtraction (+, -) */
-  BP_PRODUCT,        /**< Multiplication, division, modulo (*, /, %) */
-  BP_EXPONENT,       /**< Exponentiation operator (**) */
-  BP_UNARY,          /**< Unary operators (!, ~, +, -, prefix ++/--) */
-  BP_POSTFIX,        /**< Postfix operators (++/-- postfix) */
-  BP_CALL,           /**< Function call or indexing */
-  BP_PRIMARY         /**< Primary expressions (literals, variables) */
+  BP_NONE = 0,    /**< No binding power */
+  BP_LOWEST,      /**< Lowest binding power */
+  BP_ASSIGN,      /**< Assignment operators (=, +=, etc.) */
+  BP_TERNARY,     /**< Ternary conditional operator (? :) */
+  BP_LOGICAL_OR,  /**< Logical OR operator (||) */
+  BP_LOGICAL_AND, /**< Logical AND operator (&&) */
+  BP_BITWISE_OR,  /**< Bitwise OR operator (|) */
+  BP_BITWISE_XOR, /**< Bitwise XOR operator (^) */
+  BP_BITWISE_AND, /**< Bitwise AND operator (&) */
+  BP_EQUALITY,    /**< Equality operators (==, !=) */
+  BP_RELATIONAL,  /**< Relational operators (<, >, <=, >=) */
+  BP_SHIFT,       /**< Shift operators (<<, >>) */
+  BP_SUM,         /**< Addition and subtraction (+, -) */
+  BP_PRODUCT,     /**< Multiplication, division, modulo (*, /, %) */
+  BP_EXPONENT,    /**< Exponentiation operator (**) */
+  BP_UNARY,       /**< Unary operators (!, ~, +, -, prefix ++/--) */
+  BP_POSTFIX,     /**< Postfix operators (++/-- postfix) */
+  BP_CALL,        /**< Function call or indexing */
+  BP_PRIMARY      /**< Primary expressions (literals, variables) */
 } BindingPower;
 
 /**
- * @brief Maps token types to their corresponding literal types for primary expressions.
+ * @brief Maps token types to their corresponding literal types for primary
+ * expressions.
  */
 static const LiteralType PRIMARY_LITERAL_TYPE_MAP[] = {
-  [TOK_NUMBER]      = LITERAL_INT,
-  [TOK_STRING]      = LITERAL_STRING,
-  [TOK_CHAR_LITERAL] = LITERAL_CHAR,
-  [TOK_TRUE]       = LITERAL_BOOL,
-  [TOK_FALSE]      = LITERAL_BOOL,
-  [TOK_IDENTIFIER] = LITERAL_IDENT,
+    [TOK_NUMBER] = LITERAL_INT,        [TOK_STRING] = LITERAL_STRING,
+    [TOK_CHAR_LITERAL] = LITERAL_CHAR, [TOK_TRUE] = LITERAL_BOOL,
+    [TOK_FALSE] = LITERAL_BOOL,        [TOK_IDENTIFIER] = LITERAL_IDENT,
 };
 
 /**
  * @brief Maps token types to their corresponding binary operators.
  */
 static const BinaryOp TOKEN_TO_BINOP_MAP[] = {
-  [TOK_PLUS]  = BINOP_ADD,
-  [TOK_MINUS] = BINOP_SUB,
-  [TOK_STAR]  = BINOP_MUL,
-  [TOK_SLASH] = BINOP_DIV,
-  [TOK_EQEQ]  = BINOP_EQ,
-  [TOK_NEQ]   = BINOP_NE,
-  [TOK_LT]    = BINOP_LT,
-  [TOK_LE]    = BINOP_LE,
-  [TOK_GT]    = BINOP_GT,
-  [TOK_GE]    = BINOP_GE,
-  [TOK_AND]   = BINOP_AND,
-  [TOK_OR]    = BINOP_OR,
-  [TOK_AMP]   = BINOP_BIT_AND,
-  [TOK_PIPE]  = BINOP_BIT_OR,
-  [TOK_CARET] = BINOP_BIT_XOR,
+    [TOK_PLUS] = BINOP_ADD,      [TOK_MINUS] = BINOP_SUB,
+    [TOK_STAR] = BINOP_MUL,      [TOK_SLASH] = BINOP_DIV,
+    [TOK_EQEQ] = BINOP_EQ,       [TOK_NEQ] = BINOP_NE,
+    [TOK_LT] = BINOP_LT,         [TOK_LE] = BINOP_LE,
+    [TOK_GT] = BINOP_GT,         [TOK_GE] = BINOP_GE,
+    [TOK_AND] = BINOP_AND,       [TOK_OR] = BINOP_OR,
+    [TOK_AMP] = BINOP_BIT_AND,   [TOK_PIPE] = BINOP_BIT_OR,
+    [TOK_CARET] = BINOP_BIT_XOR,
 };
 
 /**
  * @brief Maps token types to their corresponding unary operators.
  */
 static const UnaryOp TOKEN_TO_UNOP_MAP[] = {
-  [TOK_BANG]       = UNOP_NOT,
-  [TOK_TILDE]      = UNOP_BIT_NOT,
-  [TOK_PLUS]       = UNOP_POS,
-  [TOK_MINUS]      = UNOP_NEG,
-  [TOK_PLUSPLUS]   = UNOP_PRE_INC,
-  [TOK_MINUSMINUS] = UNOP_PRE_DEC,
+    [TOK_BANG] = UNOP_NOT,         [TOK_TILDE] = UNOP_BIT_NOT,
+    [TOK_PLUS] = UNOP_POS,         [TOK_MINUS] = UNOP_NEG,
+    [TOK_PLUSPLUS] = UNOP_PRE_INC, [TOK_MINUSMINUS] = UNOP_PRE_DEC,
 };
 
 /**
@@ -188,8 +176,14 @@ Expr *call_expr(Parser *parser, Expr *left, BindingPower bp);
 Expr *assign_expr(Parser *parser, Expr *left, BindingPower bp);
 Expr *prefix_expr(Parser *parser, Expr *left, BindingPower bp);
 Expr *array_expr(Parser *parser);
+// pointer and memory related
 Expr *deref_expr(Parser *parser);
 Expr *addr_expr(Parser *parser);
+Expr *alloc_expr(Parser *parser);
+Expr *memcpy_expr(Parser *parser);
+Expr *free_expr(Parser *parser);
+Expr *cast_expr(Parser *parser);
+Expr *sizeof_expr(Parser *parser);
 
 Type *tnud(Parser *parser);
 Type *tled(Parser *parser, Type *left, BindingPower bp);

@@ -13,7 +13,8 @@ LLVMValueRef codegen_stmt_expression(CodeGenContext *ctx, AstNode *node) {
 
 LLVMValueRef codegen_stmt_var_decl(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef var_type = codegen_type(ctx, node->stmt.var_decl.var_type);
-  if (!var_type) return NULL;
+  if (!var_type)
+    return NULL;
 
   LLVMValueRef var_ref;
   if (ctx->current_function == NULL) {
@@ -138,7 +139,7 @@ LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node) {
   // Generate then block
   LLVMPositionBuilderAtEnd(ctx->builder, then_block);
   codegen_stmt(ctx, node->stmt.if_stmt.then_stmt);
-  
+
   // Only add branch if block isn't already terminated
   if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
     LLVMBuildBr(ctx->builder, merge_block);
@@ -148,7 +149,7 @@ LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node) {
   if (else_block) {
     LLVMPositionBuilderAtEnd(ctx->builder, else_block);
     codegen_stmt(ctx, node->stmt.if_stmt.else_stmt);
-    
+
     // Only add branch if block isn't already terminated
     if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
       LLVMBuildBr(ctx->builder, merge_block);

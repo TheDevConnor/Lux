@@ -24,6 +24,11 @@ typedef enum {
   AST_EXPR_ARRAY,      // [ ... ] array expressions
   AST_EXPR_DEREF,      // *object
   AST_EXPR_ADDR,       // &object
+  AST_EXPR_ALLOC,
+  AST_EXPR_MEMCPY,
+  AST_EXPR_FREE,
+  AST_EXPR_CAST,
+  AST_EXPR_SIZEOF,
 
   // Statement nodes
   AST_PROGRAM,             // Program root node
@@ -34,7 +39,7 @@ typedef enum {
   AST_STMT_IF,             // If statements
   AST_STMT_LOOP,           // Loop statements (while, for)
   AST_STMT_BREAK_CONTINUE, // Break and continue statements
-  AST_STMT_RETURN,          // Return statements
+  AST_STMT_RETURN,         // Return statements
   AST_STMT_BLOCK,          // Block statements
   AST_STMT_PRINT,          // Print statements
   AST_STMT_MODULE,         // Module declarations
@@ -194,10 +199,38 @@ struct AstNode {
           AstNode *object;
         } deref;
 
-        // Address expersion
+        // Address experssion
         struct {
           AstNode *object;
         } addr;
+
+        // alloc expression
+        struct {
+          AstNode *size;
+        } alloc;
+
+        // memcpy expression
+        struct {
+          AstNode *to;
+          AstNode *from;
+          AstNode *size;
+        } memcpy;
+
+        // free expression
+        struct {
+          AstNode *ptr;
+        } free;
+
+        // cast expression
+        struct {
+          AstNode *type;
+          AstNode *castee;
+        } cast;
+
+        // sizeof expression
+        struct {
+          AstNode *object;
+        } size_of;
       };
     } expr;
 
@@ -368,41 +401,101 @@ AstNode *create_ast_node(ArenaAllocator *arena, NodeType type,
                          NodeCategory category, size_t line, size_t column);
 
 // Expression creation macros
-AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type, void *value, size_t line, size_t column);
-AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name, size_t line, size_t column);
-AstNode *create_binary_expr(ArenaAllocator *arena, BinaryOp op, Expr *left, Expr *right, size_t line, size_t column);
-AstNode *create_unary_expr(ArenaAllocator *arena, UnaryOp op, Expr *operand, size_t line, size_t column);
-AstNode *create_call_expr(ArenaAllocator *arena, Expr *callee, Expr **args, size_t arg_count, size_t line, size_t column);
-AstNode *create_assignment_expr(ArenaAllocator *arena, Expr *target, Expr *value, size_t line, size_t column);
-AstNode *create_ternary_expr(ArenaAllocator *arena, Expr *condition, Expr *then_expr, Expr *else_expr, size_t line, size_t column);
-AstNode *create_member_expr(ArenaAllocator *arena, Expr *object, const char *member, size_t line, size_t column);
-AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index, size_t line, size_t column);
-AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line, size_t column);
-AstNode *create_array_expr(ArenaAllocator *arena, Expr **elements, size_t element_count, size_t line, size_t column);
-AstNode *create_deref_expr(ArenaAllocator *arena, Expr *object, size_t line, size_t col);
-AstNode *create_addr_expr(ArenaAllocator *arena, Expr *object, size_t line, size_t col);
+AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type,
+                             void *value, size_t line, size_t column);
+AstNode *create_identifier_expr(ArenaAllocator *arena, const char *name,
+                                size_t line, size_t column);
+AstNode *create_binary_expr(ArenaAllocator *arena, BinaryOp op, Expr *left,
+                            Expr *right, size_t line, size_t column);
+AstNode *create_unary_expr(ArenaAllocator *arena, UnaryOp op, Expr *operand,
+                           size_t line, size_t column);
+AstNode *create_call_expr(ArenaAllocator *arena, Expr *callee, Expr **args,
+                          size_t arg_count, size_t line, size_t column);
+AstNode *create_assignment_expr(ArenaAllocator *arena, Expr *target,
+                                Expr *value, size_t line, size_t column);
+AstNode *create_ternary_expr(ArenaAllocator *arena, Expr *condition,
+                             Expr *then_expr, Expr *else_expr, size_t line,
+                             size_t column);
+AstNode *create_member_expr(ArenaAllocator *arena, Expr *object,
+                            const char *member, size_t line, size_t column);
+AstNode *create_index_expr(ArenaAllocator *arena, Expr *object, Expr *index,
+                           size_t line, size_t column);
+AstNode *create_grouping_expr(ArenaAllocator *arena, Expr *expr, size_t line,
+                              size_t column);
+AstNode *create_array_expr(ArenaAllocator *arena, Expr **elements,
+                           size_t element_count, size_t line, size_t column);
+AstNode *create_deref_expr(ArenaAllocator *arena, Expr *object, size_t line,
+                           size_t col);
+AstNode *create_addr_expr(ArenaAllocator *arena, Expr *object, size_t line,
+                          size_t col);
+AstNode *create_alloc_expr(ArenaAllocator *arena, Expr *size, size_t line,
+                           size_t col);
+AstNode *create_memcpy_expr(ArenaAllocator *arena, Expr *to, Expr *from,
+                            Expr *size, size_t line, size_t col);
+AstNode *create_free_expr(ArenaAllocator *arena, Expr *ptr, size_t line,
+                          size_t col);
+AstNode *create_cast_expr(ArenaAllocator *arena, Expr *type, Expr *castee,
+                          size_t line, size_t col);
+AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, size_t line,
+                            size_t col);
 
 // Statement creation macros
-AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);
-AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line, size_t column);
-AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *var_type, Expr *initializer, bool is_mutable, bool is_public, size_t line, size_t column);
-AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name, char **param_names, AstNode **param_types, size_t param_count, AstNode *return_type, bool is_public, AstNode *body, size_t line, size_t column);
-AstNode *create_struct_decl_stmt(ArenaAllocator *arena, const char *name, AstNode **public_members, size_t public_count, AstNode **private_members, size_t private_count, bool is_piblic, size_t line, size_t column);
-AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name, AstNode *type, AstNode *function, bool is_public, size_t line, size_t column);
-AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name, char **members, size_t member_count, bool is_public, size_t line, size_t column);
-AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition, AstNode *then_stmt, AstNode **elif_stmts, int elif_count, AstNode *else_stmt, size_t line, size_t column);
+AstNode *create_program_node(ArenaAllocator *arena, AstNode **statements,
+                             size_t stmt_count, size_t line, size_t column);
+AstNode *create_expr_stmt(ArenaAllocator *arena, Expr *expression, size_t line,
+                          size_t column);
+AstNode *create_var_decl_stmt(ArenaAllocator *arena, const char *name,
+                              AstNode *var_type, Expr *initializer,
+                              bool is_mutable, bool is_public, size_t line,
+                              size_t column);
+AstNode *create_func_decl_stmt(ArenaAllocator *arena, const char *name,
+                               char **param_names, AstNode **param_types,
+                               size_t param_count, AstNode *return_type,
+                               bool is_public, AstNode *body, size_t line,
+                               size_t column);
+AstNode *create_struct_decl_stmt(ArenaAllocator *arena, const char *name,
+                                 AstNode **public_members, size_t public_count,
+                                 AstNode **private_members,
+                                 size_t private_count, bool is_piblic,
+                                 size_t line, size_t column);
+AstNode *create_field_decl_stmt(ArenaAllocator *arena, const char *name,
+                                AstNode *type, AstNode *function,
+                                bool is_public, size_t line, size_t column);
+AstNode *create_enum_decl_stmt(ArenaAllocator *arena, const char *name,
+                               char **members, size_t member_count,
+                               bool is_public, size_t line, size_t column);
+AstNode *create_if_stmt(ArenaAllocator *arena, Expr *condition,
+                        AstNode *then_stmt, AstNode **elif_stmts,
+                        int elif_count, AstNode *else_stmt, size_t line,
+                        size_t column);
 
-AstNode *create_infinite_loop_stmt(ArenaAllocator *arena, AstNode *body, size_t line, size_t column);
-AstNode *create_for_loop_stmt(ArenaAllocator *arena, AstNode **initializers, size_t init_count, Expr *condition, Expr *optional, AstNode *body, size_t line, size_t column);
-AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition, Expr *optional, AstNode *body, size_t line, size_t column);
+AstNode *create_infinite_loop_stmt(ArenaAllocator *arena, AstNode *body,
+                                   size_t line, size_t column);
+AstNode *create_for_loop_stmt(ArenaAllocator *arena, AstNode **initializers,
+                              size_t init_count, Expr *condition,
+                              Expr *optional, AstNode *body, size_t line,
+                              size_t column);
+AstNode *create_loop_stmt(ArenaAllocator *arena, Expr *condition,
+                          Expr *optional, AstNode *body, size_t line,
+                          size_t column);
 
-AstNode *create_return_stmt(ArenaAllocator *arena, Expr *value, size_t line, size_t column);
-AstNode *create_block_stmt(ArenaAllocator *arena, AstNode **statements, size_t stmt_count, size_t line, size_t column);
-AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions, size_t expr_count, bool ln, size_t line, size_t column);
-AstNode *create_break_continue_stmt(ArenaAllocator *arena, bool is_continue, size_t line, size_t column);
+AstNode *create_return_stmt(ArenaAllocator *arena, Expr *value, size_t line,
+                            size_t column);
+AstNode *create_block_stmt(ArenaAllocator *arena, AstNode **statements,
+                           size_t stmt_count, size_t line, size_t column);
+AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions,
+                           size_t expr_count, bool ln, size_t line,
+                           size_t column);
+AstNode *create_break_continue_stmt(ArenaAllocator *arena, bool is_continue,
+                                    size_t line, size_t column);
 
 // Type creation macros
-AstNode *create_basic_type(ArenaAllocator *arena, const char *name, size_t line, size_t column);
-AstNode *create_pointer_type(ArenaAllocator *arena, AstNode *pointee_type, size_t line, size_t column);
-AstNode *create_array_type(ArenaAllocator *arena, AstNode *element_type, Expr *size, size_t line, size_t column);
-AstNode *create_function_type(ArenaAllocator *arena, AstNode **param_types, size_t param_count, AstNode *return_type, size_t line, size_t column);
+AstNode *create_basic_type(ArenaAllocator *arena, const char *name, size_t line,
+                           size_t column);
+AstNode *create_pointer_type(ArenaAllocator *arena, AstNode *pointee_type,
+                             size_t line, size_t column);
+AstNode *create_array_type(ArenaAllocator *arena, AstNode *element_type,
+                           Expr *size, size_t line, size_t column);
+AstNode *create_function_type(ArenaAllocator *arena, AstNode **param_types,
+                              size_t param_count, AstNode *return_type,
+                              size_t line, size_t column);

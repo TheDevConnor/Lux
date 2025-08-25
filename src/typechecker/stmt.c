@@ -58,6 +58,17 @@ bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     return false;
   }
 
+  // 1.5 Validate that if it is the man function that we return an int
+  if (strcmp(name, "main") == 0 &&
+      strcmp(return_type->type_data.basic.name, "int") != 0) {
+    fprintf(stderr,
+            "Error: Function '%s' must return a type of 'int' but got '%s' "
+            "instead.\n",
+            name, type_to_string(return_type, arena));
+
+    return false;
+  } // else we do nothing let the program constinue
+
   // 2. Validate all parameter types
   for (size_t i = 0; i < param_count; i++) {
     const char *p_name = param_names[i];
@@ -125,31 +136,34 @@ bool typecheck_struct_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
 }
 
 bool typecheck_enum_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
-    const char *enum_name = node->stmt.enum_decl.name;
-    char **member_names = node->stmt.enum_decl.members;
-    size_t member_count = node->stmt.enum_decl.member_count;
-    
-    // 1. Add enum name as an int type (for variable declarations like "Color c;")
-    AstNode *int_type = create_basic_type(arena, "int", node->line, node->column);
-    if (!scope_add_symbol(scope, enum_name, int_type, 
-                         node->stmt.enum_decl.is_public, false, arena)) {
-        return false;
+  const char *enum_name = node->stmt.enum_decl.name;
+  char **member_names = node->stmt.enum_decl.members;
+  size_t member_count = node->stmt.enum_decl.member_count;
+
+  // 1. Add enum name as an int type (for variable declarations like "Color c;")
+  AstNode *int_type = create_basic_type(arena, "int", node->line, node->column);
+  if (!scope_add_symbol(scope, enum_name, int_type,
+                        node->stmt.enum_decl.is_public, false, arena)) {
+    return false;
+  }
+
+  // 2. Add each member as an int constant with qualified names
+  for (size_t i = 0; i < member_count; i++) {
+    size_t qualified_len = strlen(enum_name) + strlen(member_names[i]) + 2;
+    char *qualified_name = arena_alloc(arena, qualified_len, 1);
+    snprintf(qualified_name, qualified_len, "%s.%s", enum_name,
+             member_names[i]);
+
+    // Each enum member is just an int constant
+    if (!scope_add_symbol(scope, qualified_name, int_type, true, false,
+                          arena)) {
+      fprintf(stderr, "Error: Could not add enum member '%s'\n",
+              qualified_name);
+      return false;
     }
-    
-    // 2. Add each member as an int constant with qualified names
-    for (size_t i = 0; i < member_count; i++) {
-        size_t qualified_len = strlen(enum_name) + strlen(member_names[i]) + 2;
-        char *qualified_name = arena_alloc(arena, qualified_len, 1);
-        snprintf(qualified_name, qualified_len, "%s.%s", enum_name, member_names[i]);
-        
-        // Each enum member is just an int constant
-        if (!scope_add_symbol(scope, qualified_name, int_type, true, false, arena)) {
-            fprintf(stderr, "Error: Could not add enum member '%s'\n", qualified_name);
-            return false;
-        }
-    }
-    
-    return true;
+  }
+
+  return true;
 }
 bool typecheck_return_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   // Find the enclosing function's return type
@@ -219,11 +233,9 @@ bool typecheck_if_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     typecheck_statement(node->stmt.if_stmt.then_stmt, then_branch, arena);
   }
 
-  // TODO: Handle elif cases
   for (int i = 0; i < node->stmt.if_stmt.elif_count; i++) {
     if (node->stmt.if_stmt.elif_stmts[i] != NULL) {
-      typecheck_statement(node->stmt.if_stmt.elif_stmts[i], then_branch,
-      arena);
+      typecheck_statement(node->stmt.if_stmt.elif_stmts[i], then_branch, arena);
     }
   }
 

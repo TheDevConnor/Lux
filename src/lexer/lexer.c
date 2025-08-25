@@ -71,6 +71,11 @@ static const KeywordEntry keywords[] = {
     {"output", TOK_PRINT},
     {"outputln", TOK_PRINTLN},
     {"const", TOK_CONST},
+    {"alloc", TOK_ALLOC},
+    {"free", TOK_FREE},
+    {"cast", TOK_CAST},
+    {"memcpy", TOK_MEMCPY},
+    {"sizeof", TOK_SIZE_OF},
 };
 
 /**
@@ -206,7 +211,8 @@ bool is_at_end(Lexer *lx) { return *lx->current == '\0'; }
 
 /**
  * @internal
- * @brief Advances the lexer by one character, updating line and column counters.
+ * @brief Advances the lexer by one character, updating line and column
+ * counters.
  *
  * @param lx Pointer to Lexer
  * @return The character that was advanced past

@@ -1,6 +1,7 @@
 /**
  * @file lexer.h
- * @brief Tokenizer (lexer) definitions and API for lexical analysis of source code.
+ * @brief Tokenizer (lexer) definitions and API for lexical analysis of source
+ * code.
  *
  * Provides token types, lexer state, token structure, and functions
  * to initialize a lexer, retrieve tokens, and report lexer errors.
@@ -8,8 +9,8 @@
 
 #pragma once
 
-#include <stdint.h>
 #include "../c_libs/memory/memory.h"
+#include <stdint.h>
 
 /**
  * @enum TokenType
@@ -25,75 +26,80 @@ typedef enum {
   TOK_CHAR_LITERAL, /**< Character literal */
 
   // Primitive Types
-  TOK_INT,          /**< int */
-  TOK_DOUBLE,       /**< double */
-  TOK_UINT,         /**< unsigned int */
-  TOK_FLOAT,        /**< float */
-  TOK_BOOL,         /**< bool */
-  TOK_STRINGT,      /**< str (string type) */
-  TOK_VOID,         /**< void */
-  TOK_CHAR,         /**< char */
+  TOK_INT,     /**< int */
+  TOK_DOUBLE,  /**< double */
+  TOK_UINT,    /**< unsigned int */
+  TOK_FLOAT,   /**< float */
+  TOK_BOOL,    /**< bool */
+  TOK_STRINGT, /**< str (string type) */
+  TOK_VOID,    /**< void */
+  TOK_CHAR,    /**< char */
 
   // Keywords
-  TOK_IF,           /**< if keyword */
-  TOK_ELIF,         /**< elif keyword */
-  TOK_ELSE,         /**< else keyword */
-  TOK_LOOP,         /**< loop keyword */
-  TOK_RETURN,       /**< return keyword */
-  TOK_BREAK,        /**< break keyword */
-  TOK_CONTINUE,     /**< continue keyword */
-  TOK_STRUCT,       /**< struct keyword */
-  TOK_ENUM,         /**< enum keyword */
-  TOK_MOD,          /**< mod keyword */
-  TOK_IMPORT,       /**< import keyword */
-  TOK_TRUE,         /**< true keyword */
-  TOK_FALSE,        /**< false keyword */
-  TOK_PUBLIC,       /**< pub keyword */
-  TOK_PRIVATE,      /**< private keyword */
-  TOK_VAR,          /**< let keyword */
-  TOK_CONST,        /**< const keyword */
-  TOK_FN,           /**< fn keyword */
-  TOK_PRINT,        /**< output keyword */
-  TOK_PRINTLN,      /**< println keyword */
+  TOK_IF,       /**< if keyword */
+  TOK_ELIF,     /**< elif keyword */
+  TOK_ELSE,     /**< else keyword */
+  TOK_LOOP,     /**< loop keyword */
+  TOK_RETURN,   /**< return keyword */
+  TOK_BREAK,    /**< break keyword */
+  TOK_CONTINUE, /**< continue keyword */
+  TOK_STRUCT,   /**< struct keyword */
+  TOK_ENUM,     /**< enum keyword */
+  TOK_MOD,      /**< mod keyword */
+  TOK_IMPORT,   /**< import keyword */
+  TOK_TRUE,     /**< true keyword */
+  TOK_FALSE,    /**< false keyword */
+  TOK_PUBLIC,   /**< pub keyword */
+  TOK_PRIVATE,  /**< private keyword */
+  TOK_VAR,      /**< let keyword */
+  TOK_CONST,    /**< const keyword */
+  TOK_FN,       /**< fn keyword */
+  TOK_PRINT,    /**< output keyword */
+  TOK_PRINTLN,  /**< println keyword */
+  TOK_ALLOC,    /**< alloc(size_t size) */
+  TOK_FREE,     /**< free(void *ptr, size_t size) */
+  TOK_CAST,     /**< cast<Type>(value you want to cast too) */
+  TOK_SIZE_OF,  /**< size_of<TYPE> */
+  TOK_MEMCPY,   /**< memcpy(void *to, void *from, int size) */
 
   // Symbols
-  TOK_SYMBOL,       /**< Fallback symbol */
-  TOK_LPAREN,       /**< ( */
-  TOK_RPAREN,       /**< ) */
-  TOK_LBRACE,       /**< { */
-  TOK_RBRACE,       /**< } */
-  TOK_LBRACKET,     /**< [ */
-  TOK_RBRACKET,     /**< ] */
-  TOK_SEMICOLON,    /**< ; */
-  TOK_COMMA,        /**< , */
-  TOK_DOT,          /**< . */
-  TOK_EQUAL,        /**< = */
-  TOK_PLUS,         /**< + */
-  TOK_MINUS,        /**< - */
-  TOK_STAR,         /**< * */
-  TOK_SLASH,        /**< / */
-  TOK_LT,           /**< < */
-  TOK_GT,           /**< > */
-  TOK_LE,           /**< <= */
-  TOK_GE,           /**< >= */
-  TOK_EQEQ,         /**< == */
-  TOK_NEQ,          /**< != */
-  TOK_AMP,          /**< & */
-  TOK_PIPE,         /**< | */
-  TOK_CARET,        /**< ^ */
-  TOK_TILDE,        /**< ~ */
-  TOK_AND,          /**< && */
-  TOK_OR,           /**< || */
-  TOK_RESOLVE,      /**< :: */
-  TOK_COLON,        /**< : */
-  TOK_BANG,         /**< ! */
-  TOK_QUESTION,     /**< ? */
-  TOK_PLUSPLUS,     /**< ++ */
-  TOK_MINUSMINUS,   /**< -- */
-  TOK_SHIFT_LEFT,   /**< << */
-  TOK_SHIFT_RIGHT,  /**< >> */
-  TOK_WHITESPACE,   /**< whitespace */
-  TOK_COMMENT       /**< comment */
+  TOK_SYMBOL,      /**< Fallback symbol */
+  TOK_LPAREN,      /**< ( */
+  TOK_RPAREN,      /**< ) */
+  TOK_LBRACE,      /**< { */
+  TOK_RBRACE,      /**< } */
+  TOK_LBRACKET,    /**< [ */
+  TOK_RBRACKET,    /**< ] */
+  TOK_SEMICOLON,   /**< ; */
+  TOK_COMMA,       /**< , */
+  TOK_DOT,         /**< . */
+  TOK_EQUAL,       /**< = */
+  TOK_PLUS,        /**< + */
+  TOK_MINUS,       /**< - */
+  TOK_STAR,        /**< * */
+  TOK_SLASH,       /**< / */
+  TOK_LT,          /**< < */
+  TOK_GT,          /**< > */
+  TOK_LE,          /**< <= */
+  TOK_GE,          /**< >= */
+  TOK_EQEQ,        /**< == */
+  TOK_NEQ,         /**< != */
+  TOK_AMP,         /**< & */
+  TOK_PIPE,        /**< | */
+  TOK_CARET,       /**< ^ */
+  TOK_TILDE,       /**< ~ */
+  TOK_AND,         /**< && */
+  TOK_OR,          /**< || */
+  TOK_RESOLVE,     /**< :: */
+  TOK_COLON,       /**< : */
+  TOK_BANG,        /**< ! */
+  TOK_QUESTION,    /**< ? */
+  TOK_PLUSPLUS,    /**< ++ */
+  TOK_MINUSMINUS,  /**< -- */
+  TOK_SHIFT_LEFT,  /**< << */
+  TOK_SHIFT_RIGHT, /**< >> */
+  TOK_WHITESPACE,  /**< whitespace */
+  TOK_COMMENT      /**< comment */
 } TokenType;
 
 /**
@@ -126,8 +132,8 @@ typedef struct {
  * @brief Maps symbol text to token type for quick lookup.
  */
 typedef struct {
-  const char *text;  /**< Symbol text */
-  TokenType type;    /**< Corresponding token type */
+  const char *text; /**< Symbol text */
+  TokenType type;   /**< Corresponding token type */
 } SymbolEntry;
 
 /**
@@ -135,8 +141,8 @@ typedef struct {
  * @brief Maps keyword text to token type for quick lookup.
  */
 typedef struct {
-  const char *text;  /**< Keyword text */
-  TokenType type;    /**< Corresponding token type */
+  const char *text; /**< Keyword text */
+  TokenType type;   /**< Corresponding token type */
 } KeywordEntry;
 
 /**

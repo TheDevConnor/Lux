@@ -1,6 +1,5 @@
-const X: int = 100;
-
-const main = fn () int {
-    let x: int = X + 5;
+pub const main = fn () int {
+    let x: *int = cast<*int>(alloc(sizeof<int>));
+    *x = 20;
     return x;
 }
