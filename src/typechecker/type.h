@@ -117,6 +117,11 @@ AstNode *typecheck_call_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena)
 AstNode *typecheck_member_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
 AstNode *typecheck_deref_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
 AstNode *typecheck_addr_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
+AstNode *typecheck_alloc_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
+AstNode *typecheck_free_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
+AstNode *typecheck_memcpy_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
+AstNode *typecheck_cast_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
+AstNode *typecheck_sizeof_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena);
 
 AstNode *get_enclosing_function_return_type(Scope *scope);
 

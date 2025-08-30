@@ -150,11 +150,13 @@ Token p_advance(Parser *psr) {
  * @see p_current(), p_advance(), parser_error(), TokenType
  */
 Token p_consume(Parser *psr, TokenType type, const char *error_msg) {
-  if (p_current(psr).type_ == type) {
-    return p_advance(psr);
-  } else {
+  int line = p_current(psr).line;
+  int col = p_current(psr).col;
+
+  if (p_current(psr).type_ == type) return p_advance(psr);
+  else {
     parser_error(psr, "SyntaxError", "unknown_file", error_msg,
-                 p_current(psr).line, p_current(psr).col,
+                 line, col,
                  CURRENT_TOKEN_LENGTH(psr));
     return (Token){.type_ = TOK_EOF}; // Return an error token
   }

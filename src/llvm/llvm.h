@@ -102,6 +102,7 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node);
 
 // =============================================================================
 // AST NODE HANDLERS - TYPE SYSTEM

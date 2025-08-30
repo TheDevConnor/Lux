@@ -145,7 +145,6 @@ AstNode *typecheck_deref_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena
     return pointer_type->type_data.pointer.pointee_type;
 }
 
-
 AstNode *typecheck_addr_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
     AstNode *base_type = typecheck_expression(expr->expr.addr.object, scope, arena);
     if (!base_type) {
@@ -154,4 +153,64 @@ AstNode *typecheck_addr_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena)
     }
     AstNode *pointer_type = create_pointer_type(arena, base_type, expr->line, expr->column);
     return pointer_type;
+}
+
+AstNode *typecheck_alloc_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    // Verify size argument is numeric
+    AstNode *size_type = typecheck_expression(expr->expr.alloc.size, scope, arena);
+    if (!size_type) {
+        fprintf(stderr, "Error: Cannot determine type for alloc size at line %zu\n", 
+               expr->line);
+        return NULL;
+    }
+    
+    if (!is_numeric_type(size_type)) {
+        fprintf(stderr, "Error: alloc size must be numeric type at line %zu\n", 
+               expr->line);
+        return NULL;
+    }
+    
+    // alloc returns void* (generic pointer)
+    return create_pointer_type(arena, NULL, expr->line, expr->column);
+}
+
+AstNode *typecheck_free_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    return NULL;
+}
+
+AstNode *typecheck_memcpy_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    return NULL;
+}
+
+AstNode *typecheck_cast_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    // Verify the expression being cast is valid
+    AstNode *castee_type = typecheck_expression(expr->expr.cast.castee, scope, arena);
+    if (!castee_type) {
+        fprintf(stderr, "Error: Cannot determine type of cast operand at line %zu\n", 
+               expr->line);
+        return NULL;
+    }
+    
+    // Return the target type (the cast always succeeds in this system)
+    return expr->expr.cast.type;
+}
+
+AstNode *typecheck_sizeof_expr(AstNode *expr, Scope *scope, ArenaAllocator *arena) {
+    // sizeof always returns size_t (or int in simplified systems)
+    AstNode *object_type = NULL;
+    
+    // Check if it is a type or an expression
+    if (expr->expr.size_of.is_type) {
+        object_type = expr->expr.size_of.object;
+    } else {
+        object_type = typecheck_expression(expr->expr.size_of.object, scope, arena);
+    }
+
+    if (!object_type) {
+        fprintf(stderr, "Error: Cannot determine type for sizeof operand at line %zu\n", 
+               expr->line);
+        return NULL;
+    }
+
+    return create_basic_type(arena, "int", expr->line, expr->column);
 }

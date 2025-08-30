@@ -1,5 +1,11 @@
+const fib = fn (n: int, a: int, b: int) int {
+    if (n == 0) { return a; }
+    if (n == 1) { return b; }
+    return fib(n-1, b, a+b);
+}
+
 pub const main = fn () int {
-    let x: *int = cast<*int>(alloc(sizeof<int>));
-    *x = 20;
-    return x;
+    let n: int = 92;
+    output("Fib of (", n, ") = ", fib(n, 0, 1), " ");
+    return 0;
 }

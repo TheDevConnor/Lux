@@ -40,6 +40,14 @@ const char *node_type_to_string(NodeType type) {
     return "ADDR";
   case AST_EXPR_DEREF:
     return "DEREF";
+  case AST_EXPR_CAST:
+    return "CAST";
+  case AST_EXPR_SIZEOF:
+    return "SIZEOF";
+  case AST_EXPR_ALLOC:
+    return "ALLOC";
+  case AST_EXPR_FREE:
+    return "FREE";
   case AST_STMT_EXPRESSION:
     return "ExprStmt";
   case AST_STMT_VAR_DECL:
@@ -440,6 +448,89 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     } else {
       print_prefix(next_prefix, false);
       printf(GRAY("<no condition>\n"));
+    }
+    break;
+
+case AST_EXPR_ALLOC:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Alloc Expression: \n"));
+    if (node->expr.alloc.size) {
+      print_ast(node->expr.alloc.size, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no size>\n"));
+    }
+    break;
+
+  case AST_EXPR_SIZEOF:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Sizeof Expression: \n"));
+    if (node->expr.size_of.object) {
+      print_ast(node->expr.size_of.object, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no object>\n"));
+    }
+    break;
+
+  case AST_EXPR_MEMCPY:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Memcpy Expression: \n"));
+    if (node->expr.memcpy.to) {
+      print_prefix(next_prefix, false);
+      printf(BOLD_CYAN("To: \n"));
+      print_ast(node->expr.memcpy.to, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no destination>\n"));
+    }
+    if (node->expr.memcpy.from) {
+      print_prefix(next_prefix, false);
+      printf(BOLD_CYAN("From: \n"));
+      print_ast(node->expr.memcpy.from, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no source>\n"));
+    }
+    if (node->expr.memcpy.size) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Size: \n"));
+      print_ast(node->expr.memcpy.size, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no size>\n"));
+    }
+    break;
+  
+  case AST_EXPR_FREE:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Free Expression: \n"));
+    if (node->expr.free.ptr) {
+      print_ast(node->expr.free.ptr, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no pointer>\n"));
+    }
+    break;
+
+  case AST_EXPR_CAST:
+    print_prefix(next_prefix, false);
+    printf(BOLD_CYAN("Cast Expression: \n"));
+    if (node->expr.cast.type) {
+      print_prefix(next_prefix, false);
+      printf(BOLD_CYAN("Type: \n"));
+      print_ast(node->expr.cast.type, next_prefix, false, false);
+    } else {
+      print_prefix(next_prefix, false);
+      printf(GRAY("<no type>\n"));
+    }
+    if (node->expr.cast.castee) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Castee: \n"));
+      print_ast(node->expr.cast.castee, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no castee>\n"));
     }
     break;
 

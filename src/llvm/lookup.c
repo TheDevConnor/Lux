@@ -43,6 +43,8 @@ LLVMValueRef codegen_stmt(CodeGenContext *ctx, AstNode *node) {
     return codegen_stmt_block(ctx, node);
   case AST_STMT_IF:
     return codegen_stmt_if(ctx, node);
+  case AST_STMT_PRINT:
+    return codegen_stmt_print(ctx, node);
   default:
     return NULL;
   }

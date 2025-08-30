@@ -177,9 +177,10 @@ AstNode *create_cast_expr(ArenaAllocator *arena, Expr *type, Expr *castee,
   return node;
 }
 
-AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, size_t line,
+AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, bool is_type, size_t line,
                             size_t col) {
   AstNode *node = create_expr(arena, AST_EXPR_SIZEOF, line, col);
   node->expr.size_of.object = object;
+  node->expr.size_of.is_type = is_type;
   return node;
 }

@@ -230,6 +230,7 @@ struct AstNode {
         // sizeof expression
         struct {
           AstNode *object;
+          bool is_type;
         } size_of;
       };
     } expr;
@@ -436,7 +437,7 @@ AstNode *create_free_expr(ArenaAllocator *arena, Expr *ptr, size_t line,
                           size_t col);
 AstNode *create_cast_expr(ArenaAllocator *arena, Expr *type, Expr *castee,
                           size_t line, size_t col);
-AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, size_t line,
+AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, bool is_type, size_t line,
                             size_t col);
 
 // Statement creation macros
