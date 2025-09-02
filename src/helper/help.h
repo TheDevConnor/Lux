@@ -21,6 +21,8 @@
 #define TOKEN_AT(i) (((Token *)tokens.data)[(i)])
 #define MAX_TOKENS 100
 
+#define BAR_WIDTH 40
+
 /** Enable debug logs for arena allocator (comment to disable) */
 #define DEBUG_ARENA_ALLOC 1
 
@@ -62,6 +64,8 @@ bool parse_args(int argc, char *argv[], BuildConfig *config,
 bool run_build(BuildConfig config, ArenaAllocator *allocator);
 
 void print_token(const Token *t);
+
+void print_progress(int step, int total, const char *stage);
 
 bool link_with_ld(const char *obj_filename, const char *exe_filename);
 bool get_gcc_file_path(const char *filename, char *buffer, size_t buffer_size);

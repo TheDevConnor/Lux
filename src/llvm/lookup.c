@@ -18,19 +18,26 @@ LLVMValueRef codegen_expr(CodeGenContext *ctx, AstNode *node) {
     return codegen_expr_call(ctx, node);
   case AST_EXPR_ASSIGNMENT:
     return codegen_expr_assignment(ctx, node);
+  case AST_EXPR_GROUPING:
+    return codegen_expr(ctx, node->expr.grouping.expr);
   default:
     return NULL;
   }
 }
 
 LLVMValueRef codegen_stmt(CodeGenContext *ctx, AstNode *node) {
-  if (!node || node->category != Node_Category_STMT) {
-    return NULL;
-  }
-
   switch (node->type) {
   case AST_PROGRAM:
     return codegen_stmt_program(ctx, node);
+  case AST_PREPROCESSOR_MODULE: {
+    ctx->module = LLVMModuleCreateWithNameInContext(
+        node->preprocessor.module.name, ctx->context);
+    // Generate code for each statement in the module body
+    for (size_t i = 0; i < node->preprocessor.module.body_count; i++) {
+      codegen_stmt(ctx, node->preprocessor.module.body[i]);
+    }
+    return NULL;
+  }
   case AST_STMT_EXPRESSION:
     return codegen_stmt_expression(ctx, node);
   case AST_STMT_VAR_DECL:

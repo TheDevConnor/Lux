@@ -116,6 +116,9 @@ AstNode *typecheck_expression(AstNode *expr, Scope *scope,
     return target_type;
   }
 
+  case AST_EXPR_GROUPING:
+    return typecheck_expression(expr->expr.grouping.expr, scope, arena);
+
   case AST_EXPR_MEMBER:
     return typecheck_member_expr(expr, scope, arena);
 

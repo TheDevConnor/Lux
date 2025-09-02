@@ -16,7 +16,6 @@ CodeGenContext *init_codegen_context(ArenaAllocator *arena,
   LLVMInitializeAllAsmPrinters();
 
   ctx->context = LLVMContextCreate();
-  ctx->module = LLVMModuleCreateWithNameInContext(module_name, ctx->context);
   ctx->builder = LLVMCreateBuilderInContext(ctx->context);
   ctx->symbols = NULL;
   ctx->current_function = NULL;

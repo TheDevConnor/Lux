@@ -392,14 +392,14 @@ bool link_with_ld_simple(const char *obj_filename, const char *exe_filename) {
     return system(command) == 0;
   }
 
-  printf("Found startup files:\n");
-  printf("  crt1.o: %s\n", crt1_path);
-  printf("  crti.o: %s\n", crti_path);
-  printf("  crtn.o: %s\n", crtn_path);
-  if (found_crtbegin)
-    printf("  crtbegin.o: %s\n", crtbegin_path);
-  if (found_crtend)
-    printf("  crtend.o: %s\n", crtend_path);
+  // printf("Found startup files:\n");
+  // printf("  crt1.o: %s\n", crt1_path);
+  // printf("  crti.o: %s\n", crti_path);
+  // printf("  crtn.o: %s\n", crtn_path);
+  // if (found_crtbegin)
+  //   printf("  crtbegin.o: %s\n", crtbegin_path);
+  // if (found_crtend)
+  //   printf("  crtend.o: %s\n", crtend_path);
 
   // Build the ld command
   if (found_crtbegin && found_crtend) {
@@ -416,6 +416,28 @@ bool link_with_ld_simple(const char *obj_filename, const char *exe_filename) {
              crt1_path, crti_path, obj_filename, crtn_path, exe_filename);
   }
 
-  printf("Executing: %s\n", command);
+  // printf("Executing: %s\n", command);
   return system(command) == 0;
+}
+
+void print_progress(int step, int total, const char *stage) {
+  float ratio = (float)step / total;
+  int filled = (int)(ratio * BAR_WIDTH);
+
+  printf("\r["); // carriage return for in-place update
+  for (int i = 0; i < BAR_WIDTH; i++) {
+    if (i < filled)
+      putchar('=');
+    else if (i == filled)
+      putchar('>');
+    else
+      putchar(' ');
+  }
+  printf("] %d%% - %s", (int)(ratio * 100), stage);
+  // clear out the rest of the line
+  printf("\033[K");
+  fflush(stdout);
+  if (step == total) {
+    printf("\n");
+  }
 }
