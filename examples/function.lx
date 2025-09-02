@@ -1,6 +1,5 @@
-pub const main = fn () int {
-    if ((5 > 8) && (8 < 10)) {
-        return 10;
-    }
-    return 0;
+@module "test"
+
+pub const add = fn (x: int, y: int) int {
+    return x + y;
 }

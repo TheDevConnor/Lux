@@ -1,9 +1,10 @@
 /**
  * @file help.h
- * @brief Declarations for command-line parsing, file reading, and build configuration.
+ * @brief Declarations for command-line parsing, file reading, and build
+ * configuration.
  *
- * Provides functions to parse arguments, read files, print help/version/license,
- * and print token debug info.
+ * Provides functions to parse arguments, read files, print
+ * help/version/license, and print token debug info.
  */
 
 #pragma once
@@ -12,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../ast/ast.h"
 #include "../c_libs/memory/memory.h"
 #include "../lexer/lexer.h"
 
@@ -36,12 +38,14 @@ typedef enum {
 /**
  * @brief Configuration structure to hold build options parsed from CLI.
  */
+
 typedef struct {
-  const char *filepath; /**< Path to the source file */
-  const char *source;   /**< Source code content (optional) */
-  const char *name;     /**< Build target name */
-  bool save;            /**< Flag to save output */
-  bool clean;           /**< Flag to clean build artifacts */
+  const char *filepath;
+  const char *name;
+  bool save;
+  bool clean;
+  GrowableArray files; // Change from char** to GrowableArray
+  size_t file_count;   // Keep for convenience, or remove and use files.count
 } BuildConfig;
 
 bool check_argc(int argc, int expected);
@@ -51,7 +55,10 @@ int print_help();
 int print_version();
 int print_license();
 
-bool parse_args(int argc, char *argv[], BuildConfig *config);
+AstNode *lex_and_parse_file(const char *path, ArenaAllocator *allocator);
+
+bool parse_args(int argc, char *argv[], BuildConfig *config,
+                ArenaAllocator *arena);
 bool run_build(BuildConfig config, ArenaAllocator *allocator);
 
 void print_token(const Token *t);

@@ -1,14 +1,8 @@
-;; @module "main"
-
-const PIE: float = 3.141592653589793;
-const fib = fn (n: int, a: int, b: int) int {
-    if (n == 0) { return a; }
-    if (n == 1) { return b; }
-    return fib(n-1, b, a+b);
-}
+@module "main"
+@use "test" as test
 
 pub const main = fn () int {
-    let n: int = 92;
-    output("Fib of (", n, ") = ", fib(n, 0, 1), "\n");
-    return 0;
+    return test.add(3, 4);
 }
+
+:: lux build src/main.lx -name lux -save -link src/c_lib.memory.lx

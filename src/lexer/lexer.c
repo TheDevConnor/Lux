@@ -39,7 +39,7 @@ static const SymbolEntry symbols[] = {
     {"^", TOK_CARET},       {"~", TOK_TILDE},        {"!", TOK_BANG},
     {"?", TOK_QUESTION},    {"::", TOK_RESOLVE},     {":", TOK_COLON},
     {"_", TOK_SYMBOL},      {"++", TOK_PLUSPLUS},    {"--", TOK_MINUSMINUS},
-    {"<<", TOK_SHIFT_LEFT}, {">>", TOK_SHIFT_RIGHT},
+    {"<<", TOK_SHIFT_LEFT}, {">>", TOK_SHIFT_RIGHT}, {"@", TOK_AT},
 };
 
 /** @internal Keyword text to token type mapping */
@@ -76,6 +76,12 @@ static const KeywordEntry keywords[] = {
     {"cast", TOK_CAST},
     {"memcpy", TOK_MEMCPY},
     {"sizeof", TOK_SIZE_OF},
+    {"as", TOK_AS},
+};
+
+static const KeywordEntry preprocessor_directives[] = {
+    {"@module", TOK_MODULE},
+    {"@use", TOK_USE},
 };
 
 /**
@@ -156,6 +162,25 @@ static TokenType lookup_keyword(const char *str, int length) {
     }
   }
   return TOK_IDENTIFIER;
+}
+
+/**
+ * @internal
+ * @brief Looks up if a string matches a preprocessor directive.
+ *
+ * @param str Pointer to string to match
+ * @param length Length of the string
+ * @return TokenType preprocessor token if found, else TOK_SYMBOL
+ */
+static TokenType lookup_preprocessor(const char *str, int length) {
+  for (int i = 0; i < (int)(sizeof(preprocessor_directives) /
+                            sizeof(*preprocessor_directives));
+       ++i) {
+    if (STR_EQUALS_LEN(str, preprocessor_directives[i].text, length)) {
+      return preprocessor_directives[i].type;
+    }
+  }
+  return TOK_SYMBOL;
 }
 
 /**
@@ -281,7 +306,7 @@ int skip_whitespace(Lexer *lx) {
     if (isspace(c)) {
       advance(lx);
       count++;
-    } else if (c == ';' && peek(lx, 1) == ';') {
+    } else if (c == ':' && peek(lx, 1) == ':') {
       // Skip single-line comment
       while (!is_at_end(lx) && peek(lx, 0) != '\n') {
         advance(lx);
@@ -311,6 +336,32 @@ Token next_token(Lexer *lx) {
 
   const char *start = lx->current;
   char c = advance(lx);
+
+  // Preprocessor directives (starting with @)
+  if (c == '@') {
+    if (isalpha(peek(lx, 0))) {
+      // Read the rest of the directive
+      while (isalnum(peek(lx, 0)) || peek(lx, 0) == '_') {
+        advance(lx);
+      }
+      int len = (int)(lx->current - start);
+      TokenType type = lookup_preprocessor(start, len);
+      if (type != TOK_SYMBOL) {
+        return MAKE_TOKEN(type, start, lx, len, wh_count);
+      }
+      // If not a known preprocessor directive, treat as error or symbol
+      static char error_msg[64];
+      snprintf(error_msg, sizeof(error_msg),
+               "Unknown preprocessor directive: '%.*s'", len, start);
+      report_lexer_error(lx, "LexerError", "unknown_file", error_msg,
+                         get_line_text_from_source(lx->src, lx->line), lx->line,
+                         lx->col - len, len);
+      return MAKE_TOKEN(TOK_ERROR, start, lx, len, wh_count);
+    }
+    // Just @ by itself - treat as symbol
+    TokenType single_type = lookup_symbol(start, 1);
+    return MAKE_TOKEN(single_type, start, lx, 1, wh_count);
+  }
 
   // Identifiers and keywords
   if (isalpha(c) || c == '_') {

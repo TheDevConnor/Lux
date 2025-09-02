@@ -14,6 +14,10 @@ const char *node_type_to_string(NodeType type) {
   switch (type) {
   case AST_PROGRAM:
     return "Program";
+  case AST_PREPROCESSOR_MODULE:
+    return "Module";
+  case AST_PREPROCESSOR_USE:
+    return "Use";
   case AST_EXPR_LITERAL:
     return "Literal";
   case AST_EXPR_IDENTIFIER:
@@ -192,7 +196,8 @@ void print_prefix(const char *prefix, bool is_last) {
   }
 }
 
-void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_root) {
+void print_ast(const AstNode *node, const char *prefix, bool is_last,
+               bool is_root) {
   if (!node) {
     print_prefix(prefix, is_last);
     printf(GRAY("<null>\n"));
@@ -205,7 +210,8 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
   printf(BOLD_MAGENTA("%s\n"), node_type_to_string(node->type));
 
   char next_prefix[512];
-  snprintf(next_prefix, sizeof(next_prefix), "%s%s", prefix, is_last ? "    " : "│   ");
+  snprintf(next_prefix, sizeof(next_prefix), "%s%s", prefix,
+           is_last ? "    " : "│   ");
 
   if (node->line > 0 || node->column > 0) {
     print_prefix(next_prefix, true);
@@ -215,9 +221,44 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
   switch (node->type) {
   case AST_PROGRAM:
     indent(0);
-    for (size_t i = 0; i < node->stmt.program.stmt_count; ++i) {
-      bool last = (i == node->stmt.program.stmt_count - 1);
-      print_ast(node->stmt.program.statements[i], next_prefix, last, false);
+    for (size_t i = 0; i < node->stmt.program.module_count; ++i) {
+      bool last = (i == node->stmt.program.module_count - 1);
+      print_ast(node->stmt.program.modules[i], next_prefix, last, false);
+    }
+    break;
+
+  case AST_PREPROCESSOR_MODULE:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Module Name: "));
+    if (node->preprocessor.module.name) {
+      printf(YELLOW("%s"), node->preprocessor.module.name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
+    }
+    printf(BOLD_CYAN(" (Potions: %d)\n"), node->preprocessor.module.potions);
+    if (node->preprocessor.module.body) {
+      print_prefix(next_prefix, true);
+      printf(BOLD_CYAN("Body:\n"));
+      for (size_t i = 0; node->preprocessor.module.body[i] != NULL; ++i) {
+        bool last = (node->preprocessor.module.body[i + 1] == NULL);
+        print_ast(node->preprocessor.module.body[i], next_prefix, last, false);
+      }
+    }
+    break;
+
+  case AST_PREPROCESSOR_USE:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Use Module: "));
+    if (node->preprocessor.use.module_name) {
+      printf(YELLOW("%s"), node->preprocessor.use.module_name);
+    } else {
+      printf(YELLOW("<unnamed>\n"));
+    }
+    if (node->preprocessor.use.alias) {
+      printf(BOLD_CYAN(" as "));
+      printf(YELLOW("%s\n"), node->preprocessor.use.alias);
+    } else {
+      printf("\n");
     }
     break;
 
@@ -267,9 +308,11 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     }
     if (node->type_data.function.param_count > 0) {
       print_prefix(next_prefix, true);
-      printf(BOLD_CYAN("Parameters: %zu\n"), node->type_data.function.param_count);
+      printf(BOLD_CYAN("Parameters: %zu\n"),
+             node->type_data.function.param_count);
       for (size_t i = 0; i < node->type_data.function.param_count; ++i) {
-        print_ast(node->type_data.function.param_types[i], next_prefix, true, false);
+        print_ast(node->type_data.function.param_types[i], next_prefix, true,
+                  false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -279,20 +322,28 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
 
   case AST_EXPR_LITERAL:
     print_prefix(next_prefix, true);
-    printf(GREEN(" (%s): "), literal_type_to_string(node->expr.literal.lit_type));
+    printf(GREEN(" (%s): "),
+           literal_type_to_string(node->expr.literal.lit_type));
     switch (node->expr.literal.lit_type) {
     case LITERAL_INT:
-      printf(GREEN("%lld\n"), node->expr.literal.value.int_val); break;
+      printf(GREEN("%lld\n"), node->expr.literal.value.int_val);
+      break;
     case LITERAL_FLOAT:
-      printf(GREEN("%f\n"), node->expr.literal.value.float_val); break;
+      printf(GREEN("%f\n"), node->expr.literal.value.float_val);
+      break;
     case LITERAL_STRING:
-      printf(GREEN("\"%s\"\n"), node->expr.literal.value.string_val); break;
+      printf(GREEN("\"%s\"\n"), node->expr.literal.value.string_val);
+      break;
     case LITERAL_CHAR:
-      printf(GREEN("'%c'\n"), node->expr.literal.value.char_val); break;
+      printf(GREEN("'%c'\n"), node->expr.literal.value.char_val);
+      break;
     case LITERAL_BOOL:
-      printf(GREEN("%s\n"), node->expr.literal.value.bool_val ? "true" : "false"); break;
+      printf(GREEN("%s\n"),
+             node->expr.literal.value.bool_val ? "true" : "false");
+      break;
     case LITERAL_NULL:
-      printf(GREEN("null\n")); break;
+      printf(GREEN("null\n"));
+      break;
     default:
       print_prefix(next_prefix, true);
       printf(GRAY("<unknown literal type>\n"));
@@ -326,7 +377,9 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
   case AST_EXPR_UNARY:
     print_prefix(next_prefix, false);
     printf(BOLD_CYAN("Unary Operator: "));
-    printf(YELLOW(" (%s)\n"), node->expr.unary.op ? unop_to_string(node->expr.unary.op) : "unknown");
+    printf(YELLOW(" (%s)\n"), node->expr.unary.op
+                                  ? unop_to_string(node->expr.unary.op)
+                                  : "unknown");
     print_ast(node->expr.unary.operand, next_prefix, true, false);
     break;
 
@@ -337,11 +390,11 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       print_ast(node->expr.array.elements[i], next_prefix, true, false);
     }
     break;
-  
+
   case AST_EXPR_CALL:
     print_prefix(next_prefix, false);
     printf(BOLD_CYAN("Function Call: "));
-    if (node->expr.call.callee) { 
+    if (node->expr.call.callee) {
       print_ast(node->expr.call.callee, next_prefix, false, false);
     } else {
       print_prefix(next_prefix, false);
@@ -362,7 +415,7 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
   case AST_EXPR_ASSIGNMENT:
     print_prefix(next_prefix, false);
     printf(BOLD_CYAN("Assignment: \n"));
-    if (node->expr.assignment.target) { 
+    if (node->expr.assignment.target) {
       print_ast(node->expr.assignment.target, next_prefix, false, false);
     } else {
       print_prefix(next_prefix, false);
@@ -386,7 +439,8 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
       printf(GRAY("<no object>\n"));
     }
     print_prefix(next_prefix, true);
-    printf(BOLD_CYAN("Member Name: %s\n"), node->expr.member.member ? node->expr.member.member : "<unnamed>");
+    printf(BOLD_CYAN("Member Name: %s\n"),
+           node->expr.member.member ? node->expr.member.member : "<unnamed>");
     break;
 
   case AST_EXPR_INDEX:
@@ -411,7 +465,7 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     printf(BOLD_CYAN("Ternary Expression: \n"));
     if (node->expr.ternary.condition) {
       print_ast(node->expr.ternary.condition, next_prefix, false, false);
-    } else {  
+    } else {
       print_prefix(next_prefix, false);
       printf(GRAY("<no condition>\n"));
     }
@@ -451,7 +505,7 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last, bool is_ro
     }
     break;
 
-case AST_EXPR_ALLOC:
+  case AST_EXPR_ALLOC:
     print_prefix(next_prefix, false);
     printf(BOLD_CYAN("Alloc Expression: \n"));
     if (node->expr.alloc.size) {
@@ -501,7 +555,7 @@ case AST_EXPR_ALLOC:
       printf(GRAY("<no size>\n"));
     }
     break;
-  
+
   case AST_EXPR_FREE:
     print_prefix(next_prefix, false);
     printf(BOLD_CYAN("Free Expression: \n"));
@@ -543,7 +597,8 @@ case AST_EXPR_ALLOC:
     printf(BOLD_CYAN("Print Statement: \n"));
     if (node->stmt.print_stmt.expr_count > 0) {
       for (size_t i = 0; i < node->stmt.print_stmt.expr_count; ++i) {
-        print_ast(node->stmt.print_stmt.expressions[i], next_prefix, (i == node->stmt.print_stmt.expr_count - 1), false);
+        print_ast(node->stmt.print_stmt.expressions[i], next_prefix,
+                  (i == node->stmt.print_stmt.expr_count - 1), false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -569,11 +624,13 @@ case AST_EXPR_ALLOC:
     print_ast(node->stmt.var_decl.var_type, next_prefix, true, false);
     print_ast(node->stmt.var_decl.initializer, next_prefix, true, false);
     print_prefix(next_prefix, true);
-    printf(GRAY("Mutable: %s\n"), node->stmt.var_decl.is_mutable ? "true" : "false");
+    printf(GRAY("Mutable: %s\n"),
+           node->stmt.var_decl.is_mutable ? "true" : "false");
     print_prefix(next_prefix, true);
-    printf(GRAY("Is Public: %s\n"), node->stmt.var_decl.is_public ? "true" : "false");
+    printf(GRAY("Is Public: %s\n"),
+           node->stmt.var_decl.is_public ? "true" : "false");
     break;
-  
+
   case AST_STMT_FUNCTION:
     print_prefix(next_prefix, true);
     printf(BOLD_CYAN("Function Declaration: "));
@@ -583,14 +640,17 @@ case AST_EXPR_ALLOC:
       printf(YELLOW("<unnamed>\n"));
     }
     print_prefix(next_prefix, true);
-    printf(GRAY("Is Public: %s\n"), node->stmt.func_decl.is_public ? "true" : "false");
+    printf(GRAY("Is Public: %s\n"),
+           node->stmt.func_decl.is_public ? "true" : "false");
     if (node->stmt.func_decl.param_count > 0) {
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Parameters: %zu\n"), node->stmt.func_decl.param_count);
       for (size_t i = 0; i < node->stmt.func_decl.param_count; ++i) {
         print_prefix(next_prefix, false);
-        printf(GREEN("Parameter %zu: %s\n"), i + 1, node->stmt.func_decl.param_names[i]);
-        print_ast(node->stmt.func_decl.param_types[i], next_prefix, true, false);
+        printf(GREEN("Parameter %zu: %s\n"), i + 1,
+               node->stmt.func_decl.param_names[i]);
+        print_ast(node->stmt.func_decl.param_types[i], next_prefix, true,
+                  false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -607,7 +667,7 @@ case AST_EXPR_ALLOC:
     print_ast(node->stmt.func_decl.body, next_prefix, true, false);
     break;
 
-  case AST_STMT_ENUM: 
+  case AST_STMT_ENUM:
     print_prefix(next_prefix, true);
     printf(BOLD_CYAN("Enum Declaration: "));
     if (node->stmt.enum_decl.name) {
@@ -616,13 +676,15 @@ case AST_EXPR_ALLOC:
       printf(YELLOW("<unnamed>\n"));
     }
     print_prefix(next_prefix, true);
-    printf(GRAY("Is Public: %s\n"), node->stmt.enum_decl.is_public ? "true" : "false");
+    printf(GRAY("Is Public: %s\n"),
+           node->stmt.enum_decl.is_public ? "true" : "false");
     if (node->stmt.enum_decl.member_count > 0) {
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Members: %zu\n"), node->stmt.enum_decl.member_count);
       for (size_t i = 0; i < node->stmt.enum_decl.member_count; ++i) {
         print_prefix(next_prefix, false);
-        printf(GREEN("Member %zu: %s\n"), i + 1, node->stmt.enum_decl.members[i]);
+        printf(GREEN("Member %zu: %s\n"), i + 1,
+               node->stmt.enum_decl.members[i]);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -639,13 +701,16 @@ case AST_EXPR_ALLOC:
       printf(YELLOW("<unnamed>\n"));
     }
     print_prefix(next_prefix, true);
-    printf(GRAY("Is Public: %s\n"), node->stmt.struct_decl.is_public ? "true" : "false");
-    
+    printf(GRAY("Is Public: %s\n"),
+           node->stmt.struct_decl.is_public ? "true" : "false");
+
     if (node->stmt.struct_decl.public_count > 0) {
       print_prefix(next_prefix, true);
-      printf(BOLD_CYAN("Public Members: %zu\n"), node->stmt.struct_decl.public_count);
+      printf(BOLD_CYAN("Public Members: %zu\n"),
+             node->stmt.struct_decl.public_count);
       for (size_t i = 0; i < node->stmt.struct_decl.public_count; ++i) {
-        print_ast(node->stmt.struct_decl.public_members[i], next_prefix, true, false);
+        print_ast(node->stmt.struct_decl.public_members[i], next_prefix, true,
+                  false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -654,9 +719,11 @@ case AST_EXPR_ALLOC:
 
     if (node->stmt.struct_decl.private_count > 0) {
       print_prefix(next_prefix, true);
-      printf(BOLD_CYAN("Private Members: %zu\n"), node->stmt.struct_decl.private_count);
+      printf(BOLD_CYAN("Private Members: %zu\n"),
+             node->stmt.struct_decl.private_count);
       for (size_t i = 0; i < node->stmt.struct_decl.private_count; ++i) {
-        print_ast(node->stmt.struct_decl.private_members[i], next_prefix, true, false);
+        print_ast(node->stmt.struct_decl.private_members[i], next_prefix, true,
+                  false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -674,7 +741,8 @@ case AST_EXPR_ALLOC:
     }
     print_ast(node->stmt.field_decl.type, next_prefix, true, false);
     print_prefix(next_prefix, true);
-    printf(GRAY("Is Public: %s\n"), node->stmt.field_decl.is_public ? "true" : "false");
+    printf(GRAY("Is Public: %s\n"),
+           node->stmt.field_decl.is_public ? "true" : "false");
     if (node->stmt.field_decl.function) {
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Function: \n"));
@@ -684,7 +752,7 @@ case AST_EXPR_ALLOC:
       printf(GRAY("<no function>\n"));
     }
     break;
-  
+
   case AST_STMT_BLOCK:
     print_prefix(next_prefix, true);
     printf(BOLD_CYAN("Block Statement\n"));
@@ -714,7 +782,8 @@ case AST_EXPR_ALLOC:
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Elif Statements\n"));
       for (int i = 0; i < node->stmt.if_stmt.elif_count; ++i) {
-        print_ast(node->stmt.if_stmt.elif_stmts[i], next_prefix, (i == node->stmt.if_stmt.elif_count - 1), false);
+        print_ast(node->stmt.if_stmt.elif_stmts[i], next_prefix,
+                  (i == node->stmt.if_stmt.elif_count - 1), false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -753,7 +822,8 @@ case AST_EXPR_ALLOC:
       print_prefix(next_prefix, true);
       printf(BOLD_CYAN("Initializers: %zu\n"), node->stmt.loop_stmt.init_count);
       for (size_t i = 0; i < node->stmt.loop_stmt.init_count; ++i) {
-        print_ast(node->stmt.loop_stmt.initializer[i], next_prefix, (i == node->stmt.loop_stmt.init_count - 1), false);
+        print_ast(node->stmt.loop_stmt.initializer[i], next_prefix,
+                  (i == node->stmt.loop_stmt.init_count - 1), false);
       }
     } else {
       print_prefix(next_prefix, true);
@@ -764,7 +834,8 @@ case AST_EXPR_ALLOC:
 
   case AST_STMT_BREAK_CONTINUE:
     print_prefix(next_prefix, true);
-    printf(BOLD_CYAN("%s Statement | "), node->stmt.break_continue.is_continue ? "Continue" : "Break");
+    printf(BOLD_CYAN("%s Statement | "),
+           node->stmt.break_continue.is_continue ? "Continue" : "Break");
     if (node->stmt.break_continue.is_continue) {
       printf(GRAY("This is a continue statement.\n"));
     } else {
@@ -772,11 +843,10 @@ case AST_EXPR_ALLOC:
     }
     printf("\n");
     break;
-  
+
   default:
     print_prefix(next_prefix, true);
     printf(GRAY("No specific print logic for this node type.\n"));
     break;
   }
 }
-

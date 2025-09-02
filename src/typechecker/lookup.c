@@ -5,8 +5,8 @@
 bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
   switch (stmt->type) {
   case AST_PROGRAM:
-    for (size_t i = 0; i < stmt->stmt.program.stmt_count; i++) {
-      if (!typecheck(stmt->stmt.program.statements[i], scope, arena)) {
+    for (size_t i = 0; i < stmt->stmt.program.module_count; i++) {
+      if (!typecheck(stmt->stmt.program.modules[i], scope, arena)) {
         return false;
       }
     }
@@ -38,7 +38,7 @@ bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
     return true;
   }
 
-  case AST_STMT_PRINT: 
+  case AST_STMT_PRINT:
     return true; // Print statements do not affect type checking
 
   default:

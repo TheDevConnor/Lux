@@ -47,8 +47,12 @@ int main(int argc, char *argv[]) {
   // Step 2: Initialize build configuration
   BuildConfig config = {0};
 
+  // Step 2.5: Initialize arena allocator (1MB initial size)
+  ArenaAllocator allocator;
+  arena_allocator_init(&allocator, 1024 * 1024);
+
   // Step 3: Parse CLI arguments into config
-  if (!parse_args(argc, argv, &config)) {
+  if (!parse_args(argc, argv, &config, &allocator)) {
     // Commands like --help or --version are handled in parse_args
     return ARGC_ERROR;
   }
@@ -58,10 +62,6 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "No source file provided.\n");
     return ARGC_ERROR;
   }
-
-  // Step 5: Initialize arena allocator (1MB initial size)
-  ArenaAllocator allocator;
-  arena_allocator_init(&allocator, 1024 * 1024);
 
   // Step 6: Run build process
   bool success = run_build(config, &allocator);

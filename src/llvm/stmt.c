@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 LLVMValueRef codegen_stmt_program(CodeGenContext *ctx, AstNode *node) {
-  for (size_t i = 0; i < node->stmt.program.stmt_count; i++) {
-    codegen_stmt(ctx, node->stmt.program.statements[i]);
+  for (size_t i = 0; i < node->stmt.program.module_count; i++) {
+    codegen_stmt(ctx, node->stmt.program.modules[i]);
   }
   return NULL;
 }

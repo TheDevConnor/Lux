@@ -62,6 +62,11 @@ typedef enum {
   TOK_CAST,     /**< cast<Type>(value you want to cast too) */
   TOK_SIZE_OF,  /**< size_of<TYPE> */
   TOK_MEMCPY,   /**< memcpy(void *to, void *from, int size) */
+  TOK_AS,       /**< as keyword (for use in modules) */
+
+  // prepocessor directives
+  TOK_MODULE, /**< @module */
+  TOK_USE,    /**< @use */
 
   // Symbols
   TOK_SYMBOL,      /**< Fallback symbol */
@@ -74,6 +79,7 @@ typedef enum {
   TOK_SEMICOLON,   /**< ; */
   TOK_COMMA,       /**< , */
   TOK_DOT,         /**< . */
+  TOK_AT,          /**< @ */
   TOK_EQUAL,       /**< = */
   TOK_PLUS,        /**< + */
   TOK_MINUS,       /**< - */

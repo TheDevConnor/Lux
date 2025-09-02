@@ -150,12 +150,11 @@ Expr *parse_expr(Parser *parser, BindingPower bp);
 Stmt *parse_stmt(Parser *parser);
 Type *parse_type(Parser *parser);
 
-/**
- * @brief Pratt parser function for null denotation (prefix parsing).
- *
- * @param parser Parser pointer.
- * @return Parsed expression node.
- */
+// Helper functions for the parser
+bool init_parser_arrays(Parser *parser, GrowableArray *stmts,
+                        GrowableArray *modules);
+const char *parse_module_declaration(Parser *parser);
+
 Expr *nud(Parser *parser);
 
 /**
@@ -193,6 +192,7 @@ BindingPower tget_bp(Parser *parser, TokenType kind);
 Type *pointer(Parser *parser);
 Type *array_type(Parser *parser);
 
+Stmt *use_stmt(Parser *parser);
 Stmt *expr_stmt(Parser *parser);
 Stmt *var_stmt(Parser *parser, bool is_public);
 Stmt *const_stmt(Parser *parser, bool is_public);

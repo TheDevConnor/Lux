@@ -54,6 +54,25 @@ Stmt *expr_stmt(Parser *parser) {
   return create_expr_stmt(parser->arena, expr, line, col);
 }
 
+// @use "module_name" as module_alias
+Stmt *use_stmt(Parser *parser) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  p_consume(parser, TOK_USE, "Expected '@use' keyword");
+  const char *module_name = get_name(parser);
+  p_advance(parser); // Advance past the identifier token
+  const char *module_alias = NULL;
+  if (p_current(parser).type_ == TOK_AS) {
+    p_consume(parser, TOK_AS, "Expected 'as' keyword for module alias");
+    module_alias = get_name(parser);
+    p_advance(parser); // Advance past the alias identifier token
+  }
+
+  return create_use_node(parser->arena, module_name, module_alias, line,
+                           col);
+}
+
 /**
  * @brief Parses a constant declaration statement
  * 

@@ -105,7 +105,7 @@ AstNode *create_member_expr(ArenaAllocator *arena, AstNode *object,
                             const char *member, size_t line, size_t column) {
   AstNode *node = create_expr(arena, AST_EXPR_MEMBER, line, column);
   node->expr.member.object = object;
-  node->expr.member.member = strdup(member);
+  node->expr.member.member = arena_strdup(arena, member);
   return node;
 }
 
@@ -177,8 +177,8 @@ AstNode *create_cast_expr(ArenaAllocator *arena, Expr *type, Expr *castee,
   return node;
 }
 
-AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, bool is_type, size_t line,
-                            size_t col) {
+AstNode *create_sizeof_expr(ArenaAllocator *arena, Expr *object, bool is_type,
+                            size_t line, size_t col) {
   AstNode *node = create_expr(arena, AST_EXPR_SIZEOF, line, col);
   node->expr.size_of.object = object;
   node->expr.size_of.is_type = is_type;

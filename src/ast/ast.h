@@ -10,6 +10,10 @@ typedef struct AstNode AstNode;
 
 // Node type enumeration
 typedef enum {
+  // Preprocessor nodes
+  AST_PREPROCESSOR_MODULE, // Module declaration
+  AST_PREPROCESSOR_USE,    // Use/import statement
+
   // Expression nodes
   AST_EXPR_LITERAL,    // Literal values (numbers, strings, booleans)
   AST_EXPR_IDENTIFIER, // Variable/function names
@@ -107,7 +111,8 @@ typedef enum {
 typedef enum {
   Node_Category_EXPR,
   Node_Category_STMT,
-  Node_Category_TYPE
+  Node_Category_TYPE,
+  Node_Category_PREPROCESSOR
 } NodeCategory;
 
 // Base AST node structure
@@ -118,6 +123,23 @@ struct AstNode {
   NodeCategory category; // Category of the node (expression, statement, type)
 
   union {
+    struct {
+      union {
+        // Preprocessor-specific data
+        struct {
+          char *name;
+          int potions;
+          AstNode **body;
+        } module;
+        
+        // @use "module_name" as module;
+        struct {
+          const char *module_name;
+          const char *alias;
+        } use;
+      };
+    } preprocessor;
+
     struct {
       // Expression-specific data
       union {
@@ -240,8 +262,8 @@ struct AstNode {
       union {
         // Program root node
         struct {
-          AstNode **statements; // Changed from Stmt** to AstNode**
-          size_t stmt_count;
+          AstNode **modules; // Changed from Stmt** to AstNode**
+          size_t module_count;
         } program;
 
         // Expression statement
@@ -378,10 +400,13 @@ struct AstNode {
 };
 
 // Type aliases for cleaner code (defined AFTER the struct)
+typedef AstNode Preprocessor;
 typedef AstNode Expr;
 typedef AstNode Stmt;
 typedef AstNode Type;
 
+AstNode *create_preprocessor_node(ArenaAllocator *arena, NodeType type,
+                         NodeCategory category, size_t line, size_t column);
 AstNode *create_expr_node(ArenaAllocator *arena, NodeType type, size_t line,
                           size_t column);
 AstNode *create_stmt_node(ArenaAllocator *arena, NodeType type, size_t line,
@@ -390,6 +415,8 @@ AstNode *create_type_node(ArenaAllocator *arena, NodeType type, size_t line,
                           size_t column);
 
 // Helper macros for creating nodes
+#define create_preprocessor(arena, type, line, column)                        \
+  create_preprocessor_node(arena, type, Node_Category_EXPR, line, column) 
 #define create_expr(arena, type, line, column)                                 \
   create_expr_node(arena, type, line, column)
 #define create_stmt(arena, type, line, column)                                 \
@@ -400,6 +427,13 @@ AstNode *create_type_node(ArenaAllocator *arena, NodeType type, size_t line,
 // Create the AstNode
 AstNode *create_ast_node(ArenaAllocator *arena, NodeType type,
                          NodeCategory category, size_t line, size_t column);
+
+// Preprocessor creation macros
+AstNode *create_module_node(ArenaAllocator *arena, const char *name,
+                             int potions, AstNode **body, size_t body_count,
+                             size_t line, size_t column);
+AstNode *create_use_node(ArenaAllocator *arena, const char *module_name,
+                         const char *alias, size_t line, size_t column);  
 
 // Expression creation macros
 AstNode *create_literal_expr(ArenaAllocator *arena, LiteralType lit_type,

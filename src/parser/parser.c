@@ -83,50 +83,74 @@ void parser_error(Parser *psr, const char *error_type, const char *file,
  *
  * @see Parser, parse_stmt(), create_program_node()
  */
+
 Stmt *parse(GrowableArray *tks, ArenaAllocator *arena) {
-  size_t estimated_stmts = (tks->count / 4) + 10;
+    // Initialize parser
+    Parser parser = {
+        .arena = arena,
+        .tks = (Token *)tks->data,
+        .tk_count = tks->count,
+        .capacity = (tks->count / 4) + 10,
+        .pos = 0,
+    };
 
-  Parser parser = {
-      .arena = arena,
-      .tks = (Token *)tks->data,
-      .tk_count = tks->count,
-      .capacity = estimated_stmts,
-      .pos = 0,
-  };
-
-  if (!parser.tks) {
-    fprintf(stderr, "Failed to get tokens from GrowableArray\n");
-    return NULL;
-  }
-
-  // Allocate array of statement pointers with proper alignment
-  GrowableArray stmts;
-  if (!growable_array_init(&stmts, parser.arena, 1024, sizeof(Stmt *))) {
-    fprintf(stderr, "Failed to initialize the statements array.\n");
-    return NULL;
-  }
-
-  while (p_has_tokens(&parser) && p_current(&parser).type_ != TOK_EOF) {
-    Stmt *stmt = parse_stmt(&parser);
-    if (!stmt) {
-      fprintf(stderr, "parse_stmt returned NULL inside block\n");
-      continue; // or return NULL to fail the entire block
+    if (!parser.tks) {
+        fprintf(stderr, "Failed to get tokens from GrowableArray\n");
+        return NULL;
     }
 
-    Stmt **slot = (Stmt **)growable_array_push(&stmts);
-    if (!slot) {
-      fprintf(stderr, "Out of memory while growing block statement array\n");
-      return NULL;
+    // Initialize arrays
+    GrowableArray stmts, modules;
+    if (!init_parser_arrays(&parser, &stmts, &modules)) {
+        return NULL;
     }
 
-    *slot = stmt;
-  }
+    // Parse module declaration
+    Token module_tok = p_current(&parser);
+    const char *module_name = parse_module_declaration(&parser);
+    if (!module_name) {
+        return NULL;
+    }
 
-  // Cast to AstNode** since program expects AstNode**
-  return create_program_node(parser.arena, (AstNode **)stmts.data, stmts.count,
-                             0, 0);
+    // Create initial module node and add to modules array
+    Stmt *module_stmt = create_module_node(parser.arena, module_name, 0,
+                                           NULL, 0,
+                                           module_tok.line, module_tok.col);
+    
+    Stmt **module_slot = (Stmt **)growable_array_push(&modules);
+    if (!module_slot) {
+        fprintf(stderr, "Out of memory while growing modules array\n");
+        return NULL;
+    }
+    *module_slot = module_stmt;
+
+    // Parse all statements
+    while (p_current(&parser).type_ != TOK_EOF) {
+        Stmt *stmt = parse_stmt(&parser);
+        if (!stmt) {
+            // Error already reported in parse_stmt
+            return NULL;
+        }
+
+        Stmt **slot = (Stmt **)growable_array_push(&stmts);
+        if (!slot) {
+            fprintf(stderr, "Out of memory while growing statements array\n");
+            return NULL;
+        }
+        *slot = stmt;
+    }
+
+    // Update module with parsed statements
+    *module_slot = create_module_node(parser.arena, module_name, 0,
+                                      (Stmt **)stmts.data, stmts.count,
+                                      module_tok.line, module_tok.col);
+
+    // Create and return program node
+    return create_program_node(parser.arena,
+                               (AstNode **)modules.data,
+                               modules.count,
+                               0, 0);
 }
-
 /**
  * @brief Gets the binding power (precedence) for a given token type
  *
@@ -397,6 +421,8 @@ Stmt *parse_stmt(Parser *parser) {
   }
 
   switch (p_current(parser).type_) {
+  case TOK_USE:
+    return use_stmt(parser);
   case TOK_CONST:
     return const_stmt(parser, is_public);
   case TOK_VAR:
