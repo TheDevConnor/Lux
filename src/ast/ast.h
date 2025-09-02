@@ -130,6 +130,7 @@ struct AstNode {
           char *name;
           int potions;
           AstNode **body;
+          size_t body_count;
         } module;
         
         // @use "module_name" as module;
@@ -416,7 +417,7 @@ AstNode *create_type_node(ArenaAllocator *arena, NodeType type, size_t line,
 
 // Helper macros for creating nodes
 #define create_preprocessor(arena, type, line, column)                        \
-  create_preprocessor_node(arena, type, Node_Category_EXPR, line, column) 
+  create_preprocessor_node(arena, type, Node_Category_PREPROCESSOR, line, column) 
 #define create_expr(arena, type, line, column)                                 \
   create_expr_node(arena, type, line, column)
 #define create_stmt(arena, type, line, column)                                 \

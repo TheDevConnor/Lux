@@ -211,6 +211,45 @@ AstNode *lex_and_parse_file(const char *path, ArenaAllocator *allocator) {
  * @param allocator ArenaAllocator for memory allocation.
  * @return true if build succeeded, false if errors or failures occurred.
  */
+void debug_ast_module_structure(AstNode *program_node) {
+  if (!program_node || program_node->type != AST_PROGRAM) {
+    printf("DEBUG: Not a program node\n");
+    return;
+  }
+
+  printf("DEBUG: Program has %zu modules\n",
+         program_node->stmt.program.module_count);
+
+  for (size_t i = 0; i < program_node->stmt.program.module_count; i++) {
+    AstNode *module = program_node->stmt.program.modules[i];
+    if (!module) {
+      printf("DEBUG: Module %zu is NULL\n", i);
+      continue;
+    }
+
+    printf("DEBUG: Module %zu:\n", i);
+    printf("  - Type: %d\n", module->type);
+    printf("  - Name: %s\n", module->preprocessor.module.name);
+    printf("  - Body pointer: %p\n", (void *)module->preprocessor.module.body);
+    printf("  - Potions (position): %d\n", module->preprocessor.module.potions);
+
+    // Check what's actually in the body
+    if (module->preprocessor.module.body) {
+      printf("  - Body contents:\n");
+      for (int j = 0; j < 10; j++) { // Check first 10 elements
+        AstNode *body_item = module->preprocessor.module.body[j];
+        printf("    body[%d]: %p", j, (void *)body_item);
+        if (body_item) {
+          printf(" (type: %d)", body_item->type);
+        }
+        printf("\n");
+        if (!body_item)
+          break; // Stop at first null
+      }
+    }
+  }
+}
+
 bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   bool success = false;
 
@@ -259,13 +298,14 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   }
 
   // Print the combined AST for debugging
-  print_ast(combined_program, "", true, true);
+  // print_ast(combined_program, "", true, true);
 
   // Typechecking with global scope
   Scope root_scope;
   init_scope(&root_scope, NULL, "global", allocator);
 
   bool tc = typecheck(combined_program, &root_scope, allocator);
+  // debug_ast_module_structure(combined_program);
   debug_print_scope(&root_scope, 0);
 
   if (tc) {

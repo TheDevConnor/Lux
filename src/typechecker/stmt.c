@@ -7,8 +7,10 @@ bool typecheck_var_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   const char *name = node->stmt.var_decl.name;
   AstNode *declared_type = node->stmt.var_decl.var_type;
   AstNode *initializer = node->stmt.var_decl.initializer;
+  bool is_public = node->stmt.var_decl.is_public;
+  bool is_mutable = node->stmt.var_decl.is_mutable;
 
-  // If there's an initializer, check its type matches the declared type
+  // Type checking logic (same as before)
   if (initializer) {
     AstNode *init_type = typecheck_expression(initializer, scope, arena);
     if (!init_type)
@@ -24,7 +26,6 @@ bool typecheck_var_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
         return false;
       }
     } else {
-      // Type inference - use the initializer's type
       declared_type = init_type;
     }
   }
@@ -36,9 +37,9 @@ bool typecheck_var_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     return false;
   }
 
-  return scope_add_symbol(scope, name, declared_type,
-                          node->stmt.var_decl.is_public,
-                          node->stmt.var_decl.is_mutable, arena);
+  // Add variable with proper visibility
+  return scope_add_symbol(scope, name, declared_type, is_public, is_mutable,
+                          arena);
 }
 
 // Stub implementations for remaining functions
@@ -49,8 +50,9 @@ bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   char **param_names = node->stmt.func_decl.param_names;
   size_t param_count = node->stmt.func_decl.param_count;
   AstNode *body = node->stmt.func_decl.body;
+  bool is_public = node->stmt.func_decl.is_public;
 
-  // 1. Validate return type exists and is valid
+  // Validate return type
   if (!return_type || return_type->category != Node_Category_TYPE) {
     fprintf(stderr,
             "Error: Function '%s' has invalid return type at line %zu\n", name,
@@ -58,85 +60,69 @@ bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     return false;
   }
 
-  // 1.5 Validate that if it is the man function that we return an int
-  if (strcmp(name, "main") == 0 &&
-      strcmp(return_type->type_data.basic.name, "int") != 0) {
-    fprintf(stderr,
-            "Error: Function '%s' must return a type of 'int' but got '%s' "
-            "instead.\n",
-            name, type_to_string(return_type, arena));
-
-    return false;
-  } // else we do nothing let the program constinue
-
-  // 1.6 Ensure main function is always public
+  // Main function validation
   if (strcmp(name, "main") == 0) {
-    if (!node->stmt.func_decl.is_public) {
-      // Option B: Warn but fix it
+    if (strcmp(return_type->type_data.basic.name, "int") != 0) {
+      fprintf(stderr, "Error: Function '%s' must return 'int' but got '%s'\n",
+              name, type_to_string(return_type, arena));
+      return false;
+    }
+
+    // Ensure main is public
+    if (!is_public) {
       fprintf(stderr,
               "Warning: Function 'main' should be public; automatically making "
               "it public at line %zu\n",
               node->line);
       node->stmt.func_decl.is_public = true;
+      is_public = true;
     }
   }
 
-  // 2. Validate all parameter types
+  // Validate parameters
   for (size_t i = 0; i < param_count; i++) {
-    const char *p_name = param_names[i];
-    AstNode *p_type = param_types[i];
-
-    if (!p_name || !p_type) {
+    if (!param_names[i] || !param_types[i] ||
+        param_types[i]->category != Node_Category_TYPE) {
       fprintf(stderr,
               "Error: Function '%s' has invalid parameter %zu at line %zu\n",
               name, i, node->line);
       return false;
     }
-
-    if (p_type->category != Node_Category_TYPE) {
-      fprintf(stderr,
-              "Error: Parameter '%s' in function '%s' has invalid type at line "
-              "%zu\n",
-              p_name, name, node->line);
-      return false;
-    }
   }
 
-  // 3. Create function type for the symbol table
+  // Create function type
   AstNode *func_type = create_function_type(
       arena, param_types, param_count, return_type, node->line, node->column);
 
-  // 4. Add function to current scope BEFORE checking body (for recursion)
-  if (!scope_add_symbol(scope, name, func_type, node->stmt.func_decl.is_public,
-                        false, arena)) {
+  // Add function to current scope with proper visibility
+  if (!scope_add_symbol(scope, name, func_type, is_public, false, arena)) {
     return false;
   }
 
-  // 5. Create function scope for parameters and body
+  // Create function scope for parameters and body
   Scope *func_scope = create_child_scope(scope, name, arena);
   func_scope->is_function_scope = true;
   func_scope->associated_node = node;
 
-  // 6. Add parameters to function scope
+  // Add parameters to function scope (parameters are always local)
   for (size_t i = 0; i < param_count; i++) {
-    const char *p_name = param_names[i];
-    AstNode *p_type = param_types[i];
-
-    if (!scope_add_symbol(func_scope, p_name, p_type, false, true, arena)) {
+    if (!scope_add_symbol(func_scope, param_names[i], param_types[i], false,
+                          true, arena)) {
       fprintf(stderr,
               "Error: Could not add parameter '%s' to function '%s' scope\n",
-              p_name, name);
+              param_names[i], name);
       return false;
     }
   }
 
-  // 7. Typecheck function body in the function scope
+  // Typecheck function body
   if (body) {
     if (!typecheck_statement(body, func_scope, arena)) {
       fprintf(stderr, "Error: Function '%s' body failed typechecking\n", name);
       return false;
     }
   }
+
   return true;
 }
 
@@ -151,23 +137,23 @@ bool typecheck_enum_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   const char *enum_name = node->stmt.enum_decl.name;
   char **member_names = node->stmt.enum_decl.members;
   size_t member_count = node->stmt.enum_decl.member_count;
+  bool is_public = node->stmt.enum_decl.is_public;
 
-  // 1. Add enum name as an int type (for variable declarations like "Color c;")
+  // Add enum type with proper visibility
   AstNode *int_type = create_basic_type(arena, "int", node->line, node->column);
-  if (!scope_add_symbol(scope, enum_name, int_type,
-                        node->stmt.enum_decl.is_public, false, arena)) {
+  if (!scope_add_symbol(scope, enum_name, int_type, is_public, false, arena)) {
     return false;
   }
 
-  // 2. Add each member as an int constant with qualified names
+  // Add enum members - they inherit the enum's visibility
   for (size_t i = 0; i < member_count; i++) {
     size_t qualified_len = strlen(enum_name) + strlen(member_names[i]) + 2;
     char *qualified_name = arena_alloc(arena, qualified_len, 1);
     snprintf(qualified_name, qualified_len, "%s.%s", enum_name,
              member_names[i]);
 
-    // Each enum member is just an int constant
-    if (!scope_add_symbol(scope, qualified_name, int_type, true, false,
+    // Enum members have same visibility as the enum itself
+    if (!scope_add_symbol(scope, qualified_name, int_type, is_public, false,
                           arena)) {
       fprintf(stderr, "Error: Could not add enum member '%s'\n",
               qualified_name);
@@ -177,6 +163,7 @@ bool typecheck_enum_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
 
   return true;
 }
+
 bool typecheck_return_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   // Find the enclosing function's return type
   AstNode *expected_return_type = get_enclosing_function_return_type(scope);
@@ -253,6 +240,87 @@ bool typecheck_if_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
 
   if (node->stmt.if_stmt.else_stmt != NULL) {
     typecheck_statement(node->stmt.if_stmt.else_stmt, else_branch, arena);
+  }
+
+  return true;
+}
+
+bool typecheck_module_stmt(AstNode *node, Scope *global_scope,
+                           ArenaAllocator *arena) {
+  if (node->type != AST_PREPROCESSOR_MODULE) {
+    fprintf(stderr, "Error: Expected module statement\n");
+    return false;
+  }
+
+  const char *module_name = node->preprocessor.module.name;
+  AstNode **body = node->preprocessor.module.body;
+  int body_count = node->preprocessor.module.body_count;
+
+  // Create module scope if it doesn't exist
+  Scope *module_scope = find_module_scope(global_scope, module_name);
+  if (!module_scope) {
+    module_scope = create_module_scope(global_scope, module_name, arena);
+    if (!register_module(global_scope, module_name, module_scope, arena)) {
+      fprintf(stderr, "Error: Failed to register module '%s'\n", module_name);
+      return false;
+    }
+  }
+
+  // First pass: Process all use statements to establish imports
+  for (int i = 0; i < body_count; i++) {
+    if (!body[i])
+      continue;
+
+    if (body[i]->type == AST_PREPROCESSOR_USE) {
+      if (!typecheck_use_stmt(body[i], module_scope, global_scope, arena)) {
+        fprintf(stderr,
+                "Error: Failed to process use statement in module '%s'\n",
+                module_name);
+        return false;
+      }
+    }
+  }
+
+  // Second pass: Process all non-use statements
+  for (int i = 0; i < body_count; i++) {
+    if (!body[i])
+      continue;
+
+    if (body[i]->type != AST_PREPROCESSOR_USE) {
+      if (!typecheck(body[i], module_scope, arena)) {
+        fprintf(stderr, "Error: Failed to typecheck statement in module '%s'\n",
+                module_name);
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+bool typecheck_use_stmt(AstNode *node, Scope *current_scope,
+                        Scope *global_scope, ArenaAllocator *arena) {
+  if (node->type != AST_PREPROCESSOR_USE) {
+    fprintf(stderr, "Error: Expected use statement\n");
+    return false;
+  }
+
+  const char *module_name = node->preprocessor.use.module_name;
+  const char *alias = node->preprocessor.use.alias;
+
+  // Find the module scope
+  Scope *module_scope = find_module_scope(global_scope, module_name);
+  if (!module_scope) {
+    fprintf(stderr, "Error: Module '%s' not found\n", module_name);
+    return false;
+  }
+
+  // Add the import to the current scope
+  if (!add_module_import(current_scope, module_name, alias, module_scope,
+                         arena)) {
+    fprintf(stderr, "Error: Failed to import module '%s' as '%s'\n",
+            module_name, alias);
+    return false;
   }
 
   return true;

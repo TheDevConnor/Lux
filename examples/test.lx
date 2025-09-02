@@ -1,8 +1,12 @@
 @module "main"
-@use "test" as test
+@use "math" as math
 
 pub const main = fn () int {
-    return test.add(3, 4);
+    output("add: ", math.add(3, 4), "\n");
+    output("subtract: ", math.subtract(10, 5), "\n");
+    output("multiply: ", math.multiply(6, 7), "\n");
+    output("divide: ", math.divide(20, 4), "\n");
+    return 0;
 }
 
-:: lux build src/main.lx -name lux -save -link src/c_lib.memory.lx
+:: ./lux build examples/test.lx -link examples/math.lx -name test -save 

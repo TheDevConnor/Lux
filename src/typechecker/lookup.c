@@ -5,6 +5,7 @@
 bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
   switch (stmt->type) {
   case AST_PROGRAM:
+    // Simple single-pass approach: just process each module
     for (size_t i = 0; i < stmt->stmt.program.module_count; i++) {
       if (!typecheck(stmt->stmt.program.modules[i], scope, arena)) {
         return false;
@@ -12,6 +13,7 @@ bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
     }
     return true;
 
+  // ... rest of your existing cases ...
   case AST_STMT_VAR_DECL:
     return typecheck_var_decl(stmt, scope, arena);
   case AST_STMT_FUNCTION:
@@ -38,8 +40,16 @@ bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
     return true;
   }
 
-  case AST_STMT_PRINT:
-    return true; // Print statements do not affect type checking
+  case AST_STMT_PRINT: {
+    // Typecheck each argument expression
+    for (size_t i = 0; i < stmt->stmt.print_stmt.expr_count; i++) {
+      if (!typecheck_expression(stmt->stmt.print_stmt.expressions[i], scope,
+                                arena)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   default:
     printf("Warning: Unhandled statement type %d\n", stmt->type);

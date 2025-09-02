@@ -124,8 +124,25 @@ AstNode *get_enclosing_function_return_type(Scope *scope) {
 void debug_print_scope(Scope *scope, int indent_level) {
     // Print current scope header with metadata
     for (int i = 0; i < indent_level; i++) printf("  ");
-    printf("Scope '%s' (depth %zu, %zu symbols, %zu children):\n", 
-           scope->scope_name, scope->depth, scope->symbols.count, scope->children.count);
+    printf("Scope '%s' (depth %zu, %zu symbols, %zu children, %zu imports):\n", 
+           scope->scope_name, scope->depth, scope->symbols.count, 
+           scope->children.count, scope->imported_modules.count);
+    
+    // Print imported modules if any
+    if (scope->imported_modules.count > 0) {
+        for (int i = 0; i < indent_level + 1; i++) printf("  ");
+        printf("Imported modules:\n");
+        
+        for (size_t i = 0; i < scope->imported_modules.count; i++) {
+            ModuleImport *import = (ModuleImport *)((char*)scope->imported_modules.data + i * sizeof(ModuleImport));
+            
+            for (int j = 0; j < indent_level + 2; j++) printf("  ");
+            printf("- %s as %s (scope: %s)\n", 
+                   import->module_name, 
+                   import->alias,
+                   import->module_scope ? import->module_scope->scope_name : "NULL");
+        }
+    }
     
     // Print all symbols in the current scope
     for (size_t i = 0; i < scope->symbols.count; i++) {

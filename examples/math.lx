@@ -1,0 +1,22 @@
+@module "math"
+
+pub const add = fn (x: int, y: int) int {
+    return x + y;
+}
+
+pub const subtract = fn (x: int, y: int) int {
+    return x - y;
+}
+
+pub const multiply = fn (x: int, y: int) int {
+    return x * y;
+}
+
+:: If we call this it will error because functions are private by default
+pub const divide = fn (x: int, y: int) int { 
+    if (y == 0) {
+        output("Division by zero\n");
+        return 0;
+    }
+    return x / y;
+}

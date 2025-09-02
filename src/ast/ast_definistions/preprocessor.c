@@ -9,6 +9,7 @@ AstNode *create_module_node(ArenaAllocator *arena, const char *name,
   node->preprocessor.module.name = arena_strdup(arena, name);
   node->preprocessor.module.potions = potions;
   node->preprocessor.module.body = body;
+  node->preprocessor.module.body_count = body_count;
 
   return node;
 }
