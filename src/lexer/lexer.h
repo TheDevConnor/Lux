@@ -22,6 +22,7 @@ typedef enum {
   TOK_IDENTIFIER,   /**< Identifier (variable/function names) */
   TOK_KEYWORD,      /**< Reserved keyword */
   TOK_NUMBER,       /**< Numeric literal */
+  TOK_NUM_FLOAT,    /**< Floating point numeric literal */
   TOK_STRING,       /**< String literal */
   TOK_CHAR_LITERAL, /**< Character literal */
 

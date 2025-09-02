@@ -1,3 +1,6 @@
+;; @module "main"
+
+const PIE: float = 3.141592653589793;
 const fib = fn (n: int, a: int, b: int) int {
     if (n == 0) { return a; }
     if (n == 1) { return b; }
@@ -6,6 +9,6 @@ const fib = fn (n: int, a: int, b: int) int {
 
 pub const main = fn () int {
     let n: int = 92;
-    output("Fib of (", n, ") = ", fib(n, 0, 1), " ");
+    output("Fib of (", n, ") = ", fib(n, 0, 1), "\n");
     return 0;
 }

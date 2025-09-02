@@ -359,7 +359,8 @@ Expr *sizeof_expr(Parser *parser) {
   p_consume(parser, TOK_LT,
             "Expected a '<' before defining the var or type you want to get "
             "the size of.");
-  if (parse_type(parser) != NULL) {;
+  if (parse_type(parser) != NULL) {
+    ;
     object = parse_type(parser);
     p_advance(parser);
     is_type = true;

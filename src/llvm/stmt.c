@@ -1,6 +1,7 @@
 #include "llvm.h"
 #include <llvm-c/Core.h>
 #include <llvm-c/Types.h>
+#include <stdlib.h>
 
 LLVMValueRef codegen_stmt_program(CodeGenContext *ctx, AstNode *node) {
   for (size_t i = 0; i < node->stmt.program.stmt_count; i++) {
@@ -60,6 +61,8 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
 
   LLVMValueRef function =
       LLVMAddFunction(ctx->module, node->stmt.func_decl.name, func_type);
+
+  LLVMSetLinkage(function, get_function_linkage(node));
 
   // Add function to symbol table
   add_symbol(ctx, node->stmt.func_decl.name, function, func_type, true);
@@ -179,41 +182,49 @@ LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node) {
     printf_type = LLVMGlobalGetValueType(printf_func);
   }
 
-  // Print each expression
   for (size_t i = 0; i < node->stmt.print_stmt.expr_count; i++) {
-    LLVMValueRef value =
-        codegen_expr(ctx, node->stmt.print_stmt.expressions[i]);
-    if (!value)
-      return NULL;
-
-    // Create format string based on the type of the value
-    const char *format_str = NULL;
-    LLVMTypeRef value_type = LLVMTypeOf(value);
     AstNode *expr = node->stmt.print_stmt.expressions[i];
-    
+    LLVMValueRef value = NULL;
+    const char *format_str = NULL;
+
     if (expr->type == AST_EXPR_LITERAL &&
         expr->expr.literal.lit_type == LITERAL_STRING) {
+
+      // Process escape sequences in the string literal
+      char *processed_str =
+          process_escape_sequences(expr->expr.literal.value.string_val);
+
+      // Create the string value directly (not using %s format)
+      value = LLVMBuildGlobalStringPtr(ctx->builder, processed_str, "str");
       format_str = "%s";
-    } else if (LLVMGetTypeKind(value_type) == LLVMIntegerTypeKind) {
-      unsigned int bits = LLVMGetIntTypeWidth(value_type);
-      if (bits == 8 || bits == 16 || bits == 32) {
-        format_str = "%d";
-      } else if (bits == 64) {
-        format_str = "%lld";
-      } else {
-        format_str = "%d"; // Default to %d for other integer sizes
-      }
-    } else if (LLVMGetTypeKind(value_type) == LLVMDoubleTypeKind) {
-      format_str = "%f";
+
+      free(processed_str);
     } else {
-      format_str = "%p"; // Fallback for unsupported types
+      // Handle non-string expressions as before
+      value = codegen_expr(ctx, expr);
+      if (!value)
+        return NULL;
+
+      LLVMTypeRef value_type = LLVMTypeOf(value);
+      if (LLVMGetTypeKind(value_type) == LLVMIntegerTypeKind) {
+        unsigned int bits = LLVMGetIntTypeWidth(value_type);
+        if (bits == 8 || bits == 16 || bits == 32) {
+          format_str = "%d";
+        } else if (bits == 64) {
+          format_str = "%lld";
+        } else {
+          format_str = "%d";
+        }
+      } else if (LLVMGetTypeKind(value_type) == LLVMDoubleTypeKind) {
+        format_str = "%f";
+      } else {
+        format_str = "%p";
+      }
     }
 
-    // Create global string for format
+    // Create format string and call printf
     LLVMValueRef format_str_val =
         LLVMBuildGlobalStringPtr(ctx->builder, format_str, "fmt");
-
-    // Call printf for this value
     LLVMValueRef args[] = {format_str_val, value};
     LLVMBuildCall2(ctx->builder, printf_type, printf_func, args, 2, "");
   }

@@ -324,11 +324,28 @@ Token next_token(Lexer *lx) {
 
   // Numbers
   if (isdigit(c)) {
+    // Read the integer part
     while (isdigit(peek(lx, 0))) {
       advance(lx);
     }
+
+    // Check for decimal point
+    if (peek(lx, 0) == '.' && isdigit(peek(lx, 1))) {
+      advance(lx); // consume the '.'
+
+      // Read the fractional part
+      while (isdigit(peek(lx, 0))) {
+        advance(lx);
+      }
+
+      int len = (int)(lx->current - start);
+      return MAKE_TOKEN(TOK_NUM_FLOAT, start, lx, len,
+                        wh_count); // Make sure this is TOK_FLOAT_LITERAL
+    }
+
     int len = (int)(lx->current - start);
-    return MAKE_TOKEN(TOK_NUMBER, start, lx, len, wh_count);
+    return MAKE_TOKEN(TOK_NUMBER, start, lx, len,
+                      wh_count); // Make sure this is TOK_NUMBER
   }
 
   // Strings

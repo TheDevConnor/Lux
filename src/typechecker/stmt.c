@@ -69,6 +69,18 @@ bool typecheck_func_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
     return false;
   } // else we do nothing let the program constinue
 
+  // 1.6 Ensure main function is always public
+  if (strcmp(name, "main") == 0) {
+    if (!node->stmt.func_decl.is_public) {
+      // Option B: Warn but fix it
+      fprintf(stderr,
+              "Warning: Function 'main' should be public; automatically making "
+              "it public at line %zu\n",
+              node->line);
+      node->stmt.func_decl.is_public = true;
+    }
+  }
+
   // 2. Validate all parameter types
   for (size_t i = 0; i < param_count; i++) {
     const char *p_name = param_names[i];

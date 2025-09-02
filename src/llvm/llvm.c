@@ -1,5 +1,6 @@
 #include "llvm.h"
 #include <llvm-c/TargetMachine.h>
+#include <stdlib.h>
 
 // Initialize code generation context with target machine support
 CodeGenContext *init_codegen_context(ArenaAllocator *arena,
@@ -202,4 +203,66 @@ bool generate_llvm_ir(CodeGenContext *ctx, AstNode *ast_root,
   }
 
   return true;
+}
+
+// Function to determine appropriate linkage
+LLVMLinkage get_function_linkage(AstNode *node) {
+  const char *name = node->stmt.func_decl.name;
+
+  // Main function must always be external
+  if (strcmp(name, "main") == 0) {
+    return LLVMExternalLinkage;
+  }
+
+  // Use the is_public flag for other functions
+  if (node->stmt.func_decl.is_public) {
+    return LLVMExternalLinkage;
+  } else {
+    return LLVMInternalLinkage;
+  }
+}
+
+// Function to process escape sequences in string literals
+char *process_escape_sequences(const char *input) {
+  size_t len = strlen(input);
+  char *output = malloc(len + 1); // At most same length
+  size_t out_idx = 0;
+
+  for (size_t i = 0; i < len; i++) {
+    if (input[i] == '\\' && i + 1 < len) {
+      switch (input[i + 1]) {
+      case 'n':
+        output[out_idx++] = '\n';
+        i++;
+        break;
+      case 'r':
+        output[out_idx++] = '\r';
+        i++;
+        break;
+      case 't':
+        output[out_idx++] = '\t';
+        i++;
+        break;
+      case '\\':
+        output[out_idx++] = '\\';
+        i++;
+        break;
+      case '"':
+        output[out_idx++] = '"';
+        i++;
+        break;
+      case '0':
+        output[out_idx++] = '\0';
+        i++;
+        break;
+      default:
+        output[out_idx++] = input[i]; // Keep backslash if unknown escape
+        break;
+      }
+    } else {
+      output[out_idx++] = input[i];
+    }
+  }
+  output[out_idx] = '\0';
+  return output;
 }

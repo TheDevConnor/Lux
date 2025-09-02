@@ -237,6 +237,7 @@ BindingPower get_bp(TokenType kind) {
 Expr *nud(Parser *parser) {
   switch (p_current(parser).type_) {
   case TOK_NUMBER:
+  case TOK_NUM_FLOAT:
   case TOK_STRING:
   case TOK_IDENTIFIER:
     return primary(parser);

@@ -71,6 +71,12 @@ char *print_llvm_ir(CodeGenContext *ctx);
 bool generate_object_file(CodeGenContext *ctx, const char *object_filename);
 bool generate_assembly_file(CodeGenContext *ctx, const char *asm_filename);
 
+// printf helpers
+char *process_escape_sequences(const char *input);
+
+// linkage helpers
+LLVMLinkage get_function_linkage(AstNode *node);
+
 // =============================================================================
 // AST NODE HANDLERS - PUBLIC INTERFACE
 // =============================================================================
