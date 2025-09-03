@@ -1,81 +1,197 @@
-// #include "../ast/ast_utils.h"
 #include "../c_libs/error/error.h"
 #include "../llvm/llvm.h"
 #include "../parser/parser.h"
 #include "../typechecker/type.h"
 #include "help.h"
 
+#include <errno.h>
 #include <stdbool.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 
-void save_output_files(CodeGenContext *ctx, const char *base_name) {
-  char filename[256];
-
-  // Save readable LLVM IR
-  snprintf(filename, sizeof(filename), "%s.ll", base_name);
-  char *ir = print_llvm_ir(ctx);
-  if (ir) {
-    FILE *f = fopen(filename, "w");
-    if (f) {
-      fprintf(f, "%s", ir);
-      fclose(f);
-    }
-    LLVMDisposeMessage(ir);
-  }
-
-  // Generate object file
-  snprintf(filename, sizeof(filename), "%s.o", base_name);
-  generate_object_file(ctx, filename);
-
-  // Generate assembly file
-  snprintf(filename, sizeof(filename), "%s.s", base_name);
-  generate_assembly_file(ctx, filename);
-
-  // Link executable
-  snprintf(filename, sizeof(filename), "%s.o", base_name);
-  char exe_name[256];
-  snprintf(exe_name, sizeof(exe_name), "%s", base_name);
-  link_with_ld_simple(filename, exe_name);
+// Helper function to create directory if it doesn't exist
+bool create_directory(const char *path) {
+#ifdef _WIN32
+  return _mkdir(path) == 0 || errno == EEXIST;
+#else
+  return mkdir(path, 0755) == 0 || errno == EEXIST;
+#endif
 }
 
-bool generate_llvm_code(AstNode *root, BuildConfig config,
-                        ArenaAllocator *allocator, int *step) {
-  CodeGenContext *ctx = init_codegen_context(allocator, "main_module");
+void save_module_output_files(CodeGenContext *ctx, const char *output_dir) {
+  // Create output directory if it doesn't exist
+  if (!create_directory(output_dir)) {
+    fprintf(stderr, "Warning: Failed to create output directory: %s\n",
+            output_dir);
+  }
+
+  // Save IR and assembly for each module
+  for (ModuleCompilationUnit *unit = ctx->modules; unit; unit = unit->next) {
+    char filename[512];
+
+    // Set current module for legacy functions
+    set_current_module(ctx, unit);
+    ctx->module = unit->module; // Update legacy field
+
+    // Save readable LLVM IR
+    snprintf(filename, sizeof(filename), "%s/%s.ll", output_dir,
+             unit->module_name);
+    char *ir = print_llvm_ir(ctx);
+    if (ir) {
+      FILE *f = fopen(filename, "w");
+      if (f) {
+        fprintf(f, "%s", ir);
+        fclose(f);
+        // printf("Generated IR file: %s\n", filename);
+      }
+      LLVMDisposeMessage(ir);
+    }
+
+    // Generate assembly file
+    snprintf(filename, sizeof(filename), "%s/%s.s", output_dir,
+             unit->module_name);
+    generate_assembly_file(ctx, filename);
+    // printf("Generated assembly file: %s\n", filename);
+  }
+}
+
+// Update your generate_llvm_code_modules function:
+bool generate_llvm_code_modules(AstNode *root, BuildConfig config,
+                                ArenaAllocator *allocator, int *step) {
+  CodeGenContext *ctx = init_codegen_context(allocator);
   if (!ctx) {
     return false;
   }
 
   const char *base_name = config.name ? config.name : "output";
-  char bc_file[256];
+  const char *output_dir = config.save ? "output" : "obj";
 
-  if (config.save) {
-    snprintf(bc_file, sizeof(bc_file), "%s.bc", base_name);
-  }
-
-  bool success = generate_llvm_ir(ctx, root, config.save ? bc_file : NULL);
-  if (!success) {
+  // Create output directory
+  if (!create_directory(output_dir)) {
+    fprintf(stderr, "Failed to create output directory: %s\n", output_dir);
     cleanup_codegen_context(ctx);
     return false;
   }
 
-  print_progress(++(*step), 7, "LLVM IR Generation");
-  if (config.save) {
-    save_output_files(ctx, base_name);
-  } else {
-    // Directly generate executable without saving intermediate files
-    char obj_file[256];
-    snprintf(obj_file, sizeof(obj_file), "%s.o", base_name);
-    generate_object_file(ctx, obj_file);
-
-    char exe_file[256];
-    snprintf(exe_file, sizeof(exe_file), "%s", base_name);
-    link_with_ld_simple(obj_file, exe_file);
-
-    // delete the object file after linking
-    remove(obj_file);
+  // Generate LLVM IR for all modules using the new multi-module system
+  bool success = generate_program_modules(ctx, root, output_dir);
+  if (!success) {
+    fprintf(stderr, "Failed to generate LLVM modules\n");
+    cleanup_codegen_context(ctx);
+    return false;
   }
+
+  print_progress(++(*step), 9, "LLVM IR Generation");
+
+  // Validate the module system
+  // if (!validate_module_system(ctx)) {
+  //   fprintf(stderr, "Module system validation failed\n");
+  //   cleanup_codegen_context(ctx);
+  //   return false;
+  // }
+
+  if (config.save) {
+    // Save detailed output files for debugging
+    save_module_output_files(ctx, output_dir);
+
+    // Print module information for debugging
+    print_module_info(ctx);
+
+    // Debug object files
+    debug_object_files(output_dir);
+  }
+
+  // Link all object files together to create final executable
+  char exe_file[256];
+  snprintf(exe_file, sizeof(exe_file), "%s", base_name);
+
+  // printf("Linking modules into executable: %s\n", exe_file);
+  if (!link_object_files(output_dir, exe_file)) {
+    fprintf(stderr, "Failed to link object files\n");
+
+    // Try to provide more helpful error information
+    printf("\nTrying to diagnose linking issues...\n");
+    debug_object_files(output_dir);
+
+    cleanup_codegen_context(ctx);
+    return false;
+  }
+
+  print_progress(++(*step), 9, "Linking");
 
   cleanup_codegen_context(ctx);
   return true;
+}
+
+// Helper function to link all object files in a directory
+bool link_object_files(const char *output_dir, const char *executable_name) {
+  char command[2048];
+
+  // Build the linking command with PIE-compatible flags
+  snprintf(command, sizeof(command), "cc -pie %s/*.o -o %s", output_dir,
+           executable_name);
+
+  // printf("Linking command: %s\n", command);
+
+  int result = system(command);
+  if (result != 0) {
+    fprintf(stderr, "Linking failed with exit code %d\n", result);
+
+    // Try alternative linking approach
+    printf("Trying alternative linking approach...\n");
+    snprintf(command, sizeof(command), "gcc -no-pie %s/*.o -o %s", output_dir,
+             executable_name);
+
+    printf("Alternative linking command: %s\n", command);
+    result = system(command);
+
+    if (result != 0) {
+      fprintf(stderr, "Alternative linking also failed with exit code %d\n",
+              result);
+      return false;
+    }
+  }
+
+  return true;
+}
+
+// Alternative approach: Enhanced linking with better error handling
+bool link_object_files_enhanced(const char *output_dir,
+                                const char *executable_name) {
+  char command[2048];
+
+  // Try different linking strategies in order of preference
+  const char *link_strategies[] = {
+      "gcc -pie %s/*.o -o %s",     // PIE (position independent executable)
+      "gcc -no-pie %s/*.o -o %s",  // No PIE
+      "gcc -static %s/*.o -o %s",  // Static linking
+      "clang -pie %s/*.o -o %s",   // Try clang instead of gcc
+      "clang -no-pie %s/*.o -o %s" // Clang without PIE
+  };
+
+  const char *strategy_names[] = {"PIE linking", "No-PIE linking",
+                                  "Static linking", "Clang PIE linking",
+                                  "Clang no-PIE linking"};
+
+  size_t num_strategies = sizeof(link_strategies) / sizeof(link_strategies[0]);
+
+  for (size_t i = 0; i < num_strategies; i++) {
+    // printf("Attempting %s...\n", strategy_names[i]);
+    snprintf(command, sizeof(command), link_strategies[i], output_dir,
+             executable_name);
+    // printf("Command: %s\n", command);
+
+    int result = system(command);
+    if (result == 0) {
+      // printf("Successfully linked using %s\n", strategy_names[i]);
+      return true;
+    } else {
+      printf("Failed with exit code %d\n", result);
+    }
+  }
+
+  fprintf(stderr, "All linking strategies failed\n");
+  return false;
 }
 
 // Helper function to parse a single file and extract its module
@@ -181,7 +297,7 @@ AstNode *lex_and_parse_file(const char *path, ArenaAllocator *allocator) {
 
 bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   bool success = false;
-  int total_stages = 8;
+  int total_stages = 9;
   int step = 0;
 
   GrowableArray modules;
@@ -237,10 +353,11 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   // debug_print_scope(&root_scope, 0);
 
   if (tc) {
-    // Stage 5: LLVM IR
+    // Stage 5: LLVM IR (UPDATED - now uses module system)
     print_progress(++step, total_stages, "LLVM IR");
 
-    success = generate_llvm_code(combined_program, config, allocator, &step);
+    success =
+        generate_llvm_code_modules(combined_program, config, allocator, &step);
   }
 
   // Stage 6: Finalizing

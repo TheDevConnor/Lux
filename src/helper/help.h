@@ -16,6 +16,7 @@
 #include "../ast/ast.h"
 #include "../c_libs/memory/memory.h"
 #include "../lexer/lexer.h"
+#include "../llvm/llvm.h"
 
 /** Macro to access token at index in a token growable array */
 #define TOKEN_AT(i) (((Token *)tokens.data)[(i)])
@@ -71,3 +72,6 @@ bool link_with_ld(const char *obj_filename, const char *exe_filename);
 bool get_gcc_file_path(const char *filename, char *buffer, size_t buffer_size);
 bool get_lib_paths(char *buffer, size_t buffer_size);
 bool link_with_ld_simple(const char *obj_filename, const char *exe_filename);
+bool link_object_files(const char *output_dir, const char *executable_name);
+bool validate_module_system(CodeGenContext *ctx);
+void save_module_output_files(CodeGenContext *ctx, const char *output_dir);

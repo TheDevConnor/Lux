@@ -3,11 +3,9 @@
 #include <llvm-c/Types.h>
 #include <stdlib.h>
 
+// Legacy program handler (now redirects to multi-module handler)
 LLVMValueRef codegen_stmt_program(CodeGenContext *ctx, AstNode *node) {
-  for (size_t i = 0; i < node->stmt.program.module_count; i++) {
-    codegen_stmt(ctx, node->stmt.program.modules[i]);
-  }
-  return NULL;
+  return codegen_stmt_program_multi_module(ctx, node);
 }
 
 LLVMValueRef codegen_stmt_expression(CodeGenContext *ctx, AstNode *node) {
@@ -20,8 +18,21 @@ LLVMValueRef codegen_stmt_var_decl(CodeGenContext *ctx, AstNode *node) {
     return NULL;
 
   LLVMValueRef var_ref;
+
+  // Use current module instead of legacy ctx->module
+  LLVMModuleRef current_llvm_module =
+      ctx->current_module ? ctx->current_module->module : ctx->module;
+
   if (ctx->current_function == NULL) {
-    var_ref = LLVMAddGlobal(ctx->module, var_type, node->stmt.var_decl.name);
+    var_ref =
+        LLVMAddGlobal(current_llvm_module, var_type, node->stmt.var_decl.name);
+
+    // Set linkage based on whether this is a public declaration
+    if (node->stmt.var_decl.is_public) {
+      LLVMSetLinkage(var_ref, LLVMExternalLinkage);
+    } else {
+      LLVMSetLinkage(var_ref, LLVMInternalLinkage);
+    }
   } else {
     var_ref = LLVMBuildAlloca(ctx->builder, var_type, node->stmt.var_decl.name);
   }
@@ -59,8 +70,12 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef func_type = LLVMFunctionType(
       return_type, param_types, node->stmt.func_decl.param_count, false);
 
-  LLVMValueRef function =
-      LLVMAddFunction(ctx->module, node->stmt.func_decl.name, func_type);
+  // Use current module instead of legacy ctx->module
+  LLVMModuleRef current_llvm_module =
+      ctx->current_module ? ctx->current_module->module : ctx->module;
+
+  LLVMValueRef function = LLVMAddFunction(current_llvm_module,
+                                          node->stmt.func_decl.name, func_type);
 
   LLVMSetLinkage(function, get_function_linkage(node));
 
@@ -165,8 +180,13 @@ LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node) {
 }
 
 LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node) {
+  // Use current module instead of legacy ctx->module
+  LLVMModuleRef current_llvm_module =
+      ctx->current_module ? ctx->current_module->module : ctx->module;
+
   // Declare printf once (check if it already exists first)
-  LLVMValueRef printf_func = LLVMGetNamedFunction(ctx->module, "printf");
+  LLVMValueRef printf_func =
+      LLVMGetNamedFunction(current_llvm_module, "printf");
   LLVMTypeRef printf_type = NULL;
 
   if (!printf_func) {
@@ -174,7 +194,7 @@ LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node) {
         LLVMPointerType(LLVMInt8TypeInContext(ctx->context), 0)};
     printf_type = LLVMFunctionType(LLVMInt32TypeInContext(ctx->context),
                                    printf_arg_types, 1, true);
-    printf_func = LLVMAddFunction(ctx->module, "printf", printf_type);
+    printf_func = LLVMAddFunction(current_llvm_module, "printf", printf_type);
     add_symbol(ctx, "printf", printf_func, printf_type, true);
   } else {
     printf_type = LLVMGlobalGetValueType(printf_func);

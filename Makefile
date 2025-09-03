@@ -82,7 +82,6 @@ clean:
 	$(call DEL,output.ll)
 	$(call DEL,output.s)
 	$(call DEL,program)
-	$(call DEL,test_simple.lux)
 
 # Help target
 help:

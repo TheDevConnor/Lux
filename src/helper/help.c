@@ -72,7 +72,7 @@ int print_help() {
   printf("Options:\n");
   printf("  -v, --version   Show version information\n");
   printf("  -h, --help      Show this help message\n");
-  printf("  -l, --license   Show license information\n");
+  printf("  -lc, --license  Show license information\n");
   printf("Crust Compiler Options:\n");
   printf("  -name <name>    Set the name of the build target\n");
   printf("  -save           Save the outputed llvm file\n");
@@ -80,7 +80,7 @@ int print_help() {
   printf("  clean           Clean the build artifacts\n");
   printf("  -debug          builds a debug version and shows the allocators "
          "trace");
-  printf("  -l or -link     Link lux files so that they can be used in other "
+  printf("  -l, -link     Link lux files so that they can be used in other "
          "lux files\n");
   return 0;
 }
@@ -130,7 +130,7 @@ bool parse_args(int argc, char *argv[], BuildConfig *config,
       return print_version(), false;
     else if (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "--help") == 0)
       return print_help(), false;
-    else if (strcmp(argv[i], "-l") == 0 || strcmp(argv[i], "--license") == 0)
+    else if (strcmp(argv[i], "-lc") == 0 || strcmp(argv[i], "--license") == 0)
       return print_license(), false;
     else if (strcmp(argv[i], "build") == 0 && i + 1 < argc) {
       config->filepath = argv[++i];

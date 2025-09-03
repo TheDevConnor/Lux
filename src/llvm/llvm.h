@@ -1,3 +1,4 @@
+// Enhanced llvm.h - Complete module system declarations
 #pragma once
 // LLVM C API Headers
 #include <llvm-c/Analysis.h>
@@ -5,7 +6,7 @@
 #include <llvm-c/Core.h>
 #include <llvm-c/ExecutionEngine.h>
 #include <llvm-c/Target.h>
-#include <llvm-c/TargetMachine.h> // Added for object file generation
+#include <llvm-c/TargetMachine.h>
 
 // Standard Library Headers
 #include <llvm-c/Types.h>
@@ -20,6 +21,7 @@
 
 typedef struct LLVM_Symbol LLVM_Symbol;
 typedef struct CodeGenContext CodeGenContext;
+typedef struct ModuleCompilationUnit ModuleCompilationUnit;
 
 // Symbol table entry for variables and functions
 struct LLVM_Symbol {
@@ -30,15 +32,27 @@ struct LLVM_Symbol {
   struct LLVM_Symbol *next;
 };
 
+// Individual module compilation unit
+struct ModuleCompilationUnit {
+  char *module_name;
+  LLVMModuleRef module;
+  LLVM_Symbol *symbols;
+  bool is_main_module;
+  struct ModuleCompilationUnit *next;
+};
+
 // Code generation context
 struct CodeGenContext {
   // LLVM Core Components
   LLVMContextRef context;
-  LLVMModuleRef module;
   LLVMBuilderRef builder;
 
-  // Symbol Management
-  LLVM_Symbol *symbols;
+  // Module Management (New System)
+  ModuleCompilationUnit *modules;
+  ModuleCompilationUnit *current_module;
+
+  // Legacy Support (for backward compatibility)
+  LLVMModuleRef module;
 
   // Code Generation State
   LLVMValueRef current_function;
@@ -50,32 +64,97 @@ struct CodeGenContext {
 };
 
 // =============================================================================
-// CORE API FUNCTIONS
+// MODULE MANAGEMENT FUNCTIONS
+// =============================================================================
+
+// Create a new module compilation unit
+ModuleCompilationUnit *create_module_unit(CodeGenContext *ctx,
+                                          const char *module_name);
+
+// Find module by name
+ModuleCompilationUnit *find_module(CodeGenContext *ctx,
+                                   const char *module_name);
+
+// Set current module for code generation
+void set_current_module(CodeGenContext *ctx, ModuleCompilationUnit *module);
+
+// Compile all modules to separate object files
+bool compile_modules_to_objects(CodeGenContext *ctx, const char *output_dir);
+
+// Generate external function declarations for cross-module calls
+void generate_external_declarations(CodeGenContext *ctx,
+                                    ModuleCompilationUnit *target_module);
+
+// =============================================================================
+// SYMBOL IMPORT AND MODULE INTEROP
+// =============================================================================
+
+// Import symbols from one module to another
+void import_module_symbols(CodeGenContext *ctx,
+                           ModuleCompilationUnit *source_module,
+                           const char *alias);
+
+// Import specific function symbol
+void import_function_symbol(CodeGenContext *ctx, LLVM_Symbol *source_symbol,
+                            ModuleCompilationUnit *source_module,
+                            const char *alias);
+
+// Import specific variable symbol
+void import_variable_symbol(CodeGenContext *ctx, LLVM_Symbol *source_symbol,
+                            ModuleCompilationUnit *source_module,
+                            const char *alias);
+
+// Enhanced symbol lookup with module support
+LLVM_Symbol *find_symbol_with_module_support(CodeGenContext *ctx,
+                                             const char *name);
+
+// =============================================================================
+// MODULE UTILITY FUNCTIONS
+// =============================================================================
+
+// Check if module is the main module
+bool is_main_module(ModuleCompilationUnit *unit);
+
+// Set a module as the main module
+void set_module_as_main(ModuleCompilationUnit *unit);
+
+// Print module information for debugging
+void print_module_info(CodeGenContext *ctx);
+void debug_object_files(const char *output_dir);
+
+// =============================================================================
+// ENHANCED CORE API FUNCTIONS
 // =============================================================================
 
 // Context Management
-CodeGenContext *init_codegen_context(ArenaAllocator *arena,
-                                     const char *module_name);
+CodeGenContext *init_codegen_context(ArenaAllocator *arena);
 void cleanup_codegen_context(CodeGenContext *ctx);
 
-// Symbol Table Operations
+// Enhanced Symbol Table Operations (now module-aware)
+void add_symbol_to_module(ModuleCompilationUnit *module, const char *name,
+                          LLVMValueRef value, LLVMTypeRef type,
+                          bool is_function);
+LLVM_Symbol *find_symbol_in_module(ModuleCompilationUnit *module,
+                                   const char *name);
+LLVM_Symbol *find_symbol_global(CodeGenContext *ctx, const char *name,
+                                const char *module_name);
+
+// Main Code Generation
+bool generate_program_modules(CodeGenContext *ctx, AstNode *ast_root,
+                              const char *output_dir);
+
+// Object File Generation (per module)
+bool generate_module_object_file(ModuleCompilationUnit *module,
+                                 const char *output_path);
+
+// Existing API (preserved for compatibility)
 void add_symbol(CodeGenContext *ctx, const char *name, LLVMValueRef value,
                 LLVMTypeRef type, bool is_function);
 LLVM_Symbol *find_symbol(CodeGenContext *ctx, const char *name);
-
-// Main Code Generation
-bool generate_llvm_ir(CodeGenContext *ctx, AstNode *ast_root,
-                      const char *output_file);
 char *print_llvm_ir(CodeGenContext *ctx);
-
-// Object File Generation
 bool generate_object_file(CodeGenContext *ctx, const char *object_filename);
 bool generate_assembly_file(CodeGenContext *ctx, const char *asm_filename);
-
-// printf helpers
 char *process_escape_sequences(const char *input);
-
-// linkage helpers
 LLVMLinkage get_function_linkage(AstNode *node);
 
 // =============================================================================
@@ -86,6 +165,13 @@ LLVMLinkage get_function_linkage(AstNode *node);
 LLVMValueRef codegen_expr(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt(CodeGenContext *ctx, AstNode *node);
 LLVMTypeRef codegen_type(CodeGenContext *ctx, AstNode *node);
+
+// Enhanced handlers for module system
+LLVMValueRef codegen_stmt_program_multi_module(CodeGenContext *ctx,
+                                               AstNode *node);
+LLVMValueRef codegen_stmt_module(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_stmt_use(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_member_access(CodeGenContext *ctx, AstNode *node);
 
 // =============================================================================
 // AST NODE HANDLERS - EXPRESSION TYPES

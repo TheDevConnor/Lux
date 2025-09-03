@@ -12,10 +12,9 @@ pub const multiply = fn (x: int, y: int) int {
     return x * y;
 }
 
-:: If we call this it will error because functions are private by default
 pub const divide = fn (x: int, y: int) int { 
     if (y == 0) {
-        output("Division by zero\n");
+        output("(Division by zero error) ");
         return 0;
     }
     return x / y;
