@@ -68,7 +68,7 @@ You'll need the following tools installed:
 
 Interested in contributing to Lux? We'd love to have you!
 - Check out our [GitHub repository](https://github.com/TheDevConnor/Lux)
-- Join our [Discord community]() "Not yet set up"
+- Join our [Discord community](https://bit.ly/lux-discord)
 - Look at the doxygen-generated docs for architecture details [here](https://thedevconnor.github.io/Lux/)
 - If you would like to contribute, please read our [contribution guidelines](CONTRIBUTING.md).
 
