@@ -20,6 +20,18 @@ LLVMValueRef codegen_expr(CodeGenContext *ctx, AstNode *node) {
     return codegen_expr_assignment(ctx, node);
   case AST_EXPR_GROUPING:
     return codegen_expr(ctx, node->expr.grouping.expr);
+  case AST_EXPR_CAST:
+    return codegen_expr_cast(ctx, node);
+  case AST_EXPR_SIZEOF:
+    return codegen_expr_sizeof(ctx, node);
+  case AST_EXPR_ALLOC:
+    return codegen_expr_alloc(ctx, node);
+  case AST_EXPR_FREE:
+    return codegen_expr_free(ctx, node);
+  case AST_EXPR_DEREF:
+    return codegen_expr_deref(ctx, node);
+  case AST_EXPR_ADDR:
+    return codegen_expr_addr(ctx, node);
   default:
     return NULL;
   }

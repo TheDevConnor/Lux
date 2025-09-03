@@ -101,15 +101,13 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
 }
 
 LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
+  LLVMValueRef ret_val = NULL;
   if (node->stmt.return_stmt.value) {
-    LLVMValueRef ret_val = codegen_expr(ctx, node->stmt.return_stmt.value);
-    if (ret_val) {
-      return LLVMBuildRet(ctx->builder, ret_val);
-    }
-  } else {
-    return LLVMBuildRetVoid(ctx->builder);
+    ret_val = codegen_expr(ctx, node->stmt.return_stmt.value);
+    if (!ret_val)
+      return NULL;
   }
-  return NULL;
+  return LLVMBuildRet(ctx->builder, ret_val);
 }
 
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {

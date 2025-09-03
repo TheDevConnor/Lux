@@ -235,12 +235,26 @@ AstNode *typecheck_alloc_expr(AstNode *expr, Scope *scope,
   }
 
   // alloc returns void* (generic pointer)
-  return create_pointer_type(arena, NULL, expr->line, expr->column);
+  Type *void_type = create_basic_type(arena, "void", expr->line, expr->column);
+  return create_pointer_type(arena, void_type, expr->line, expr->column);
 }
 
 AstNode *typecheck_free_expr(AstNode *expr, Scope *scope,
                              ArenaAllocator *arena) {
-  return NULL;
+  AstNode *ptr_type =
+      typecheck_expression(expr->expr.free.ptr, scope, arena);
+  if (!ptr_type) {
+    fprintf(stderr,
+            "Error: Failed to type-check free expression at line %zu\n",
+            expr->line);
+    return NULL;
+  }
+  if (ptr_type->type != AST_TYPE_POINTER) {
+    fprintf(stderr, "Error: Cannot free non-pointer type at line %zu\n",
+            expr->line);
+    return NULL;
+  }
+  return create_basic_type(arena, "void", expr->line, expr->column);
 }
 
 AstNode *typecheck_memcpy_expr(AstNode *expr, Scope *scope,

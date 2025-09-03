@@ -8,6 +8,7 @@
 #include <llvm-c/TargetMachine.h> // Added for object file generation
 
 // Standard Library Headers
+#include <llvm-c/Types.h>
 #include <stdalign.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -96,6 +97,12 @@ LLVMValueRef codegen_expr_binary(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_expr_unary(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_expr_call(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_expr_assignment(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_cast(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_sizeof(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_alloc(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_free(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_deref(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_expr_addr(CodeGenContext *ctx, AstNode *node);
 
 // =============================================================================
 // AST NODE HANDLERS - STATEMENT TYPES

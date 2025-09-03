@@ -1,135 +1,33 @@
 @module "main"
 
-const r   = fn () int { return 40 + 2; }
-const r2  = fn () int { return 86 / 2; }
-const r3  = fn () int { return 22 + 21; }
-const r4  = fn () int { return 50 - 5; }
-const r5  = fn () int { return 46 - 3; }
-const r6  = fn () int { return 24 * 2 - 1; }
-const r7  = fn () int { return 7 * 7 - 1; }
-const r8  = fn () int { return 8 * 6; }
-const r9  = fn () int { return 3 * 3 * 5 + 4; }
-const r10 = fn () int { return 100 - 57; }
-const r11 = fn () int { return 11 + 0; }
-const r12 = fn () int { return 6 * 7 + 1; }
-const r13 = fn () int { return 2 * 7 + (40 - 1); }
-const r14 = fn () int { return 70 / 5; }
-const r15 = fn () int { return 30 + 15; }
-const r16 = fn () int { return 2 * 8 + 41; }
-const r17 = fn () int { return 85 / 5 + 40; }
-const r18 = fn () int { return 60 - 2; }
-const r19 = fn () int { return 95 / 5; }
-const r20 = fn () int { return 100 - 55; }
-const r21 = fn () int { return 7 * 3; }
-const r22 = fn () int { return 44 + (2 - 24); }
-const r23 = fn () int { return 69 - 46; }
-const r24 = fn () int { return 6 * 4; }
-const r25 = fn () int { return 5 * 5 + 0; }
-const r26 = fn () int { return 2 * 13 + 0; }
-const r27 = fn () int { return 9 * 3; }
-const r28 = fn () int { return 56 / 2; }
-const r29 = fn () int { return 58 - 29; }
-const r30 = fn () int { return 60 - 30; }
-const r31 = fn () int { return 62 - 31; }
-const r32 = fn () int { return 8 * 4; }
-const r33 = fn () int { return 66 / 2; }
-const r34 = fn () int { return 2 * 17; }
-const r35 = fn () int { return 70 - 35; }
-const r36 = fn () int { return 6 * 6; }
-const r37 = fn () int { return 74 / 2; }
-const r38 = fn () int { return 40 - 2; }
-const r39 = fn () int { return 78 - 39; }
-const r40 = fn () int { return 80 - 40; }
-const r41 = fn () int { return 82 - 41; }
-const r42 = fn () int { return 21 * 2; }
-const r43 = fn () int { return 86 - 43; }
-const r44 = fn () int { return 88 - 44; }
-const r45 = fn () int { return 90 - 45; }
-const r46 = fn () int { return 92 - 46; }
-const r47 = fn () int { return 94 - 47; }
-const r48 = fn () int { return 96 - 48; }
-const r49 = fn () int { return 98 - 49; }
-const r50 = fn () int { return 100 - 50; }
-const r51 = fn () int { return 102 - 51; }
-const r52 = fn () int { return 104 - 52; }
-const r53 = fn () int { return 106 - 53; }
-const r54 = fn () int { return 108 - 54; }
-const r55 = fn () int { return 110 - 55; }
-const r56 = fn () int { return 112 - 56; }
-const r57 = fn () int { return 114 - 57; }
-const r58 = fn () int { return 116 - 58; }
-const r59 = fn () int { return 118 - 59; }
-const r60 = fn () int { return 120 - 60; }
-const r61 = fn () int { return 122 - 61; }
-const r62 = fn () int { return 124 - 62; }
-const r63 = fn () int { return 126 - 63; }
-const r64 = fn () int { return 128 - 64; }
-const r65 = fn () int { return 130 - 65; }
-const r66 = fn () int { return 132 - 66; }
-const r67 = fn () int { return 134 - 67; }
-const r68 = fn () int { return 136 - 68; }
-const r69 = fn () int { return 138 - 69; }
-const r70 = fn () int { return 140 - 70; }
-const r71 = fn () int { return 142 - 71; }
-const r72 = fn () int { return 144 - 72; }
-const r73 = fn () int { return 146 - 73; }
-const r74 = fn () int { return 148 - 74; }
-const r75 = fn () int { return 150 - 75; }
-const r76 = fn () int { return 152 - 76; }
-const r77 = fn () int { return 154 - 77; }
-const r78 = fn () int { return 156 - 78; }
-const r79 = fn () int { return 158 - 79; }
-const r80 = fn () int { return 160 - 80; }
-const r81 = fn () int { return 162 - 81; }
-const r82 = fn () int { return 164 - 82; }
-const r83 = fn () int { return 166 - 83; }
-const r84 = fn () int { return 168 - 84; }
-const r85 = fn () int { return 170 - 85; }
-const r86 = fn () int { return 172 - 86; }
-const r87 = fn () int { return 174 - 87; }
-const r88 = fn () int { return 176 - 88; }
-const r89 = fn () int { return 178 - 89; }
-const r90 = fn () int { return 180 - 90; }
-const r91 = fn () int { return 182 - 91; }
-const r92 = fn () int { return 184 - 92; }
-const r93 = fn () int { return 186 - 93; }
-const r94 = fn () int { return 188 - 94; }
-const r95 = fn () int { return 190 - 95; }
-const r96 = fn () int { return 192 - 96; }
-const r97 = fn () int { return 194 - 97; }
-const r98 = fn () int { return 196 - 98; }
-const r99 = fn () int { return 198 - 99; }
-const r100 = fn () int { return 200 - 100; }
-const r101 = fn () int { return 202 - 101; }
-const r102 = fn () int { return 204 - 102; }
-const r103 = fn () int { return 206 - 103; }
-
 pub const main = fn () int {
-    output(
-      r(), " ", r2(), " ", r3(), " ", r4(), " ", r5(), "\n",
-      r6(), " ", r7(), " ", r8(), " ", r9(), " ", r10(), "\n",
-      r11(), " ", r12(), " ", r13(), " ", r14(), " ", r15(), "\n",
-      r16(), " ", r17(), " ", r18(), " ", r19(), " ", r20(), "\n",
-      r21(), " ", r22(), " ", r23(), " ", r24(), " ", r25(), "\n",
-      r26(), " ", r27(), " ", r28(), " ", r29(), " ", r30(), "\n",
-      r31(), " ", r32(), " ", r33(), " ", r34(), " ", r35(), "\n",
-      r36(), " ", r37(), " ", r38(), " ", r39(), " ", r40(), "\n",
-      r41(), " ", r42(), " ", r43(), " ", r44(), " ", r45(), "\n",
-      r46(), " ", r47(), " ", r48(), " ", r49(), " ", r50(), "\n",
-      r51(), " ", r52(), " ", r53(), " ", r54(), " ", r55(), "\n",
-      r56(), " ", r57(), " ", r58(), " ", r59(), " ", r60(), "\n",
-      r61(), " ", r62(), " ", r63(), " ", r64(), " ", r65(), "\n",
-      r66(), " ", r67(), " ", r68(), " ", r69(), " ", r70(), "\n",
-      r71(), " ", r72(), " ", r73(), " ", r74(), " ", r75(), "\n",
-      r76(), " ", r77(), " ", r78(), " ", r79(), " ", r80(), "\n",
-      r81(), " ", r82(), " ", r83(), " ", r84(), " ", r85(), "\n",
-      r86(), " ", r87(), " ", r88(), " ", r89(), " ", r90(), "\n",
-      r91(), " ", r92(), " ", r93(), " ", r94(), " ", r95(), "\n",
-      r96(), " ", r97(), " ", r98(), " ", r99(), " ", r100(), "\n",
-      r101(), " ", r102(), " ", r103(), "\n"
-    );
+    let x: *int = cast<*int>(alloc(sizeof<int>));
+    *x = 20;
+    output(*x, "\n");
 
-    output("hello, world!\n");
+    :: free(x);
     return 0;
 }
-
+/*
+ * ==18363== Memcheck, a memory error detector
+ * ==18363== Copyright (C) 2002-2024, and GNU GPL'd, by Julian Seward et al.
+ * ==18363== Using Valgrind-3.25.1 and LibVEX; rerun with -h for copyright info
+ * ==18363== Command: ./test
+ * ==18363== 
+ * 20
+ * ==18363== 
+ * ==18363== HEAP SUMMARY:
+ * ==18363==     in use at exit: 8 bytes in 1 blocks
+ * ==18363==   total heap usage: 2 allocs, 1 frees, 1,032 bytes allocated
+ * ==18363== 
+ * ==18363== LEAK SUMMARY:
+ * ==18363==    definitely lost: 8 bytes in 1 blocks
+ * ==18363==    indirectly lost: 0 bytes in 0 blocks
+ * ==18363==      possibly lost: 0 bytes in 0 blocks
+ * ==18363==    still reachable: 0 bytes in 0 blocks
+ * ==18363==         suppressed: 0 bytes in 0 blocks
+ * ==18363== Rerun with --leak-check=full to see details of leaked memory
+ * ==18363== 
+ * ==18363== For lists of detected and suppressed errors, rerun with: -s
+ * ==18363== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+/*
