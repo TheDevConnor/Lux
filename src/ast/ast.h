@@ -50,6 +50,7 @@ typedef enum {
   AST_STMT_ENUM,           // Enum declarations
   AST_STMT_STRUCT,         // Struct declarations
   AST_STMT_FIELD_DECL,     // Field declarations (for structs)
+  AST_STMT_DEFER,          // Defer statements
 
   // Type nodes
   AST_TYPE_BASIC,    // Basic types (int, float, string, etc.)
@@ -367,6 +368,10 @@ struct AstNode {
         struct {
           bool is_continue; // true for continue, false for break
         } break_continue;
+
+        struct {
+          AstNode *statement;
+        } defer_stmt;
       };
     } stmt;
 
@@ -524,6 +529,8 @@ AstNode *create_print_stmt(ArenaAllocator *arena, Expr **expressions,
                            size_t column);
 AstNode *create_break_continue_stmt(ArenaAllocator *arena, bool is_continue,
                                     size_t line, size_t column);
+AstNode *create_defer_stmt(ArenaAllocator *arena, AstNode *statement,
+                            size_t line, size_t column);  
 
 // Type creation macros
 AstNode *create_basic_type(ArenaAllocator *arena, const char *name, size_t line,

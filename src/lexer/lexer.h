@@ -63,6 +63,7 @@ typedef enum {
   TOK_SIZE_OF,  /**< size_of<TYPE> */
   TOK_MEMCPY,   /**< memcpy(void *to, void *from, int size) */
   TOK_AS,       /**< as keyword (for use in modules) */
+  TOK_DEFER,    /**< defer keyword */
 
   // prepocessor directives
   TOK_MODULE, /**< @module */

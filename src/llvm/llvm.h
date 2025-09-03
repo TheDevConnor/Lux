@@ -41,6 +41,12 @@ struct ModuleCompilationUnit {
   struct ModuleCompilationUnit *next;
 };
 
+typedef struct DeferredStatement {
+  AstNode *statement;
+  LLVMBasicBlockRef cleanup_block;
+  struct DeferredStatement *next;
+} DeferredStatement;
+
 // Code generation context
 struct CodeGenContext {
   // LLVM Core Components
@@ -53,6 +59,11 @@ struct CodeGenContext {
 
   // Legacy Support (for backward compatibility)
   LLVMModuleRef module;
+
+  // Defer statement tracking
+  struct DeferredStatement *deferred_statements;
+  size_t deferred_count;
+  size_t deferred_capacity;
 
   // Code Generation State
   LLVMValueRef current_function;
@@ -202,6 +213,16 @@ LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_stmt_defer(CodeGenContext *ctx, AstNode *node);
+
+// =============================================================================
+// DEFER MANAGEMENT FUNCTIONS
+// =============================================================================
+
+void init_defer_stack(CodeGenContext *ctx);
+void push_defer_statement(CodeGenContext *ctx, AstNode *statement);
+void generate_cleanup_blocks(CodeGenContext *ctx);
+void clear_defer_stack(CodeGenContext *ctx);
 
 // =============================================================================
 // AST NODE HANDLERS - TYPE SYSTEM

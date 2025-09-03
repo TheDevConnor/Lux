@@ -51,6 +51,9 @@ bool typecheck_statement(AstNode *stmt, Scope *scope, ArenaAllocator *arena) {
     return true;
   }
 
+  case AST_STMT_DEFER:
+    return typecheck_statement(stmt->stmt.defer_stmt.statement, scope, arena);
+
   default:
     printf("Warning: Unhandled statement type %d\n", stmt->type);
     return true; // Don't fail on unimplemented statements yet

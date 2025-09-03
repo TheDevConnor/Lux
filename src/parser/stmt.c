@@ -863,3 +863,17 @@ Stmt *break_continue_stmt(Parser *parser, bool is_continue) {
 
   return create_break_continue_stmt(parser->arena, is_continue, line, col);
 }
+
+Stmt *defer_stmt(Parser *parser) {
+  int line = p_current(parser).line;
+  int col = p_current(parser).col;
+
+  p_consume(parser, TOK_DEFER, "Expected 'defer' keyword");
+  Stmt *stmt = parse_stmt(parser);
+  if (!stmt) {
+    parser_error(parser, "Syntax Error", __FILE__, "Expected statement after 'defer'", line, col, 1);
+    return NULL;
+  }
+
+  return create_defer_stmt(parser->arena, stmt, line, col);
+}

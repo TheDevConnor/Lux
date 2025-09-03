@@ -1,5 +1,7 @@
 @module "math"
 
+@use "fib" as fib
+
 pub const add = fn (x: int, y: int) int {
     return x + y;
 }
@@ -18,4 +20,12 @@ pub const divide = fn (x: int, y: int) int {
         return 0;
     }
     return x / y;
+}
+
+pub const fibonacci = fn (n: int) int {
+    if (n < 0) {
+        output("(Negative index error) ");
+        return 0;
+    }
+    return fib.fib(n, 0, 1);
 }

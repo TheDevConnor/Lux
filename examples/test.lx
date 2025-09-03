@@ -1,11 +1,20 @@
 @module "main"
-@use "math" as math
 
-pub const main = fn () int {
-    output("Addition: ", math.add(5, 3), "\n");
-    output("Subtraction: ", math.subtract(5, 3), "\n");
-    output("Multiplication: ", math.multiply(5, 3), "\n");
-    output("Division: ", math.divide(5, 0), "\n");
-    return 0;
+pub const main = fn () int { 
+    let a: int = 42;
+
+    let x: *int = &a;
+    let y: *int = &a;
+    defer { 
+        output("defer x: ", *x, ", y: ", *y, "\n");
+
+        *x = 100;
+        *y = 200;
+
+        output("defer modified x: ", *x, ", y: ", *y, "\n");
+    }
+    
+    output("x: ", *x, ", y: ", *y, "\n");
+
+    return 0; 
 }
-

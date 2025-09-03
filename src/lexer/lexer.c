@@ -77,6 +77,7 @@ static const KeywordEntry keywords[] = {
     {"memcpy", TOK_MEMCPY},
     {"sizeof", TOK_SIZE_OF},
     {"as", TOK_AS},
+    {"defer", TOK_DEFER},
 };
 
 static const KeywordEntry preprocessor_directives[] = {

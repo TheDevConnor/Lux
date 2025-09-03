@@ -1,3 +1,4 @@
+// #include "../ast/ast_utils.h"
 #include "../c_libs/error/error.h"
 #include "../llvm/llvm.h"
 #include "../parser/parser.h"
@@ -95,10 +96,10 @@ bool generate_llvm_code_modules(AstNode *root, BuildConfig config,
     save_module_output_files(ctx, output_dir);
 
     // Print module information for debugging
-    print_module_info(ctx);
+    // print_module_info(ctx);
 
     // Debug object files
-    debug_object_files(output_dir);
+    // debug_object_files(output_dir);
   }
 
   // Link all object files together to create final executable
@@ -342,7 +343,7 @@ bool run_build(BuildConfig config, ArenaAllocator *allocator) {
   if (!combined_program)
     goto cleanup;
 
-  // print_ast(combined_program, false, false, 0);
+  // print_ast(combined_program, "", false, false);
 
   // Stage 4: Typechecking
   print_progress(++step, total_stages, "Typechecker");

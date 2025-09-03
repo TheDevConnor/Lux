@@ -442,6 +442,8 @@ Stmt *parse_stmt(Parser *parser) {
   case TOK_CONTINUE:
   case TOK_BREAK:
     return break_continue_stmt(parser, p_current(parser).type_ == TOK_CONTINUE);
+  case TOK_DEFER:
+    return defer_stmt(parser);
   default:
     return expr_stmt(
         parser); // expression statements handle their own semicolon

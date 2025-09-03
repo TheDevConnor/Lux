@@ -164,3 +164,10 @@ AstNode *create_break_continue_stmt(ArenaAllocator *arena, bool is_continue,
   node->stmt.break_continue.is_continue = is_continue;
   return node;
 }
+
+AstNode *create_defer_stmt(ArenaAllocator *arena, AstNode *statement,
+                           size_t line, size_t column) {
+  AstNode *node = create_stmt_node(arena, AST_STMT_DEFER, line, column);
+  node->stmt.defer_stmt.statement = statement;
+  return node;
+}

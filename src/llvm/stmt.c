@@ -70,7 +70,6 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
   LLVMTypeRef func_type = LLVMFunctionType(
       return_type, param_types, node->stmt.func_decl.param_count, false);
 
-  // Use current module instead of legacy ctx->module
   LLVMModuleRef current_llvm_module =
       ctx->current_module ? ctx->current_module->module : ctx->module;
 
@@ -78,8 +77,6 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
                                           node->stmt.func_decl.name, func_type);
 
   LLVMSetLinkage(function, get_function_linkage(node));
-
-  // Add function to symbol table
   add_symbol(ctx, node->stmt.func_decl.name, function, func_type, true);
 
   // Set parameter names
@@ -89,13 +86,19 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
                       strlen(node->stmt.func_decl.param_names[i]));
   }
 
-  // Generate function body
+  // Create entry block
   LLVMBasicBlockRef entry_block =
       LLVMAppendBasicBlockInContext(ctx->context, function, "entry");
   LLVMPositionBuilderAtEnd(ctx->builder, entry_block);
 
+  // Save old function context
   LLVMValueRef old_function = ctx->current_function;
+  DeferredStatement *old_deferred = ctx->deferred_statements;
+  size_t old_defer_count = ctx->deferred_count;
+
+  // Set new function context
   ctx->current_function = function;
+  init_defer_stack(ctx);
 
   // Add parameters to symbol table as allocas
   for (size_t i = 0; i < node->stmt.func_decl.param_count; i++) {
@@ -107,22 +110,117 @@ LLVMValueRef codegen_stmt_function(CodeGenContext *ctx, AstNode *node) {
                false);
   }
 
-  // Generate body
+  // Create blocks for normal return and cleanup
+  LLVMBasicBlockRef normal_return =
+      LLVMAppendBasicBlockInContext(ctx->context, function, "normal_return");
+  LLVMBasicBlockRef cleanup_entry =
+      LLVMAppendBasicBlockInContext(ctx->context, function, "cleanup_entry");
+
+  // Generate function body
   codegen_stmt(ctx, node->stmt.func_decl.body);
 
+  // If we reach the end without an explicit return, branch to cleanup
+  if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
+    LLVMBuildBr(ctx->builder, cleanup_entry);
+  }
+
+  // Generate cleanup blocks for deferred statements
+  generate_cleanup_blocks(ctx);
+
+  // Set up cleanup entry point
+  LLVMPositionBuilderAtEnd(ctx->builder, cleanup_entry);
+
+  if (ctx->deferred_statements) {
+    // Branch to the first cleanup block
+    LLVMBuildBr(ctx->builder, ctx->deferred_statements->cleanup_block);
+  } else {
+    // No deferred statements, go straight to normal return
+    LLVMBuildBr(ctx->builder, normal_return);
+  }
+
+  // Set up normal return block
+  LLVMPositionBuilderAtEnd(ctx->builder, normal_return);
+
+  if (LLVMGetTypeKind(return_type) == LLVMVoidTypeKind) {
+    LLVMBuildRetVoid(ctx->builder);
+  } else {
+    // Return default value for the type
+    LLVMValueRef default_val = LLVMConstNull(return_type);
+    LLVMBuildRet(ctx->builder, default_val);
+  }
+
+  // Restore old function context
   ctx->current_function = old_function;
+  ctx->deferred_statements = old_deferred;
+  ctx->deferred_count = old_defer_count;
 
   return function;
 }
 
 LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
   LLVMValueRef ret_val = NULL;
+
   if (node->stmt.return_stmt.value) {
     ret_val = codegen_expr(ctx, node->stmt.return_stmt.value);
     if (!ret_val)
       return NULL;
   }
-  return LLVMBuildRet(ctx->builder, ret_val);
+
+  // If we have deferred statements, we need to branch to cleanup blocks
+  if (ctx->deferred_statements) {
+    LLVMValueRef return_val_storage = NULL;
+
+    if (ret_val) {
+      // Allocate storage for return value
+      LLVMTypeRef ret_type = LLVMTypeOf(ret_val);
+      return_val_storage =
+          LLVMBuildAlloca(ctx->builder, ret_type, "return_val_storage");
+      LLVMBuildStore(ctx->builder, ret_val, return_val_storage);
+    }
+
+    // Branch to first cleanup block (which will chain to others)
+    // The cleanup blocks are generated later in codegen_stmt_function
+    // For now, we need to create a temporary block and branch there
+    // The actual cleanup chain will be built when generate_cleanup_blocks is
+    // called
+
+    // Create a unique cleanup entry point for this return
+    char cleanup_name[64];
+    snprintf(cleanup_name, sizeof(cleanup_name), "return_cleanup_%p",
+             (void *)node);
+    LLVMBasicBlockRef return_cleanup = LLVMAppendBasicBlockInContext(
+        ctx->context, ctx->current_function, cleanup_name);
+
+    // Branch to cleanup
+    LLVMBuildBr(ctx->builder, return_cleanup);
+
+    // Set up the cleanup block
+    LLVMPositionBuilderAtEnd(ctx->builder, return_cleanup);
+
+    // Execute deferred statements in reverse order (inline for now)
+    DeferredStatement *current = ctx->deferred_statements;
+    while (current) {
+      codegen_stmt(ctx, current->statement);
+      current = current->next;
+    }
+
+    // Return the stored value or void
+    if (return_val_storage) {
+      LLVMValueRef final_ret_val =
+          LLVMBuildLoad2(ctx->builder, LLVMTypeOf(ret_val), return_val_storage,
+                         "final_return_val");
+      return LLVMBuildRet(ctx->builder, final_ret_val);
+    } else {
+      return LLVMBuildRetVoid(ctx->builder);
+    }
+  } else {
+    // No deferred statements, return normally
+    if (ret_val) {
+      return LLVMBuildRet(ctx->builder, ret_val);
+    } else {
+      return LLVMBuildRetVoid(ctx->builder);
+    }
+  }
 }
 
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {
@@ -248,4 +346,10 @@ LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node) {
   }
 
   return LLVMConstNull(LLVMVoidTypeInContext(ctx->context));
+}
+
+LLVMValueRef codegen_stmt_defer(CodeGenContext *ctx, AstNode *node) {
+  // Push the deferred statement onto the context's deferred stack
+  push_defer_statement(ctx, node->stmt.defer_stmt.statement);
+  return NULL;
 }
