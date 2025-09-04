@@ -166,7 +166,9 @@ LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
       return NULL;
   }
 
-  // If we have deferred statements, we need to branch to cleanup blocks
+  // If we have deferred statements at function level, we need to branch to
+  // cleanup blocks But first, execute any local scope deferred statements
+  // inline
   if (ctx->deferred_statements) {
     LLVMValueRef return_val_storage = NULL;
 
@@ -178,31 +180,8 @@ LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
       LLVMBuildStore(ctx->builder, ret_val, return_val_storage);
     }
 
-    // Branch to first cleanup block (which will chain to others)
-    // The cleanup blocks are generated later in codegen_stmt_function
-    // For now, we need to create a temporary block and branch there
-    // The actual cleanup chain will be built when generate_cleanup_blocks is
-    // called
-
-    // Create a unique cleanup entry point for this return
-    char cleanup_name[64];
-    snprintf(cleanup_name, sizeof(cleanup_name), "return_cleanup_%p",
-             (void *)node);
-    LLVMBasicBlockRef return_cleanup = LLVMAppendBasicBlockInContext(
-        ctx->context, ctx->current_function, cleanup_name);
-
-    // Branch to cleanup
-    LLVMBuildBr(ctx->builder, return_cleanup);
-
-    // Set up the cleanup block
-    LLVMPositionBuilderAtEnd(ctx->builder, return_cleanup);
-
-    // Execute deferred statements in reverse order (inline for now)
-    DeferredStatement *current = ctx->deferred_statements;
-    while (current) {
-      codegen_stmt(ctx, current->statement);
-      current = current->next;
-    }
+    // Execute deferred statements inline (these will be from local scopes)
+    execute_deferred_statements_inline(ctx, ctx->deferred_statements);
 
     // Return the stored value or void
     if (return_val_storage) {
@@ -224,6 +203,15 @@ LLVMValueRef codegen_stmt_return(CodeGenContext *ctx, AstNode *node) {
 }
 
 LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {
+  // Save the current defer context
+  DeferredStatement *saved_defers = ctx->deferred_statements;
+  size_t saved_count = ctx->deferred_count;
+
+  // Create new defer scope for this block
+  ctx->deferred_statements = NULL;
+  ctx->deferred_count = 0;
+
+  // Process all statements in the block
   for (size_t i = 0; i < node->stmt.block.stmt_count; i++) {
     // Stop processing if we hit a terminator
     if (LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
@@ -231,6 +219,16 @@ LLVMValueRef codegen_stmt_block(CodeGenContext *ctx, AstNode *node) {
     }
     codegen_stmt(ctx, node->stmt.block.statements[i]);
   }
+
+  // Execute any deferred statements from this block scope (in reverse order)
+  if (ctx->deferred_statements) {
+    execute_deferred_statements_inline(ctx, ctx->deferred_statements);
+  }
+
+  // Restore the previous defer context
+  ctx->deferred_statements = saved_defers;
+  ctx->deferred_count = saved_count;
+
   return NULL;
 }
 

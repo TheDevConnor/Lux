@@ -1,20 +1,13 @@
 @module "main"
 
 pub const main = fn () int { 
-    let a: int = 42;
-
-    let x: *int = &a;
-    let y: *int = &a;
-    defer { 
-        output("defer x: ", *x, ", y: ", *y, "\n");
-
-        *x = 100;
-        *y = 200;
-
-        output("defer modified x: ", *x, ", y: ", *y, "\n");
+    defer {
+        output("0\n");
+        defer { 
+            output("2\n");
+        }
+        output("1\n"); 
     }
-    
-    output("x: ", *x, ", y: ", *y, "\n");
-
+        
     return 0; 
 }

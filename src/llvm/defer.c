@@ -17,6 +17,51 @@ void push_defer_statement(CodeGenContext *ctx, AstNode *statement) {
   ctx->deferred_count++;
 }
 
+// Execute deferred statements inline (for nested contexts)
+void execute_deferred_statements_inline(CodeGenContext *ctx,
+                                        DeferredStatement *defers) {
+  if (!defers)
+    return;
+
+  // Execute in reverse order (LIFO)
+  DeferredStatement *current = defers;
+  DeferredStatement *reversed_list = NULL;
+
+  // Reverse the list to execute in LIFO order
+  while (current) {
+    DeferredStatement *next = current->next;
+    current->next = reversed_list;
+    reversed_list = current;
+    current = next;
+  }
+
+  // Execute all deferred statements
+  current = reversed_list;
+  while (current) {
+    // Save the current defer context
+    DeferredStatement *saved_defers = ctx->deferred_statements;
+    size_t saved_count = ctx->deferred_count;
+
+    // Create new defer context for this statement
+    ctx->deferred_statements = NULL;
+    ctx->deferred_count = 0;
+
+    // Execute the deferred statement
+    codegen_stmt(ctx, current->statement);
+
+    // Execute any nested deferred statements that were created
+    if (ctx->deferred_statements) {
+      execute_deferred_statements_inline(ctx, ctx->deferred_statements);
+    }
+
+    // Restore the defer context
+    ctx->deferred_statements = saved_defers;
+    ctx->deferred_count = saved_count;
+
+    current = current->next;
+  }
+}
+
 void generate_cleanup_blocks(CodeGenContext *ctx) {
   if (!ctx->deferred_statements || !ctx->current_function) {
     return;
@@ -43,8 +88,25 @@ void generate_cleanup_blocks(CodeGenContext *ctx) {
     LLVMBasicBlockRef old_block = LLVMGetInsertBlock(ctx->builder);
     LLVMPositionBuilderAtEnd(ctx->builder, current->cleanup_block);
 
+    // Save the current defer context before executing
+    DeferredStatement *saved_defers = ctx->deferred_statements;
+    size_t saved_count = ctx->deferred_count;
+
+    // Create new defer context for this cleanup block
+    ctx->deferred_statements = NULL;
+    ctx->deferred_count = 0;
+
     // Generate the deferred statement
     codegen_stmt(ctx, current->statement);
+
+    // Execute any nested deferred statements that were created
+    if (ctx->deferred_statements) {
+      execute_deferred_statements_inline(ctx, ctx->deferred_statements);
+    }
+
+    // Restore the defer context
+    ctx->deferred_statements = saved_defers;
+    ctx->deferred_count = saved_count;
 
     // Always branch to next cleanup block (or normal return)
     if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {

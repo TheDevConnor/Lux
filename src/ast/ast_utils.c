@@ -78,6 +78,8 @@ const char *node_type_to_string(NodeType type) {
     return "Enum";
   case AST_STMT_STRUCT:
     return "Struct";
+  case AST_STMT_DEFER:
+    return "Defer";
   case AST_STMT_FIELD_DECL:
     return "FieldDecl";
   case AST_TYPE_BASIC:
@@ -842,6 +844,17 @@ void print_ast(const AstNode *node, const char *prefix, bool is_last,
       printf(GRAY("This is a break statement.\n"));
     }
     printf("\n");
+    break;
+
+  case AST_STMT_DEFER:
+    print_prefix(next_prefix, true);
+    printf(BOLD_CYAN("Defer Statement\n"));
+    if (node->stmt.defer_stmt.statement) {
+      print_ast(node->stmt.defer_stmt.statement, next_prefix, true, false);
+    } else {
+      print_prefix(next_prefix, true);
+      printf(GRAY("<no deferred statement>\n"));
+    }
     break;
 
   default:

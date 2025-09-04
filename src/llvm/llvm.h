@@ -221,6 +221,8 @@ LLVMValueRef codegen_stmt_defer(CodeGenContext *ctx, AstNode *node);
 
 void init_defer_stack(CodeGenContext *ctx);
 void push_defer_statement(CodeGenContext *ctx, AstNode *statement);
+void execute_deferred_statements_inline(CodeGenContext *ctx,
+                                        DeferredStatement *defers);
 void generate_cleanup_blocks(CodeGenContext *ctx);
 void clear_defer_stack(CodeGenContext *ctx);
 
