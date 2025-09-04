@@ -1,13 +1,26 @@
 @module "main"
 
 pub const main = fn () int { 
-    defer {
-        output("0\n");
-        defer { 
-            output("2\n");
-        }
-        output("1\n"); 
-    }
+   :: Infinite Loop
+   let i: int = 0;
+   loop {
+        if (i <= 10) { output("i = ", i, "\n"); }
+        else { break; }
+        i = i + 1;
+   }
+    
+   :: For Loop
+   :: loop [i: int = 0](i < 10) {
+   ::      outputln("i = ", i);
+   ::      ++i;
+   :: }
+
+   :: For Loop with multiple variables + optional
+   :: loop [i: int = 0, j: int = 0](i < 10) : (++i) {
+   ::      outputln("i = ", i, " j = ", j);
+   ::      ++j;
+   :: }
+
         
     return 0; 
 }

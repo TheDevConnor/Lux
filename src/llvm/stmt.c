@@ -351,3 +351,70 @@ LLVMValueRef codegen_stmt_defer(CodeGenContext *ctx, AstNode *node) {
   push_defer_statement(ctx, node->stmt.defer_stmt.statement);
   return NULL;
 }
+
+LLVMValueRef codegen_stmt_break_continue(CodeGenContext *ctx, AstNode *node) {
+  if (node->stmt.break_continue.is_continue) {
+    if (ctx->loop_continue_block) {
+      LLVMBuildBr(ctx->builder, ctx->loop_continue_block);
+    } else {
+      fprintf(stderr, "Error: 'continue' used outside of a loop\n");
+    }
+  } else {
+    if (ctx->loop_break_block) {
+      LLVMBuildBr(ctx->builder, ctx->loop_break_block);
+    } else {
+      fprintf(stderr, "Error: 'break' used outside of a loop\n");
+    }
+  }
+  return NULL;
+}
+
+LLVMValueRef codegen_infinite_loop(CodeGenContext *ctx, AstNode *node) {
+  LLVMBasicBlockRef loop_block = LLVMAppendBasicBlockInContext(
+      ctx->context, ctx->current_function, "infinite_loop");
+  LLVMBasicBlockRef after_loop_block = LLVMAppendBasicBlockInContext(
+      ctx->context, ctx->current_function, "after_infinite_loop");
+
+  // Branch to loop block
+  LLVMBuildBr(ctx->builder, loop_block);
+
+  // Generate loop block
+  LLVMPositionBuilderAtEnd(ctx->builder, loop_block);
+
+  // Save old loop context
+  LLVMBasicBlockRef old_continue = ctx->loop_continue_block;
+  LLVMBasicBlockRef old_break = ctx->loop_break_block;
+
+  // Set new loop context
+  ctx->loop_continue_block = loop_block;
+  ctx->loop_break_block = after_loop_block;
+
+  // Generate loop body
+  codegen_stmt(ctx, node->stmt.loop_stmt.body);
+
+  // If we reach the end of the loop body without a terminator, branch back to
+  // the start
+  if (!LLVMGetBasicBlockTerminator(LLVMGetInsertBlock(ctx->builder))) {
+    LLVMBuildBr(ctx->builder, loop_block);
+  }
+
+  // Restore old loop context
+  ctx->loop_continue_block = old_continue;
+  ctx->loop_break_block = old_break;
+
+  // Continue with after loop block
+  LLVMPositionBuilderAtEnd(ctx->builder, after_loop_block);
+  return NULL;
+}
+
+LLVMValueRef codegen_while_loop(CodeGenContext *ctx, AstNode *node) { return NULL; }
+LLVMValueRef codegen_for_loop(CodeGenContext *ctx, AstNode *node) { return NULL; }
+
+LLVMValueRef codegen_loop(CodeGenContext *ctx, AstNode *node) {
+  if (node->stmt.loop_stmt.condition == NULL && node->stmt.loop_stmt.initializer == NULL)
+    return codegen_infinite_loop(ctx, node);
+  else if (node->stmt.loop_stmt.condition != NULL && node->stmt.loop_stmt.initializer == NULL)
+    return codegen_while_loop(ctx, node);
+  else
+    return codegen_for_loop(ctx, node);
+}

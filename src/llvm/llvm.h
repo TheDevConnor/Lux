@@ -215,6 +215,13 @@ LLVMValueRef codegen_stmt_if(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_print(CodeGenContext *ctx, AstNode *node);
 LLVMValueRef codegen_stmt_defer(CodeGenContext *ctx, AstNode *node);
 
+LLVMValueRef codegen_infinite_loop(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_while_loop(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_for_loop(CodeGenContext *ctx, AstNode *node);
+LLVMValueRef codegen_loop(CodeGenContext *ctx, AstNode *node);
+
+LLVMValueRef codegen_stmt_break_continue(CodeGenContext *ctx, AstNode *node);
+
 // =============================================================================
 // DEFER MANAGEMENT FUNCTIONS
 // =============================================================================

@@ -325,3 +325,42 @@ bool typecheck_use_stmt(AstNode *node, Scope *current_scope,
 
   return true;
 }
+
+bool typecheck_infinite_loop_decl(AstNode *node, Scope *scope,
+                                  ArenaAllocator *arena) {
+  Scope *loop_scope = create_child_scope(scope, "infinite_loop", arena);
+
+  if (node->stmt.loop_stmt.body == NULL) {
+    fprintf(stderr, "Error: Loop body cannot be null at line %zu\n",
+            node->line);
+    return false;
+  }
+
+  if (!typecheck_statement(node->stmt.loop_stmt.body, loop_scope, arena)) {
+    fprintf(stderr, "Error: Loop body failed typechecking at line %zu\n",
+            node->line);
+    return false;
+  }
+
+  return true;
+}
+bool typecheck_while_loop_decl(AstNode *node, Scope *scope,
+                               ArenaAllocator *arena) {
+  return true;
+}
+bool typecheck_for_loop_decl(AstNode *node, Scope *scope,
+                             ArenaAllocator *arena) {
+  return true;
+}
+
+bool typecheck_loop_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
+  // check what type of loop it is
+  if (node->stmt.loop_stmt.condition == NULL &&
+      node->stmt.loop_stmt.initializer == NULL)
+    return typecheck_infinite_loop_decl(node, scope, arena);
+  else if (node->stmt.loop_stmt.condition != NULL &&
+           node->stmt.loop_stmt.initializer == NULL)
+    return typecheck_while_loop_decl(node, scope, arena);
+  else
+    return typecheck_for_loop_decl(node, scope, arena);
+}
