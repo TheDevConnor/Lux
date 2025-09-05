@@ -1,41 +1,39 @@
 @module "main"
 
 pub const main = fn () int { 
-   :: Infinite Loop (Working)
-   let k: int = 0;
-   loop {
-        defer ++k;
-        if (k <= 10) { output("k = ", k, "\n"); }
-        else { break; }
-   }
+   :: Infinite Loop
+   :: let i: int = 0;
+   :: loop {
+   ::      defer ++i;
+   ::      if (i <= 10) { output("i = ", i, "\n"); }
+   ::      else { break; }
+   :: }
 
-   :: For Loop (Working)
+   :: For Loop
    loop [i: int = 0](i < 10) {
-        outputln("i = ", i, "\n");
+        outputln("i = ", i);
         ++i;
    }
 
-   :: For Loop with multiple variables + optional (working)
-   loop [i: int = 0, j: int = 0](i < 5) : (++i) {
-      output("i = ", i, " j = ", j, "\n");
-      ++j;
-   }
+   :: For Loop with multiple variables + optional
+   :: loop [i: int = 0, j: int = 0](i < 10) : (++i) {
+   ::      outputln("i = ", i, " j = ", j);
+   ::      ++j;
+   :: }
         
    :: While Loop
-   let j: int = 0;
-   output("j = [");
-   loop (j < 19) {
-        outputln(j, ", ");
-        ++j;
-   }
-   output("]\n");
+   :: let j: int = 0;
+   :: loop (j < 19) {
+   ::      outputln("j = ", j);
+   ::      ++j;
+   :: }
 
    :: While Loop with optional 
-   let a: int = 0;
-   loop (a < 19) : (++j) {
-        outputln("j = ", a, "\n");
-        ++a;
-   }
+   :: let j: int = 0;
+   :: loop (j < 19) : (++j) {
+   ::      outputln("j = ", j);
+   ::      ++j;
+   :: }
     
    return 0; 
 }
