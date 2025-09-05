@@ -1,8 +1,8 @@
-# Lux
+# Luma
 *A low-level compiled alternative to C, C++, and more!*
 
 <p align="center">
-  <img src="assets/lux.png" alt="Lux Logo" width="120">
+  <img src="assets/luma.png" alt="Luma Logo" width="120">
 </p>
 
 <p align="center">
@@ -18,11 +18,11 @@
 
 ## Introduction
 
-Lux is a modern systems programming language designed to provide the performance and control of low-level languages while maintaining developer productivity and code clarity. Built from the ground up to address common pain points in systems programming.
+Luma is a modern systems programming language designed to provide the performance and control of low-level languages while maintaining developer productivity and code clarity. Built from the ground up to address common pain points in systems programming.
 
 ## Why?
 
-Modern systems programming often involves a trade-off between performance, safety, and developer experience. Lux aims to bridge this gap by providing:
+Modern systems programming often involves a trade-off between performance, safety, and developer experience. Luma aims to bridge this gap by providing:
 
 - **Direct hardware access** without sacrificing code readability
 - **Predictable performance** characteristics for systems-critical applications  
@@ -41,7 +41,7 @@ Modern systems programming often involves a trade-off between performance, safet
 
 **Current Phase:** Early Development
 
-Lux is currently in active development. Core language features are being implemented and the compiler architecture is being established. 
+Luma is currently in active development. Core language features are being implemented and the compiler architecture is being established. 
 Check out the [todo](todo) to see what is being worked on or that is done.
 
 ## Getting Started
@@ -61,14 +61,14 @@ You'll need the following tools installed:
 
 ## Join Us
 
-Interested in contributing to Lux? We'd love to have you!
-- Check out our [GitHub repository](https://github.com/TheDevConnor/Lux)
+Interested in contributing to Luma? We'd love to have you!
+- Check out our [GitHub repository](https://github.com/TheDevConnor/luma)
 - Join our [Discord community](https://bit.ly/lux-discord)
-- Look at the doxygen-generated docs for architecture details [here](https://thedevconnor.github.io/Lux/)
+- Look at the doxygen-generated docs for architecture details [here](https://thedevconnor.github.io/luma/)
 - If you would like to contribute, please read our [contribution guidelines](CONTRIBUTING.md).
 
 ---
 
 <p align="center">
-  <strong>Built with ❤️ by the Lux community</strong>
+  <strong>Built with ❤️ by the Luma community</strong>
 </p>

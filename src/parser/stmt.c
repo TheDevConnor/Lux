@@ -77,7 +77,6 @@ Stmt *use_stmt(Parser *parser) {
  * @brief Parses a constant declaration statement
  * 
  * Handles multiple forms of constant declarations:
- * - `const name = value;` - Type inferred from value
  * - `const name: Type = value;` - Explicit type annotation
  * - `const name = fn ...` - Function declaration
  * - `const name = struct ...` - Struct declaration  

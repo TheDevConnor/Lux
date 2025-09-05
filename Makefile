@@ -25,7 +25,7 @@ else
 	PATHSEP = /
 endif
 
-BIN := lux$(EXE)
+BIN := luma$(EXE)
 
 .PHONY: all clean debug test llvm-test
 
@@ -49,13 +49,13 @@ test: $(BIN)
 
 llvm-test: $(BIN)
 	@echo "Testing LLVM IR generation..."
-	@echo "fn add(a: int, b: int) -> int { return a + b; }" > test_simple.lux
-	@echo "fn main() -> int { let x: int = 42; let y: int = 24; return add(x, y); }" >> test_simple.lux
-	./$(BIN) test_simple.lux --save
+	@echo "fn add(a: int, b: int) -> int { return a + b; }" > test_simple.lx
+	@echo "fn main() -> int { let x: int = 42; let y: int = 24; return add(x, y); }" >> test_simple.lx
+	./$(BIN) test_simple.luma --save
 	@echo "Generated files:"
 	@ls -la *.bc *.ll 2>/dev/null || echo "No LLVM output files generated"
 	@echo "Cleaning up test file..."
-	@rm -f test_simple.lux
+	@rm -f test_simple.lx
 
 # View generated LLVM IR
 view-ir: output.ll
