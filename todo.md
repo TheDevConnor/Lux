@@ -18,6 +18,8 @@ These AST node types are fully implemented in code generation:
 - [x] `AST_EXPR_DEREF`
 - [x] `AST_EXPR_ADDR`
 - [x] `AST_EXPR_MEMBER`
+- [x] `AST_EXPR_INC`
+- [x] `AST_EXPR_DEC`
 
 ### Statements
 - [x] `AST_PROGRAM` (multi-module support)
@@ -31,6 +33,7 @@ These AST node types are fully implemented in code generation:
 - [x] `AST_STMT_IF`
 - [x] `AST_STMT_PRINT`
 - [x] `AST_STMT_DEFER`
+- [x] `AST_STMT_LOOP` (this is for, while, and while-true)
 
 ### Types
 - [x] `AST_TYPE_BASIC`
@@ -54,20 +57,17 @@ These AST node types are fully implemented in code generation:
 
 ### Codegen
 - [ ] Implement codegen for `switch` or `match` constructs  
-- [ ] Add codegen support for loops 
 - [ ] Support more LLVM optimizations  
 - [ ] **Add structs and enums support** in codegen  
-- [ ] **Add unions support** in codegen  
+- [ ] **Add unions support** in codegen
+- [ ] **Add in memcpy and streq** streq === strcmp
 
 ### Lexer & Parser
-- [ ] Add tokens and grammar for structs  
-- [ ] Add tokens and grammar for enums  
 - [ ] Add tokens and grammar for unions  
 
 ### Type Checker
 - [ ] Implement type checking for structs  
 - [ ] Implement type checking for unions 
-- [ ] Implement type checking for loops
 
 ---
 

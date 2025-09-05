@@ -54,6 +54,43 @@ AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope,
   return NULL;
 }
 
+AstNode *typecheck_unary_expr(AstNode *expr, Scope *scope,
+                              ArenaAllocator *arena) {
+  AstNode *operand_type =
+      typecheck_expression(expr->expr.unary.operand, scope, arena);
+  if (!operand_type)
+    return NULL;
+
+  UnaryOp op = expr->expr.unary.op;
+
+  if (op == UNOP_NEG) {
+    if (!is_numeric_type(operand_type)) {
+      fprintf(stderr, "Error: Unary negation on non-numeric type at line %zu\n",
+              expr->line);
+      return NULL;
+    }
+    return operand_type; // Negation does not change type
+  }
+
+  if (op == UNOP_POST_INC || op == UNOP_POST_DEC || op == UNOP_PRE_INC ||
+      op == UNOP_PRE_DEC) {
+    if (!is_numeric_type(operand_type)) {
+      fprintf(stderr,
+              "Error: Increment/decrement on non-numeric type at line %zu\n",
+              expr->line);
+      return NULL;
+    }
+    return operand_type; // Increment/decrement does not change type
+  }
+
+  if (op == UNOP_NOT) {
+    // In many languages, logical NOT works with any type (truthy/falsy)
+    return create_basic_type(arena, "bool", expr->line, expr->column);
+  }
+
+  return NULL;
+}
+
 // Fixed version of typecheck_call_expr for expr.c
 AstNode *typecheck_call_expr(AstNode *expr, Scope *scope,
                              ArenaAllocator *arena) {
@@ -241,11 +278,9 @@ AstNode *typecheck_alloc_expr(AstNode *expr, Scope *scope,
 
 AstNode *typecheck_free_expr(AstNode *expr, Scope *scope,
                              ArenaAllocator *arena) {
-  AstNode *ptr_type =
-      typecheck_expression(expr->expr.free.ptr, scope, arena);
+  AstNode *ptr_type = typecheck_expression(expr->expr.free.ptr, scope, arena);
   if (!ptr_type) {
-    fprintf(stderr,
-            "Error: Failed to type-check free expression at line %zu\n",
+    fprintf(stderr, "Error: Failed to type-check free expression at line %zu\n",
             expr->line);
     return NULL;
   }

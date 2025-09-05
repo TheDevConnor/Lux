@@ -99,6 +99,8 @@ AstNode *typecheck_expression(AstNode *expr, Scope *scope,
 
   case AST_EXPR_BINARY:
     return typecheck_binary_expr(expr, scope, arena);
+  case AST_EXPR_UNARY:
+    return typecheck_unary_expr(expr, scope, arena);
 
   case AST_EXPR_CALL:
     return typecheck_call_expr(expr, scope, arena);

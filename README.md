@@ -42,12 +42,7 @@ Modern systems programming often involves a trade-off between performance, safet
 **Current Phase:** Early Development
 
 Lux is currently in active development. Core language features are being implemented and the compiler architecture is being established. 
-
-**What's Working:**
-- Basic lexer, Allocator, Pratt parser, and AST generation
-
-**Coming Soon:**
-- TypeChecker, and LLVM generation
+Check out the [todo](todo) to see what is being worked on or that is done.
 
 ## Getting Started
 

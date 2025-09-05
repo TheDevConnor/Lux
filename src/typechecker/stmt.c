@@ -346,10 +346,12 @@ bool typecheck_infinite_loop_decl(AstNode *node, Scope *scope,
 }
 bool typecheck_while_loop_decl(AstNode *node, Scope *scope,
                                ArenaAllocator *arena) {
+  Scope *while_loop = create_child_scope(scope, "while_loop", arena);
   return true;
 }
 bool typecheck_for_loop_decl(AstNode *node, Scope *scope,
                              ArenaAllocator *arena) {
+  Scope *lookup_scope = create_child_scope(scope, "for_loop", arena);
   return true;
 }
 
@@ -364,3 +366,5 @@ bool typecheck_loop_decl(AstNode *node, Scope *scope, ArenaAllocator *arena) {
   else
     return typecheck_for_loop_decl(node, scope, arena);
 }
+
+// NOTE: I will be back in a bit going to go get dinner.

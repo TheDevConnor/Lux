@@ -158,6 +158,8 @@ bool typecheck_loop_decl(AstNode *node, Scope *scope, ArenaAllocator *arena);
 // Expressions
 AstNode *typecheck_binary_expr(AstNode *expr, Scope *scope,
                                ArenaAllocator *arena);
+AstNode *typecheck_unary_expr(AstNode *expr, Scope *scope,
+                              ArenaAllocator *arena);
 AstNode *typecheck_call_expr(AstNode *expr, Scope *scope,
                              ArenaAllocator *arena);
 AstNode *typecheck_member_expr(AstNode *expr, Scope *scope,

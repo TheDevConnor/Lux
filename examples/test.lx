@@ -2,25 +2,38 @@
 
 pub const main = fn () int { 
    :: Infinite Loop
-   let i: int = 0;
-   loop {
-        if (i <= 10) { output("i = ", i, "\n"); }
-        else { break; }
-        i = i + 1;
-   }
-    
-   :: For Loop
-   :: loop [i: int = 0](i < 10) {
-   ::      outputln("i = ", i);
-   ::      ++i;
+   :: let i: int = 0;
+   :: loop {
+   ::      defer ++i;
+   ::      if (i <= 10) { output("i = ", i, "\n"); }
+   ::      else { break; }
    :: }
+
+   :: For Loop
+   loop [i: int = 0](i < 10) {
+        outputln("i = ", i);
+        ++i;
+   }
 
    :: For Loop with multiple variables + optional
    :: loop [i: int = 0, j: int = 0](i < 10) : (++i) {
    ::      outputln("i = ", i, " j = ", j);
    ::      ++j;
    :: }
-
         
-    return 0; 
+   :: While Loop
+   :: let j: int = 0;
+   :: loop (j < 19) {
+   ::      outputln("j = ", j);
+   ::      ++j;
+   :: }
+
+   :: While Loop with optional 
+   :: let j: int = 0;
+   :: loop (j < 19) : (++j) {
+   ::      outputln("j = ", j);
+   ::      ++j;
+   :: }
+    
+   return 0; 
 }
