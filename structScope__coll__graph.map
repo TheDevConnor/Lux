@@ -1,0 +1,14 @@
+<map id="Scope" name="Scope">
+<area shape="rect" id="Node000001" title="Represents a lexical scope with hierarchical relationships." alt="" coords="110,449,171,475"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="186,450,194,454,198,462,190,473,172,476,171,470,187,468,193,462,191,458,184,455"/>
+<area shape="rect" id="Node000002" href="$structGrowableArray.html" title="Growable array backed by an arena allocator." alt="" coords="5,264,124,289"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="60,303,55,330,53,361,56,394,68,424,87,441,111,452,109,457,84,446,64,427,51,395,47,362,50,329,55,302"/>
+<area shape="rect" id="Node000003" href="$structArenaAllocator.html" title="Arena allocator structure." alt="" coords="5,108,124,133"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="67,147,67,264,62,264,62,147"/>
+<area shape="rect" id="Node000004" href="$structBuffer.html" title="Represents a memory buffer in the arena." alt="" coords="34,5,95,31"/>
+<area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="67,45,67,108,62,108,62,45"/>
+<area shape="poly" id="edge5_Node000004_Node000004" title=" " alt="" coords="110,7,118,11,122,18,113,28,96,30,95,25,111,23,117,18,115,15,108,12"/>
+<area shape="rect" id="Node000005" href="$structAstNode.html" title=" " alt="" coords="179,264,257,289"/>
+<area shape="poly" id="edge6_Node000001_Node000005" title=" " alt="" coords="221,303,215,362,206,396,191,427,179,441,164,451,161,447,175,437,186,424,201,394,210,361,216,303"/>
+<area shape="poly" id="edge7_Node000005_Node000005" title=" " alt="" coords="243,255,257,253,270,256,280,264,283,277,278,292,265,300,248,299,230,292,233,287,249,294,264,294,274,289,278,277,275,266,268,260,257,258,244,261"/>
+</map>

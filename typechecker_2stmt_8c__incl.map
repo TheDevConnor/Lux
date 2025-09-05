@@ -1,0 +1,22 @@
+<map id="src/typechecker/stmt.c" name="src/typechecker/stmt.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="47,5,217,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,72,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,33,66,72,63,68,115,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="97,79,167,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="135,31,135,65,129,65,129,31"/>
+<area shape="rect" id="Node000004" href="$type_8h.html" title="Type checking and symbol table management for AST nodes." alt="" coords="191,79,254,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="148,29,199,68,195,72,145,33"/>
+<area shape="rect" id="Node000005" href="$ast_8h.html" title=" " alt="" coords="129,152,220,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="217,106,192,142,188,139,213,103"/>
+<area shape="rect" id="Node000008" href="$memory_8h.html" title="Arena allocator and growable array utilities for fast memory management." alt="" coords="185,225,383,251"/>
+<area shape="poly" id="edge11_Node000004_Node000008" title=" " alt="" coords="230,103,276,211,271,214,225,105"/>
+<area shape="rect" id="Node000006" title=" " alt="" coords="159,299,241,324"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="176,178,173,211,176,250,189,285,184,287,171,251,168,211,170,177"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="60,299,135,324"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="171,179,112,288,108,285,166,177"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="194,175,256,215,253,220,191,180"/>
+<area shape="poly" id="edge9_Node000008_Node000006" title=" " alt="" coords="272,253,226,292,223,287,269,249"/>
+<area shape="poly" id="edge10_Node000008_Node000007" title=" " alt="" coords="255,253,141,296,140,291,253,248"/>
+<area shape="rect" id="Node000009" title=" " alt="" coords="266,299,353,324"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="291,250,303,285,298,287,286,252"/>
+</map>
